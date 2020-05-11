@@ -1,3 +1,3 @@
-# Just Good Advice Demo
+# Just Good Advice Showcase
 
-The advice demo app for Just Good Advice.
+The advice showcase demo app for Just Good Advice.
