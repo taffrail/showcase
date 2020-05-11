@@ -1,0 +1,26 @@
+// font awesome config
+$fa-font-path: "../../@fortawesome/fontawesome-pro/webfonts";
+$fa-font-size-base: 13px;
+
+$colors: (
+  'gray': #605F5E,
+  'gray-dark': #21232B,
+  'red': #EC2D3A
+);
+
+$theme-colors: (
+  'primary': #6D256C,
+  'secondary': #605F5E,
+  'tertiary': #CE1B6D
+);
+
+$primary: map-get($theme-colors, 'primary');
+$secondary: map-get($theme-colors, 'secondary');
+$tertiary: map-get($theme-colors, 'tertiary');
+$gray: map-get($colors, 'gray');
+
+$zindex-modal-backdrop: 1040;
+
+// loader
+$zindex-loading-mask: $zindex-modal-backdrop - 2;
+$zindex-loading-spinner: $zindex-loading-mask + 1;

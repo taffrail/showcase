@@ -1,0 +1,47 @@
+{
+  "extends": "eslint:recommended",
+  "rules": {
+    "accessor-pairs": ["warn"],
+    "array-callback-return": ["error"],
+    "arrow-body-style": ["warn", "always"],
+    "callback-return": [ "error", ["callback", "cb", "done", "next"] ],
+    "complexity": ["error", 10],
+    "indent": ["warn", 2, { "SwitchCase": 1 } ],
+    "handle-callback-err": [ "error", "error" ],
+    "keyword-spacing": ["error"],
+    "key-spacing": ["warn"],
+    "max-len": ["warn", { "code": 170, "tabWidth": 2 }],
+    "max-nested-callbacks": ["error"],
+    "max-params": ["warn", 6],
+    "new-cap": ["warn", { "newIsCap": true, "capIsNewExceptions": ["Router"] }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-duplicate-imports": ["error"],
+    "no-extra-bind": ["warn"],
+    "no-trailing-spaces": ["warn"],
+    "no-unused-vars": ["warn", { "args": "none" }],
+    "no-use-before-define": ["error", { "functions": false }],
+    "no-useless-constructor": ["warn"],
+    "no-var": "error",
+    "object-curly-spacing": ["warn", "always"],
+    "prefer-arrow-callback": ["warn"],
+    "prefer-const": ["warn"],
+    "prefer-destructuring": ["warn", {"object": true, "array": true}],
+    "space-before-function-paren": ["warn", "never"],
+    "spaced-comment": ["warn"],
+    "template-curly-spacing": ["warn"],
+    "quotes": ["error", "double"]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "$": true,
+    "Promise": true
+  }
+}
