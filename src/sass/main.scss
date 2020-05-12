@@ -6,10 +6,39 @@
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
 
 
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-a {
-  color: #00B7FF;
+.showcase {
+  &.showcase--advice {
+    background: $gray-300;
+
+    .banner {
+      align-items: center;
+      box-shadow: $dropdown-box-shadow;
+      display: flex;
+      height: 5rem;
+      padding: .5rem;
+    }
+
+    .bg-stripes {
+      background: $primary url('/img/slashes.png') right center no-repeat;
+      background-size: 70%;
+    }
+
+    .advice-set-details {
+      h1 {
+        font-weight: 900; //heavy
+      }
+    }
+
+    .advice-container {
+      padding: .5rem;
+
+    }
+
+    .variables-container {
+      font-family: monospace;
+      font-size: 90%;
+      margin-top: 2rem;
+      padding: .25rem;
+    }
+  }
 }
