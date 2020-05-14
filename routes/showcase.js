@@ -27,16 +27,16 @@ router.get("/:adviceSetId", (req, res, next) => {
       return next(new Error(resp.statusMessage));
     }
 
-    try {
+    if (!err && resp.statusCode == 200) {
       const api = JSON.parse(body);
-
       if (api.error) { return next(new Error(api.error.message)); }
 
       return res.render("showcase/advice", {
         api: api
       });
-    } catch (e) {
-      return next(e);
+    } else {
+      console.error("unexpected!");
+      return res.status(resp.statusCode).send(body);
     }
   });
 });

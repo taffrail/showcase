@@ -122,8 +122,13 @@ export default class showcase {
       Loading.hide(loadingId);
       return api;
     }).catch((jqXHR) => {
-      const err = jqXHR.responseJSON;
-      alert(err.error.message);
+      let err;
+      try {
+        err = jqXHR.responseJSON.error.message;
+      } catch (e){
+        err = jqXHR;
+      }
+      alert(err);
     });
   }
 
