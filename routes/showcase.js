@@ -23,13 +23,21 @@ router.get("/:adviceSetId", (req, res, next) => {
   }, (err, resp, body) => {
     if (err) { return next(err); }
 
-    const api = JSON.parse(body);
+    if (resp.statusCode > 200) {
+      return next(new Error(resp.statusMessage));
+    }
 
-    if (api.error) { return next(new Error(api.error.message)); }
+    try {
+      const api = JSON.parse(body);
 
-    return res.render("showcase/advice", {
-      api: api
-    });
+      if (api.error) { return next(new Error(api.error.message)); }
+
+      return res.render("showcase/advice", {
+        api: api
+      });
+    } catch (e) {
+      return next(e);
+    }
   });
 });
 
