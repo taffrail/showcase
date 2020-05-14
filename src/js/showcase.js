@@ -38,6 +38,7 @@ export default class showcase {
     // events
     this.handleClickOk();
     this.handleClickQuesAns();
+    this.handleClickOpenDebug();
     this.listenForUrlChanges();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
@@ -77,6 +78,16 @@ export default class showcase {
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
       this.api.display = this.api.answers.find((a) => { return a.idx == data.idx; }).expand;
       this.updateMainPane();
+    });
+  }
+
+  handleClickOpenDebug() {
+    $(".advice").on("click", "[data-action=openDebugWithQuerystring]", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const url = $this.prop("href");
+      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      window.open(`${url}?${queryString}`);
     });
   }
 

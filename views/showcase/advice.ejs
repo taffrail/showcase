@@ -225,6 +225,9 @@
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
+							<i class="fad fa-debug"></i> Debug
+						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
 							<i class="fad fa-code"></i> Open API
 						</a>
@@ -303,6 +306,9 @@
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
+						</a>
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
+							<i class="fad fa-debug"></i> Debug
 						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
 							<i class="fad fa-code"></i> Open API
