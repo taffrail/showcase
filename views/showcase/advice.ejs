@@ -154,7 +154,14 @@
 		<script id="tmpl_variablesList" type="x-tmpl-mustache">
 			{{#variables}}
 				<tr>
-					<td>{{nameAlt}}</td>
+					<td>
+						{{^nameAlt}}
+							{{name}}
+						{{/nameAlt}}
+						{{#nameAlt}}
+							{{nameAlt}}
+						{{/nameAlt}}
+					</td>
 					<td class="text-right">
 						{{^format}}
 							{{value}}
