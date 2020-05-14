@@ -75,7 +75,8 @@
       margin-top: 2.5rem;
       padding: .5rem .25rem;
 
-      .answers {
+      .answers,
+      .answersByVariable {
         li {
           border-radius: $border-radius;
           margin-bottom: .5rem;
@@ -88,6 +89,12 @@
 
         .q {
           font-weight: bold;
+        }
+      }
+
+      .answersByVariable {
+        li {
+          display: flex;
         }
       }
 

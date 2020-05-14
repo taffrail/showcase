@@ -48,7 +48,22 @@
 						</div>
 						<div class="col-4">
 							<div class="assumptions-container bg-white rounded">
-								<ul class="answers list-unstyled"></ul>
+								<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+									<li class="nav-item" role="presentation">
+										<a class="nav-link active" id="pills-vars-tab" data-toggle="pill" href="#pills-vars" role="tab" aria-controls="pills-vars" aria-selected="false">Parameters</a>
+									</li>
+									<li class="nav-item" role="presentation">
+										<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="true">Questions</a>
+									</li>
+								</ul>
+								<div class="tab-content" id="pills-tabContent">
+									<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
+										<ul class="answers list-unstyled"></ul>
+									</div>
+									<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
+										<ul class="answersByVariable list-unstyled"></ul>
+									</div>
+								</div>
 								<hr>
 								<table class="table table-borderless table-hover table-sm">
 									<thead>
@@ -59,7 +74,7 @@
 									</thead>
 									<tbody class="variables"></tbody>
 								</table>
-							</div>
+							</>
 						</div>
 					</div>
 				</div>
@@ -89,55 +104,57 @@
 			</ul>
 
 			<div>
-				<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
+				<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
 			</div>
 		</script>
 
-		<script id="tmpl_interimAdviceList" type="x-tmpl-mustache">
-			<h6>Recommendations</h6>
-			<ul class="advice-list recommendations fa-ul">
-			{{#list_advice.ungrouped}}
-				<li data-id="{{id}}" data-idx="{{idx}}">
-					<span class="fa-li">
-						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-							<i class="fad fa-thumbs-up"></i>
-						</a>
-					</span>
-					{{question}}
-				</li>
-			{{/list_advice.ungrouped}}
-			</ul>
-
-			{{#list_advice.ToDo.length}}
-				<h6>To-Do</h6>
-				<ul class="advice-list todo fa-ul">
-				{{#list_advice.ToDo}}
+		<script id="tmpl_recommendationsAdviceList" type="x-tmpl-mustache">
+			{{#recommendations.ungrouped.length}}
+				<h6>Recommendations</h6>
+				<ul class="advice-list recommendations fa-ul">
+				{{#recommendations.ungrouped}}
 					<li data-id="{{id}}" data-idx="{{idx}}">
 						<span class="fa-li">
-							<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+								<i class="fad fa-thumbs-up"></i>
+							</a>
+						</span>
+						{{headline}}
+					</li>
+				{{/recommendations.ungrouped}}
+				</ul>
+			{{/recommendations.ungrouped.length}}
+
+			{{#recommendations.todo.length}}
+				<h6>To-Do</h6>
+				<ul class="advice-list todo fa-ul">
+				{{#recommendations.todo}}
+					<li data-id="{{id}}" data-idx="{{idx}}">
+						<span class="fa-li">
+							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 								<i class="far fa-circle"></i> 
 							</a>
 						</span>
-						{{question}}
+						{{headline}}
 					</li>
-				{{/list_advice.ToDo}}
-			{{/list_advice.ToDo.length}}
+				{{/recommendations.todo}}
+			{{/recommendations.todo.length}}
 			</ul>
 
-			{{#list_advice.Completed.length}}
+			{{#recommendations.completed.length}}
 				<h6>Completed</h6>
 				<ul class="advice-list completed fa-ul">
-				{{#list_advice.Completed}}
+				{{#recommendations.completed}}
 					<li data-id="{{id}}" data-idx="{{idx}}">
 						<span class="fa-li">
-							<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 								<i class="far fa-check-circle"></i> 
 							</a>
 						</span>
-						{{question}}
+						{{headline}}
 					</li>
-				{{/list_advice.Completed}}
-			{{/list_advice.Completed.length}}
+				{{/recommendations.completed}}
+			{{/recommendations.completed.length}}
 			</ul>
 			<hr>
 		</script>
@@ -147,6 +164,29 @@
 				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
 					<div class="q">{{question}}</div>
 					<div class="a"><a href="#" class="stretched-link">{{value}}</a></div>
+				</li>
+			{{/answers}}
+		</script>
+
+		<script id="tmpl_answersListByVariable" type="x-tmpl-mustache">
+			{{#answers}}
+				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
+					<div class="q">
+						{{#expand.form.questionVariable}}
+							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>:&nbsp;
+						{{/expand.form.questionVariable}}
+						{{^expand.form.questionVariable}}
+							{{question}}
+						{{/expand.form.questionVariable}}
+					</div>
+					<div class="a"><a href="#" class="stretched-link">
+						{{#expand.form.questionVariable}}
+							{{expand.form.questionVariable.result.value}}
+						{{/expand.form.questionVariable}}
+						{{^expand.form.questionVariable}}
+							{{value}}
+						{{/expand.form.questionVariable}}
+					</a></div>
 				</li>
 			{{/answers}}
 		</script>
@@ -182,7 +222,7 @@
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
-						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
@@ -192,7 +232,7 @@
 				</div>
 			</header>
 
-			<div class="interimAdvice"></div>
+			<div class="recommendationsContainer"></div>
 
 			<h3>{{display.question}}</h3>
 			<hr>
@@ -261,7 +301,7 @@
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
-						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
@@ -271,7 +311,7 @@
 				</div>
 			</header>
 
-			<div class="interimAdvice"></div>
+			<div class="recommendationsContainer"></div>
 
 			<h3>{{display.headline}}</h3>
 			<hr>

@@ -30,9 +30,6 @@ export default class showcase {
   }
 
   init() {
-    // strip off first 2 chars
-    this.api.advice.id_without_ownerId = this.api.advice.id.slice(2);
-
     this.updateAdviceSetDetails();
     this.updatePanes();
     // on page load, save current state
@@ -49,8 +46,6 @@ export default class showcase {
    *
    */
   updatePanes(){
-    // strip off first 2 chars
-    this.api.advice.id_without_ownerId = this.api.advice.id.slice(2);
     this.updateMainPane();
     this.updateAnswersList();
     this.updateVariablesList();
@@ -74,7 +69,7 @@ export default class showcase {
   }
 
   handleClickQuesAns() {
-    $(".answers").on("click", ".a > a", e => {
+    $(".answers, .answersByVariable").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
@@ -156,6 +151,8 @@ export default class showcase {
       str = Mustache.render($("#tmpl_adviceAdvice").html(), this.api);
       $(".advice").html(str);
     }
+
+    this.updateRecommendationsList();
   }
 
   /**
@@ -171,42 +168,20 @@ export default class showcase {
 	 * Update answers/history list (right side)
 	 */
   updateAnswersList(){
-    // create new list of interim advice, by group
-    this.api.list_advice = _.groupBy(this.api.answers.filter(a => {
-      return a.expand.type == "ADVICE";
-    }).map(advice => {
-      // advice.question = advice.question.replace(/::TODO::|::DONE::/,"");
-      return advice;
-    }), (a) => {
-      if (a.expand.tagGroup) {
-        return a.expand.tagGroup.name.replace(/[- ]/, ""); // we are using mustache templating for this demo and whitespace characters are not allowed
-      } else {
-        return "ungrouped";
-      }
-    });
-
-    // if interim "List" advice exists, add it
-    if (this.api.list_advice) {
-      this.updateInterimList();
-    }
-
-    // only display questions
-    this.api.answers = this.api.answers.filter(a => {
-      return a.expand.type == "INPUT_REQUEST";
-    });
-
     // render
     const str = Mustache.render($("#tmpl_answersList").html(), this.api);
+    const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
     $(".answers").html(str);
+    $(".answersByVariable").html(strVar);
   }
 
   /**
 	 *
 	 */
-  updateInterimList() {
+  updateRecommendationsList() {
     // render
-    const str = Mustache.render($("#tmpl_interimAdviceList").html(), this.api);
-    $(".interimAdvice").html(str);
+    const str = Mustache.render($("#tmpl_recommendationsAdviceList").html(), this.api);
+    $(".recommendationsContainer").html(str);
   }
 
   /**
