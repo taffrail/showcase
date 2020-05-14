@@ -1,6 +1,4 @@
 
 node_modules/
 .env
-public/dist/css/main.css
-public/dist/css/main.css.map
-public/dist/js/main.js
+public/dist/
