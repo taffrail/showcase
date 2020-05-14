@@ -178,7 +178,7 @@ export default class showcase {
     this.api.list_advice = _.groupBy(this.api.answers.filter(a => {
       return a.expand.type == "ADVICE";
     }).map(advice => {
-      advice.question = advice.question.replace(/::TODO::|::DONE::/,"");
+      // advice.question = advice.question.replace(/::TODO::|::DONE::/,"");
       return advice;
     }), (a) => {
       if (a.expand.tagGroup) {
