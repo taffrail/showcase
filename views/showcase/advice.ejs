@@ -112,7 +112,14 @@
 				<h6>To-Do</h6>
 				<ul class="advice-list todo fa-ul">
 				{{#list_advice.ToDo}}
-					<li data-id="{{id}}" data-idx="{{idx}}"><span class="fa-li"><i class="far fa-circle"></i></span>{{question}}</li>
+					<li data-id="{{id}}" data-idx="{{idx}}">
+						<span class="fa-li">
+							<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+								<i class="far fa-circle"></i> 
+							</a>
+						</span>
+						{{question}}
+					</li>
 				{{/list_advice.ToDo}}
 			{{/list_advice.ToDo.length}}
 			</ul>
@@ -121,7 +128,14 @@
 				<h6>Completed</h6>
 				<ul class="advice-list completed fa-ul">
 				{{#list_advice.Completed}}
-					<li data-id="{{id}}" data-idx="{{idx}}"><span class="fa-li"><i class="far fa-check-circle"></i></span>{{question}}</li>
+					<li data-id="{{id}}" data-idx="{{idx}}">
+						<span class="fa-li">
+							<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+								<i class="far fa-check-circle"></i> 
+							</a>
+						</span>
+						{{question}}
+					</li>
 				{{/list_advice.Completed}}
 			{{/list_advice.Completed.length}}
 			</ul>

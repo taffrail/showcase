@@ -8,11 +8,6 @@ import numeral from "numeral";
 const history = createBrowserHistory();
 
 export default class showcase {
-  constructor() {
-    // showcase
-    console.log("showcase");
-  }
-
   get api() {
     return window.jga.api;
   }
@@ -35,6 +30,9 @@ export default class showcase {
   }
 
   init() {
+    // strip off first 2 chars
+    this.api.advice.id_without_ownerId = this.api.advice.id.slice(2);
+
     this.updateAdviceSetDetails();
     this.updatePanes();
     // on page load, save current state
@@ -51,9 +49,6 @@ export default class showcase {
    *
    */
   updatePanes(){
-    // strip off first 2 chars
-    this.api.advice.id_without_ownerId = this.api.advice.id.slice(2);
-
     this.updateMainPane();
     this.updateAnswersList();
     this.updateVariablesList();
@@ -182,14 +177,14 @@ export default class showcase {
       return advice;
     }), (a) => {
       if (a.expand.tagGroup) {
-        return a.expand.tagGroup.name.replace(/ /, ""); // remove spaces
+        return a.expand.tagGroup.name.replace(/[- ]/, ""); // we are using mustache templating for this demo and whitespace characters are not allowed
       } else {
         return "ungrouped";
       }
     });
 
     // if interim "List" advice exists, add it
-    if (this.api.list_advice && this.api.list_advice.ungrouped && this.api.list_advice.ungrouped.length) {
+    if (this.api.list_advice) {
       this.updateInterimList();
     }
 
@@ -239,7 +234,6 @@ export default class showcase {
     $formEls.each((i, el) => {
       const $el = $(el);
       if ($el.is(":radio")) {
-        console.log(value,$el.prop("value"), "----", $el.prop("value") == "\""+value+"\"")
         if ($el.prop("value") == value || $el.prop("value") == "\""+value+"\"") {
           $el.prop("checked", true)
         }
