@@ -195,12 +195,14 @@
 			{{#variables}}
 				<tr>
 					<td>
-						{{^nameAlt}}
-							{{name}}
-						{{/nameAlt}}
-						{{#nameAlt}}
-							{{nameAlt}}
-						{{/nameAlt}}
+						<a href="https://app.justgoodadvice.com/admin/dictionary?preloadId={{id}}" target="_blank">
+							{{^nameAlt}}
+								{{name}}
+							{{/nameAlt}}
+							{{#nameAlt}}
+								{{nameAlt}}
+							{{/nameAlt}}
+						</a>
 					</td>
 					<td class="text-right">
 						{{^format}}
