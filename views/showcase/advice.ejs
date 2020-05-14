@@ -78,7 +78,7 @@
 			<ul class="list-unstyled tagged">
 				<li><a href="#" target="_blank"><i class="fad fa-album-collection"></i> {{advice.category}}</a></li>
 				{{#advice.tags}}
-					<li><a href="http://localhost:3002/library/search?advicebuilder_updatedAt%5BrefinementList%5D%5BentityType.displayName%5D%5B0%5D=Advice%20Set&advicebuilder_updatedAt%5BrefinementList%5D%5Badviceset.tags.name%5D%5B0%5D={{.}}" target="_blank"><i class="fad fa-tag"></i> {{.}}</a></li>
+					<li><a href="https://app.justgoodadvice.com/library/search?advicebuilder_updatedAt%5BrefinementList%5D%5BentityType.displayName%5D%5B0%5D=Advice%20Set&advicebuilder_updatedAt%5BrefinementList%5D%5Badviceset.tags.name%5D%5B0%5D={{.}}" target="_blank"><i class="fad fa-tag"></i> {{.}}</a></li>
 				{{/advice.tags}}
 			</ul>
 			<h6>Reference Documents</h6>
@@ -89,7 +89,7 @@
 			</ul>
 
 			<div>
-				<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
+				<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
 			</div>
 		</script>
 
@@ -99,7 +99,7 @@
 			{{#list_advice.ungrouped}}
 				<li data-id="{{id}}" data-idx="{{idx}}">
 					<span class="fa-li">
-						<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 							<i class="fad fa-thumbs-up"></i>
 						</a>
 					</span>
@@ -114,7 +114,7 @@
 				{{#list_advice.ToDo}}
 					<li data-id="{{id}}" data-idx="{{idx}}">
 						<span class="fa-li">
-							<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+							<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 								<i class="far fa-circle"></i> 
 							</a>
 						</span>
@@ -130,7 +130,7 @@
 				{{#list_advice.Completed}}
 					<li data-id="{{id}}" data-idx="{{idx}}">
 						<span class="fa-li">
-							<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+							<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 								<i class="far fa-check-circle"></i> 
 							</a>
 						</span>
@@ -175,7 +175,7 @@
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
-						<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
@@ -254,7 +254,7 @@
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
-						<a href="http://localhost:3002/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
+						<a href="https://app.justgoodadvice.com/advicesets/{{advice.id_without_ownerId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
