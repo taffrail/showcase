@@ -27,6 +27,13 @@ app.use(sassMiddleware({
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "node_modules/")));
 
+app.use((req, res, next) => {
+  res.locals.WEB_HOST = process.env.WEB_HOST;
+  res.locals.API_HOST = process.env.API_HOST;
+  res.locals.API_KEY = process.env.API_KEY;
+  next();
+});
+
 app.use("/", indexRouter);
 app.use("/s", showcaseRouter);
 

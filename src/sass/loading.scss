@@ -1,0 +1,17 @@
+.loading-mask {
+  background: #fff none repeat scroll 0%;
+  border: 0 none;
+  opacity: .6;
+  position: absolute;
+  z-index: $zindex-loading-mask;
+}
+
+.loading-mask--cover-clear {
+  background-color: transparent;
+  opacity: 1;
+}
+
+.loading-spinner {
+  position: absolute;
+  z-index: $zindex-loading-spinner;
+}

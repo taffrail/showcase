@@ -5,6 +5,7 @@
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
 
+@import 'loading';
 
 .showcase {
   &.showcase--advice {
@@ -15,7 +16,7 @@
       box-shadow: $dropdown-box-shadow;
       display: flex;
       height: 5rem;
-      padding: .5rem;
+      padding: .5rem ($grid-gutter-width/2);
     }
 
     .bg-stripes {
@@ -24,21 +25,76 @@
     }
 
     .advice-set-details {
+      .by {
+        color: $gray-600;
+        font-size: $font-size-sm;
+      }
+
       h1 {
         font-weight: 900; //heavy
+      }
+
+      .tagged,
+      .refdocs {
+        font-size: $font-size-sm;
+      }
+    }
+
+    // main pane
+    .advice {
+      .icon-row {
+        margin-bottom: .5rem;
+
+        .btn-light {
+          margin-left: .25rem;
+        }
+      }
+
+      form {
+        padding: .5rem;
+
+        .custom-control {
+          border: 1px solid #fff;
+          border-radius: $border-radius;
+          margin-bottom: .5rem;
+
+          label {
+            width: 100%;
+          }
+        }
       }
     }
 
     .advice-container {
       padding: .5rem;
-
     }
 
-    .variables-container {
-      font-family: monospace;
-      font-size: 90%;
-      margin-top: 2rem;
-      padding: .25rem;
+    .assumptions-container {
+      font-size: 11px;
+      margin-left: 1px;
+      margin-top: 2.5rem;
+      padding: .5rem .25rem;
+
+      .answers {
+        li {
+          border-radius: $border-radius;
+          margin-bottom: .5rem;
+          padding: .25rem;
+
+          &:hover {
+            background-color: $gray-100;
+          }
+        }
+
+        .q {
+          font-weight: bold;
+        }
+      }
+
+      .variables {
+        font-family: $font-family-monospace;
+        font-size: 10px;
+      }
     }
   }
 }

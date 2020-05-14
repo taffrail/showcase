@@ -10,7 +10,10 @@ router.get("/:adviceSetId", (req, res, next) => {
   }
 
   // advice
-  const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(req.query)}`;
+  const qrystr = Object.assign({}, req.query, {
+    include: ["filteredVars"]
+  });
+  const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
 
   request.get(apiUrl, {
     headers: {
