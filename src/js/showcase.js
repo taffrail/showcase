@@ -49,6 +49,8 @@ export default class showcase {
    *
    */
   updatePanes(){
+    // strip off first 2 chars
+    this.api.advice.id_without_ownerId = this.api.advice.id.slice(2);
     this.updateMainPane();
     this.updateAnswersList();
     this.updateVariablesList();
