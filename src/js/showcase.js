@@ -195,6 +195,11 @@ export default class showcase {
 	 * Update answers/history list (right side)
 	 */
   updateAnswersList(){
+    // add row # to list
+    this.api.answers = this.api.answers.map(a => {
+      a._count = a.idx + 1;
+      return a;
+    })
     // render
     const str = Mustache.render($("#tmpl_answersList").html(), this.api);
     const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
