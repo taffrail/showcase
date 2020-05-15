@@ -195,6 +195,9 @@ export default class showcase {
 	 *
 	 */
   updateRecommendationsList() {
+    // simple helper for UX
+    this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
+
     // render
     const str = Mustache.render($("#tmpl_recommendationsAdviceList").html(), this.api);
     $(".recommendationsContainer").html(str);
