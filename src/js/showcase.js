@@ -2,8 +2,9 @@ import _ from "lodash";
 import { createBrowserHistory } from "history";
 import Loading from "./loading";
 import Mustache from "mustache";
-import qs from "querystring";
 import numeral from "numeral";
+import qs from "querystring";
+import store from "store";
 
 const history = createBrowserHistory();
 
@@ -37,10 +38,13 @@ export default class showcase {
 
     // events
     this.handleClickOk();
+    this.handleClickBack();
     this.handleClickQuesAns();
     this.handleClickOpenDebug();
     this.handleClickOpenClassic();
     this.listenForUrlChanges();
+    this.loadViewMode();
+    this.handleClickToggleMode();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
 
@@ -70,6 +74,17 @@ export default class showcase {
     });
   }
 
+  handleClickBack() {
+    $(".advice").on("click", "a[data-action=back]", e => {
+      e.preventDefault();
+      const { _currIdx } = this.api.display;
+      const ans = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
+      if (!ans) { return; }
+      this.api.display = ans.expand;
+      this.updateMainPane();
+    });
+  }
+
   handleClickQuesAns() {
     $(".answers, .answersByVariable, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
@@ -77,7 +92,9 @@ export default class showcase {
       const data = $this.closest("li").data();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      this.api.display = this.api.answers.find((a) => { return a.idx == data.idx; }).expand;
+      const ans = this.api.answers.find((a) => { return a.idx == data.idx; });
+      this.api.display = ans.expand;
+      this.api.display.idx = ans.idx;
       this.updateMainPane();
     });
   }
@@ -100,6 +117,32 @@ export default class showcase {
       const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
       window.open(`${url}?${queryString}`);
     });
+  }
+
+  handleClickToggleMode() {
+    $(".toggle-mode").on("click", "[data-action=toggle-mode]", e => {
+      e.preventDefault();
+      const isDevMode = store.get("showcase-dev-mode");
+      let newMode;
+      if (isDevMode === true) {
+        newMode = false;
+      } else if (isDevMode === false) {
+        newMode = true;
+      } else {
+        newMode = false;
+      }
+
+      store.set("showcase-dev-mode", newMode);
+      this.loadViewMode(newMode);
+    });
+  }
+
+  loadViewMode(newMode = store.get("showcase-dev-mode")) {
+    if (newMode) {
+      $(".variables-container").fadeIn("fast");
+    } else {
+      $(".variables-container").fadeOut("fast");
+    }
   }
 
   listenForUrlChanges() {
@@ -150,6 +193,15 @@ export default class showcase {
     // update the window title
     this.windowTitle = `${this.api.advice.title} - ${this.api.advice.owner.name}`;
 
+    // set the current index based on answers
+    // only useful for going "back"
+    let currIdx = _.findIndex(this.api.answers, (ans) => { return this.api.display.id == ans.id });
+    if (currIdx == -1) {
+      currIdx = this.api.answers.length;
+    }
+    this.api.display._currIdx = currIdx;
+    this.api.display._isFirst = currIdx === 0;
+
     // render
     let str;
     if (this.api.display.type == "INPUT_REQUEST") {
@@ -167,6 +219,8 @@ export default class showcase {
       this._setValue();
       // focus input
       this._focusFirstInput();
+      // highlight active assumption/question
+      this._setAssumptionActive();
     } else {
       const isUnreachable = this.api.display.id === "-32768";
       if (isUnreachable){
@@ -267,6 +321,14 @@ export default class showcase {
   _focusFirstInput() {
     // focus 1st input
     $(".advice form").find("input:not(:radio),textarea,select").filter(":visible").first().focus();
+  }
+
+  /**
+   *
+   */
+  _setAssumptionActive(){
+    const { id } = this.api.display;
+    $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
   }
 
   /**

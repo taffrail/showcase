@@ -35,14 +35,29 @@
       }
     }
 
+    // all white panes
+    .rounded.bg-white {
+      padding: ($grid-gutter-width/2);
+    }
+
     // main pane
     .advice {
+      &.rounded {
+        box-shadow: $dropdown-box-shadow;
+        margin-bottom: 2rem;
+      }
+
       .icon-row {
         margin-bottom: .5rem;
 
         .btn-light {
           margin-left: .25rem;
         }
+      }
+
+      .question .lead {
+        color: $gray-600;
+        line-height: 28px;
       }
 
       form {
@@ -56,6 +71,22 @@
           label {
             width: 100%;
           }
+        }
+      }
+    }
+
+    .toggle-mode {
+      font-size: $font-size-sm;
+      margin-top: .5rem;
+      text-align: right;
+
+      span {
+        display: none;
+      }
+
+      a:hover {
+        span {
+          display: inline;
         }
       }
     }
@@ -108,6 +139,7 @@
           margin-bottom: .33rem;
           padding: .25rem;
 
+          &.active,
           &:hover {
             background-color: $gray-100;
           }
@@ -116,10 +148,6 @@
         .q,
         .statement {
           font-weight: bold;
-        }
-
-        .statement a {
-          color: $body-color;
         }
       }
 
