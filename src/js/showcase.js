@@ -39,6 +39,7 @@ export default class showcase {
     this.handleClickOk();
     this.handleClickQuesAns();
     this.handleClickOpenDebug();
+    this.handleClickOpenClassic();
     this.listenForUrlChanges();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
@@ -83,6 +84,16 @@ export default class showcase {
 
   handleClickOpenDebug() {
     $(".advice").on("click", "[data-action=openDebugWithQuerystring]", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const url = $this.prop("href");
+      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      window.open(`${url}?${queryString}`);
+    });
+  }
+
+  handleClickOpenClassic() {
+    $(".advice").on("click", "[data-action=openClassicWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const url = $this.prop("href");

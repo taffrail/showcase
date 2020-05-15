@@ -39,7 +39,6 @@
 						<div class="col-8 rounded bg-white p-2">
 							<div class="advice"></div>
 							<div class="mt-5">
-								<small><a href="/s/<%= api.data.advice.id %>" class="btn btn-link btn-sm"><i class="fad fa-redo-alt"></i> start over</a></small>
 								<!--
 								<small>
 									<pre><%- JSON.stringify(api.data.display,null,2) %></pre>
@@ -96,14 +95,17 @@
 					<li><a href="https://app.justgoodadvice.com/library/search?advicebuilder_updatedAt%5BrefinementList%5D%5BentityType.displayName%5D%5B0%5D=Advice%20Set&advicebuilder_updatedAt%5BrefinementList%5D%5Badviceset.tags.name%5D%5B0%5D={{.}}" target="_blank"><i class="fad fa-tag"></i> {{.}}</a></li>
 				{{/advice.tags}}
 			</ul>
+			{{#advice.referenceDocuments.length}}
 			<h6>Reference Documents</h6>
 			<ul class="list-unstyled refdocs">
 				{{#advice.referenceDocuments}}
 					<li><a href="{{url}}" target="_blank"><i class="fad fa-file"></i> {{name}}</a></li>
 				{{/advice.referenceDocuments}}
 			</ul>
+			{{/advice.referenceDocuments.length}}
 
 			<div>
+				<a href="/s/{{advice.id}}/" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" title="Start over"><i class="fad fa-redo-alt"></i></a>
 				<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
 			</div>
 		</script>
@@ -221,17 +223,23 @@
 		<script id="tmpl_adviceInputRequest" type="x-tmpl-mustache">
 			<header class="d-flex justify-content-end icon-row">
 				<div class="dropdown">
-					<a class="" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fad fa-ellipsis-h"></i>
+					<a class="btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="far fa-ellipsis-h"></i>
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
+						<div class="dropdown-header">ADVICE BUILDER</div>
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
 							<i class="fad fa-debug"></i> Debug
 						</a>
+						<a href="https://app.justgoodadvice.com/_/advice/widget/{{advice.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
+							<i class="fad fa-comments"></i> Classic
+						</a>
+						<div class="dropdown-divider"></div>
+						<div class="dropdown-header">DEVELOPERS</div>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
 							<i class="fad fa-code"></i> Open API
 						</a>
@@ -295,7 +303,7 @@
 			</div>
 
 			<div class="continue">
-				<button type="submit" data-id="{{display.id}}" class="btn btn-primary">OK <i class="fad fa-arrow-right"></i></button>
+				<button type="submit" data-id="{{display.id}}" class="btn btn-primary">Next</button>
 			</div>
 			</form>
 		</script>
@@ -303,17 +311,23 @@
 		<script id="tmpl_adviceAdvice" type="x-tmpl-mustache">
 			<header class="d-flex justify-content-end icon-row">
 				<div class="dropdown">
-					<a class="" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<i class="fad fa-ellipsis-h"></i>
+					<a class="btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="far fa-ellipsis-h"></i>
 					</a>
 
 					<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
+						<div class="dropdown-header">ADVICE BUILDER</div>
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" target="_blank" class="dropdown-item">
 							<i class="fad fa-pencil"></i> Edit in Advice Builder
 						</a>
 						<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
 							<i class="fad fa-debug"></i> Debug
 						</a>
+						<a href="https://app.justgoodadvice.com/_/advice/widget/{{advice.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
+							<i class="fad fa-comments"></i> Classic
+						</a>
+						<div class="dropdown-divider"></div>
+						<div class="dropdown-header">DEVELOPERS</div>
 						<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
 							<i class="fad fa-code"></i> Open API
 						</a>
