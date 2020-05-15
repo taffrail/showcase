@@ -45,11 +45,12 @@
 							</li>
 						</ul>
 						<div class="tab-content" id="pills-tabContent">
+							<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
+								<!--<ul class="answersByVariable list-unstyled"></ul>-->
+								<ul class="assumptions list-unstyled"></ul>
+							</div>
 							<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
 								<ul class="answers list-unstyled"></ul>
-							</div>
-							<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
-								<ul class="answersByVariable list-unstyled"></ul>
 							</div>
 						</div>
 					</div>
@@ -181,6 +182,38 @@
 							{{value}}
 						{{/expand.form.questionVariable}}
 					</a></div>
+				</li>
+			{{/answers}}
+		</script>
+
+		<script id="tmpl_assumptionsList" type="x-tmpl-mustache">
+			{{#answers}}
+				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
+					{{^statement}}
+						<div class="q">
+							{{_count}}.
+							{{#expand.form.questionVariable}}
+								<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+							{{/expand.form.questionVariable}}
+							{{^expand.form.questionVariable}}
+								{{question}}
+							{{/expand.form.questionVariable}}
+						</div>
+						<div class="a"><a href="#" class="stretched-link">
+							{{#expand.form.questionVariable}}
+								{{expand.form.questionVariable.result.value}}
+							{{/expand.form.questionVariable}}
+							{{^expand.form.questionVariable}}
+								{{value}}
+							{{/expand.form.questionVariable}}
+						</a></div>
+					{{/statement}}
+						
+					{{#statement}}
+						<div class="a statement"><a href="#" class="stretched-link">
+							{{_count}}. {{statement}}
+						</a></div>
+					{{/statement}}
 				</li>
 			{{/answers}}
 		</script>

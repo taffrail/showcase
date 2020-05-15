@@ -71,7 +71,7 @@ export default class showcase {
   }
 
   handleClickQuesAns() {
-    $(".answers, .answersByVariable").on("click", ".a > a", e => {
+    $(".answers, .answersByVariable, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
@@ -202,9 +202,11 @@ export default class showcase {
     })
     // render
     const str = Mustache.render($("#tmpl_answersList").html(), this.api);
-    const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
+    // const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
+    const strAssump = Mustache.render($("#tmpl_assumptionsList").html(), this.api);
     $(".answers").html(str);
-    $(".answersByVariable").html(strVar);
+    // $(".answersByVariable").html(strVar);
+    $(".assumptions").html(strAssump);
   }
 
   /**
