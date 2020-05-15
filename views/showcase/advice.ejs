@@ -33,37 +33,40 @@
 
 		<div class="container-fluid mt-4">
 			<div class="row">
-				<div class="col-3 advice-set-details">Loading...</div>
-				<div class="col-7">
-					<div class="row no-gutters">
-						<div class="col-8 rounded bg-white p-2">
-							<div class="advice"></div>
-							<div class="mt-5">
-								<!--
-								<small>
-									<pre><%- JSON.stringify(api.data.display,null,2) %></pre>
-								</small>-->
+				<div class="col-3">
+					<div class="advice-set-details">Loading...</div>
+					<div class="assumptions-container rounded">
+						<ul class="nav nav-tabs" id="pills-tab" role="tablist">
+							<li class="nav-item" role="presentation">
+								<a class="nav-link active" id="pills-vars-tab" data-toggle="pill" href="#pills-vars" role="tab" aria-controls="pills-vars" aria-selected="false">Assumptions</a>
+							</li>
+							<li class="nav-item" role="presentation">
+								<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="true">Q&A</a>
+							</li>
+						</ul>
+						<div class="tab-content" id="pills-tabContent">
+							<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
+								<ul class="answers list-unstyled"></ul>
+							</div>
+							<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
+								<ul class="answersByVariable list-unstyled"></ul>
 							</div>
 						</div>
+					</div>
+					<div>
+						<small><a href="/s/<%= api.data.advice.id %>/" class="text-muted">Reset</a></small>
+					</div>
+				</div>
+				<div class="col-7">
+					<div class="row no-gutters">
+						<div class="col-8 p-2">
+							<div class="list-advice-recommendations"></div>
+							<div class="list-advice-todo"></div>
+							<div class="list-advice-completed"></div>
+							<div class="advice rounded bg-white p-2 mt-2"></div>
+						</div>
 						<div class="col-4">
-							<div class="assumptions-container bg-white rounded">
-								<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-									<li class="nav-item" role="presentation">
-										<a class="nav-link active" id="pills-vars-tab" data-toggle="pill" href="#pills-vars" role="tab" aria-controls="pills-vars" aria-selected="false">Parameters</a>
-									</li>
-									<li class="nav-item" role="presentation">
-										<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="true">Questions</a>
-									</li>
-								</ul>
-								<div class="tab-content" id="pills-tabContent">
-									<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
-										<ul class="answers list-unstyled"></ul>
-									</div>
-									<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
-										<ul class="answersByVariable list-unstyled"></ul>
-									</div>
-								</div>
-								<hr>
+							<div class="variables-container rounded">
 								<table class="table table-borderless table-hover table-sm">
 									<thead>
 										<tr>
@@ -73,7 +76,7 @@
 									</thead>
 									<tbody class="variables"></tbody>
 								</table>
-							</>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -85,82 +88,68 @@
 
 		<!--templates-->
 		<script id="tmpl_adviceSetDetails" type="x-tmpl-mustache">
-			<div class="by">By {{advice.owner.name}}</div>
-			<h2>{{advice.title}}</h2>
+			<h2><a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/open-editor" target="_blank" class="text-body">{{advice.title}}</a></h2>
 			<p class="lead">{{advice.description}}</p>
-			<h6>Category & Tags</h6>
-			<ul class="list-unstyled tagged">
-				<li><a href="#" target="_blank"><i class="fad fa-album-collection"></i> {{advice.category}}</a></li>
-				{{#advice.tags}}
-					<li><a href="https://app.justgoodadvice.com/library/search?advicebuilder_updatedAt%5BrefinementList%5D%5BentityType.displayName%5D%5B0%5D=Advice%20Set&advicebuilder_updatedAt%5BrefinementList%5D%5Badviceset.tags.name%5D%5B0%5D={{.}}" target="_blank"><i class="fad fa-tag"></i> {{.}}</a></li>
-				{{/advice.tags}}
-			</ul>
-			{{#advice.referenceDocuments.length}}
-			<h6>Reference Documents</h6>
-			<ul class="list-unstyled refdocs">
-				{{#advice.referenceDocuments}}
-					<li><a href="{{url}}" target="_blank"><i class="fad fa-file"></i> {{name}}</a></li>
-				{{/advice.referenceDocuments}}
-			</ul>
-			{{/advice.referenceDocuments.length}}
-
-			<div>
-				<a href="/s/{{advice.id}}/" class="btn btn-sm btn-outline-primary" data-toggle="tooltip" title="Start over"><i class="fad fa-redo-alt"></i></a>
-				<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/open-editor" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fad fa-tools"></i> Advice Builder</a>
-			</div>
 		</script>
 
 		<script id="tmpl_recommendationsAdviceList" type="x-tmpl-mustache">
 			{{#recommendations.ungrouped.length}}
-				<h6>Recommendations</h6>
-				<ul class="advice-list recommendations fa-ul">
-				{{#recommendations.ungrouped}}
-					<li data-id="{{id}}" data-idx="{{idx}}">
-						<span class="fa-li">
-							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-								<i class="fad fa-thumbs-up"></i>
-							</a>
-						</span>
-						{{headline}}
-					</li>
-				{{/recommendations.ungrouped}}
-				</ul>
+				<div class="rounded bg-white p-2 mt-2">
+					<h6>Recommendations</h6>
+					<ul class="advice-list recommendations fa-ul">
+					{{#recommendations.ungrouped}}
+						<li data-id="{{id}}" data-idx="{{idx}}">
+							<span class="fa-li">
+								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+									<i class="fad fa-thumbs-up"></i>
+								</a>
+							</span>
+							{{headline}}
+						</li>
+					{{/recommendations.ungrouped}}
+					</ul>
+				</div>
 			{{/recommendations.ungrouped.length}}
-
+		</script>
+		
+		<script id="tmpl_recommendationsToDoAdviceList" type="x-tmpl-mustache">
 			{{#recommendations.todo.length}}
-				<h6>To-Do</h6>
-				<ul class="advice-list todo fa-ul">
-				{{#recommendations.todo}}
-					<li data-id="{{id}}" data-idx="{{idx}}">
-						<span class="fa-li">
-							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-								<i class="far fa-circle"></i> 
-							</a>
-						</span>
-						{{headline}}
-					</li>
-				{{/recommendations.todo}}
+				<div class="rounded bg-white p-2 mt-2">
+					<h6>To-Do</h6>
+					<ul class="advice-list todo fa-ul">
+					{{#recommendations.todo}}
+						<li data-id="{{id}}" data-idx="{{idx}}">
+							<span class="fa-li">
+								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+									<i class="far fa-circle"></i> 
+								</a>
+							</span>
+							{{headline}}
+						</li>
+					{{/recommendations.todo}}
+					</ul>
+				</div>
 			{{/recommendations.todo.length}}
-			</ul>
+		</script>
 
+		<script id="tmpl_recommendationsCompletedAdviceList" type="x-tmpl-mustache">
 			{{#recommendations.completed.length}}
-				<h6>Completed</h6>
-				<ul class="advice-list completed fa-ul">
-				{{#recommendations.completed}}
-					<li data-id="{{id}}" data-idx="{{idx}}">
-						<span class="fa-li">
-							<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-								<i class="far fa-check-circle"></i> 
-							</a>
-						</span>
-						{{headline}}
-					</li>
-				{{/recommendations.completed}}
+				<div class="rounded bg-white p-2 mt-2">
+					<h6>Completed</h6>
+					<ul class="advice-list completed fa-ul">
+					{{#recommendations.completed}}
+						<li data-id="{{id}}" data-idx="{{idx}}">
+							<span class="fa-li">
+								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+									<i class="far fa-check-circle"></i> 
+								</a>
+							</span>
+							{{headline}}
+						</li>
+					{{/recommendations.completed}}
+					</ul>
+				</div>
 			{{/recommendations.completed.length}}
-			</ul>
-			{{#_recommendationsExist}}
-			<hr>
-			{{/_recommendationsExist}}
 		</script>
 
 		<script id="tmpl_answersList" type="x-tmpl-mustache">
@@ -177,7 +166,7 @@
 				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
 					<div class="q">
 						{{#expand.form.questionVariable}}
-							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>:&nbsp;
+							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
 						{{/expand.form.questionVariable}}
 						{{^expand.form.questionVariable}}
 							{{question}}
@@ -199,16 +188,11 @@
 			{{#variables}}
 				<tr>
 					<td>
-						<a href="https://app.justgoodadvice.com/admin/dictionary?preloadId={{id}}" target="_blank">
-							{{^nameAlt}}
-								{{name}}
-							{{/nameAlt}}
-							{{#nameAlt}}
-								{{nameAlt}}
-							{{/nameAlt}}
+						<a href="https://app.justgoodadvice.com/admin/dictionary?preloadId={{id}}" target="_blank"  title="{{name}}">
+							{{name}}
 						</a>
 					</td>
-					<td class="text-right">
+					<td class="text-right" title="{{value}}">
 						{{^format}}
 							{{value}}
 						{{/format}}
@@ -221,7 +205,8 @@
 		</script>
 
 		<script id="tmpl_adviceInputRequest" type="x-tmpl-mustache">
-			<header class="d-flex justify-content-end icon-row">
+			<header class="d-flex justify-content-between icon-row">
+				<h3>{{display.question}}</h3>
 				<div class="dropdown">
 					<a class="btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class="far fa-ellipsis-h"></i>
@@ -246,10 +231,7 @@
 					</div>
 				</div>
 			</header>
-
-			<div class="recommendationsContainer"></div>
-
-			<h3>{{display.question}}</h3>
+			
 			<hr>
 			<form data-id="{{display.id}}">
 			{{#display.explanation}}
@@ -309,7 +291,8 @@
 		</script>
 
 		<script id="tmpl_adviceAdvice" type="x-tmpl-mustache">
-			<header class="d-flex justify-content-end icon-row">
+			<header class="d-flex justify-content-between icon-row">
+				<h3>{{display.headline}}</h3>
 				<div class="dropdown">
 					<a class="btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class="far fa-ellipsis-h"></i>
@@ -335,9 +318,6 @@
 				</div>
 			</header>
 
-			<div class="recommendationsContainer"></div>
-
-			<h3>{{display.headline}}</h3>
 			<hr>
 			<p class="">
 				{{#display.summary}}

@@ -25,11 +25,6 @@
     }
 
     .advice-set-details {
-      .by {
-        color: $gray-600;
-        font-size: $font-size-sm;
-      }
-
       h1 {
         font-weight: 900; //heavy
       }
@@ -69,11 +64,41 @@
       padding: .5rem;
     }
 
-    .assumptions-container {
+    .variables-container {
       font-size: 11px;
       margin-left: 1px;
       margin-top: 2.5rem;
-      padding: .5rem .25rem;
+
+      .variables {
+        font-family: $font-family-monospace;
+        font-size: 10px;
+        td:nth-child(1) {
+          max-width: 1px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        td:nth-child(2) {
+          max-width: 1px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .assumptions-container {      
+      font-size: 11px;
+
+      .nav-link.active {
+        background-color: $gray-200;
+        border-bottom-color: $gray-200;
+      }
+
+      .tab-content {
+        background-color: $gray-200;
+        padding: .25rem;
+      }
 
       .answers,
       .answersByVariable {
@@ -96,11 +121,6 @@
         li {
           display: flex;
         }
-      }
-
-      .variables {
-        font-family: $font-family-monospace;
-        font-size: 10px;
       }
     }
   }

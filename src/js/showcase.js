@@ -210,8 +210,12 @@ export default class showcase {
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
 
     // render
-    const str = Mustache.render($("#tmpl_recommendationsAdviceList").html(), this.api);
-    $(".recommendationsContainer").html(str);
+    const str1 = Mustache.render($("#tmpl_recommendationsAdviceList").html(), this.api);
+    const str2 = Mustache.render($("#tmpl_recommendationsToDoAdviceList").html(), this.api);
+    const str3 = Mustache.render($("#tmpl_recommendationsCompletedAdviceList").html(), this.api);
+    $(".list-advice-recommendations").html(str1);
+    $(".list-advice-todo").html(str2);
+    $(".list-advice-completed").html(str3);
   }
 
   /**
