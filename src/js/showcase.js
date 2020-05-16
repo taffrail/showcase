@@ -253,7 +253,12 @@ export default class showcase {
     this.api.answers = this.api.answers.map(a => {
       a._count = a.idx + 1;
       return a;
-    })
+    });
+
+    // do we have ANY assumptions/answers yet?
+    // show or hide depending
+    $(".assumptions-container").toggle(this.api.answers.length > 0);
+
     // render
     const str = Mustache.render($("#tmpl_answersList").html(), this.api);
     // const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
