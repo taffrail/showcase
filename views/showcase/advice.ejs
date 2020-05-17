@@ -62,6 +62,7 @@
 					<div class="row no-gutters">
 						<div class="col-lg-8 p-2">
 							<div class="advice rounded bg-white mt-2"></div>
+							<div class="list-all-recommendations"></div>
 							<div class="list-advice-recommendations"></div>
 							<div class="list-advice-todo"></div>
 							<div class="list-advice-completed"></div>
@@ -96,163 +97,119 @@
 			<p class="lead">{{advice.description}}</p>
 		</script>
 
-		<script id="tmpl_recommendationsAdviceList" type="x-tmpl-mustache">
-			{{#recommendations.ungrouped.length}}
-				<div class="rounded bg-white mt-2">
-					<h6>Recommendations</h6>
-					<ul class="advice-list recommendations fa-ul">
-					{{#recommendations.ungrouped}}
-						<li data-id="{{id}}" data-idx="{{idx}}">
-							<span class="fa-li">
-								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-									<i class="fad fa-thumbs-up"></i>
-								</a>
-							</span>
-							{{headline}}
-						</li>
-					{{/recommendations.ungrouped}}
-					</ul>
-				</div>
-			{{/recommendations.ungrouped.length}}
-		</script>
-		
-		<script id="tmpl_recommendationsToDoAdviceList" type="x-tmpl-mustache">
-			{{#recommendations.todo.length}}
-				<div class="rounded bg-white mt-2">
-					<h6>To-Do</h6>
-					<ul class="advice-list todo fa-ul">
-					{{#recommendations.todo}}
-						<li data-id="{{id}}" data-idx="{{idx}}">
-							<span class="fa-li">
-								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-									<i class="far fa-circle"></i> 
-								</a>
-							</span>
-							{{headline}}
-						</li>
-					{{/recommendations.todo}}
-					</ul>
-				</div>
-			{{/recommendations.todo.length}}
-		</script>
-
-		<script id="tmpl_recommendationsCompletedAdviceList" type="x-tmpl-mustache">
-			{{#recommendations.completed.length}}
-				<div class="rounded bg-white mt-2">
-					<h6>Completed</h6>
-					<ul class="advice-list completed fa-ul">
-					{{#recommendations.completed}}
-						<li data-id="{{id}}" data-idx="{{idx}}">
-							<span class="fa-li">
-								<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
-									<i class="far fa-check-circle"></i> 
-								</a>
-							</span>
-							{{headline}}
-						</li>
-					{{/recommendations.completed}}
-					</ul>
-				</div>
-			{{/recommendations.completed.length}}
+		<script id="tmpl_groupedRecommendationsAdviceList" type="x-tmpl-mustache">
+			{{#if _recommendationsExist}}
+				
+					{{#each recommendations}}
+						<div class="rounded bg-white mt-2">
+							<h6>{{@key}}</h6>
+							<ul class="advice-list recommendations fa-ul">
+								{{#each this}}
+									<li data-id="{{id}}" data-idx="{{idx}}">
+										<span class="fa-li">
+											<a href="https://app.justgoodadvice.com/advicesets/{{../../advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+												<i class="fad fa-thumbs-up"></i>
+											</a>
+										</span>
+										{{headline}}
+									</li>
+								{{/each}}
+							</ul>
+						</div>
+					{{/each}}
+				
+			{{/if}}
 		</script>
 
 		<script id="tmpl_answersList" type="x-tmpl-mustache">
-			{{#answers}}
+			{{#each answers}}
 				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
 					<div class="q">{{question}}</div>
 					<div class="a"><a href="#" class="stretched-link">{{value}}</a></div>
 				</li>
-			{{/answers}}
+			{{/each}}
 		</script>
 
 		<script id="tmpl_answersListByVariable" type="x-tmpl-mustache">
-			{{#answers}}
+			{{#if answers}}
 				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
 					<div class="q">
 						{{_count}}.
-						{{#expand.form.questionVariable}}
+						{{#if expand.form.questionVariable}}
 							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
-						{{/expand.form.questionVariable}}
-						{{^expand.form.questionVariable}}
+						{{else}}
 							{{question}}
-						{{/expand.form.questionVariable}}
+						{{/if}}
 					</div>
 					<div class="a"><a href="#" class="stretched-link">
-						{{#expand.form.questionVariable}}
+						{{#if expand.form.questionVariable}}
 							{{expand.form.questionVariable.result.value}}
-						{{/expand.form.questionVariable}}
-						{{^expand.form.questionVariable}}
+						{{else}}
 							{{value}}
-						{{/expand.form.questionVariable}}
+						{{/if}}
 					</a></div>
 				</li>
-			{{/answers}}
+			{{/if}}
 		</script>
 
 		<script id="tmpl_assumptionsList" type="x-tmpl-mustache">
-			{{#answers}}
-				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
-					{{^statement}}
-						<div class="q">
-							{{_count}}.
-							{{#expand.form.questionVariable}}
-								<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
-							{{/expand.form.questionVariable}}
-							{{^expand.form.questionVariable}}
-								{{question}}
-							{{/expand.form.questionVariable}}
-						</div>
-						<div class="a"><a href="#" class="stretched-link">
-							{{#expand.form.questionVariable}}
-								{{expand.form.questionVariable.result.value}}
-							{{/expand.form.questionVariable}}
-							{{^expand.form.questionVariable}}
-								{{value}}
-							{{/expand.form.questionVariable}}
-						</a></div>
-					{{/statement}}
-						
-					{{#statement}}
+			{{#each answers}}
+				<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">			
+					{{#if statement}}
 						<div class="a statement"><a href="#" class="stretched-link">
 							{{_count}}. {{statement}}
 						</a></div>
-					{{/statement}}
+					{{else}}
+						<div class="q">
+							{{_count}}.
+							{{#if expand.form.questionVariable}}
+								<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+							{{else}}
+								{{question}}
+							{{/if}}
+						</div>
+						<div class="a"><a href="#" class="stretched-link">
+							{{#if expand.form.questionVariable}}
+								{{expand.form.questionVariable.result.value}}
+							{{else}}
+								{{value}}
+							{{/if}}
+						</a></div>
+					{{/if}}
 				</li>
-			{{/answers}}
+			{{/each}}
 		</script>
 
 		<script id="tmpl_variablesList" type="x-tmpl-mustache">
-			{{#variables}}
+			{{#each variables}}
 				<tr>
 					<td>
-						<a href="https://app.justgoodadvice.com/admin/dictionary?preloadId={{id}}" target="_blank"  title="{{name}}">
+						<a href="https://app.justgoodadvice.com/admin/dictionary?preloadId={{id}}" target="_blank" title="{{name}}">
 							{{name}}
 						</a>
 					</td>
 					<td class="text-right" title="{{value}}">
-						{{^format}}
-							{{value}}
-						{{/format}}
-						{{#format}}
+						{{#if format}}
 							{{valueF}}
-						{{/format}}
+						{{else}}
+							{{value}}
+						{{/if}}
 					</td>
 				</tr>
-			{{/variables}}
+			{{/each}}
 		</script>
 
 		<script id="tmpl_adviceInputRequest" type="x-tmpl-mustache">
 			<div class="question">
 				<header class="d-flex justify-content-between icon-row">
-					{{#display.explanation}}
+					{{#if display.explanation}}
 						<div>
 						<p class="lead">{{display.explanation}}</p>
 						<h3>{{display.question}}</h3>
 						</div>
-					{{/display.explanation}}
-					{{^display.explanation}}
+					{{else}}
 						<h3>{{display.question}}</h3>
-					{{/display.explanation}}
+					{{/if}}
 					<div class="dropdown">
 						<a class="btn btn-sm btn-light" href="#" role="button" id="dropdownMenuLink{{display.id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<i class="far fa-ellipsis-h"></i>
@@ -283,22 +240,22 @@
 
 					<div class="form-group">
 
-						{{#display.form.fieldType_isRadio}}
+						{{#if display.form.fieldType_isRadio}}
 						
-							{{#display.form.values}}
+							{{#each display.form.values}}
 								<div class="custom-control custom-radio">
-									<input type="radio" name="{{display.form.name}}" value="{{value}}" id="{{id}}" class="custom-control-input">
+									<input type="radio" name="{{../display.form.name}}" value="{{value}}" id="{{id}}" class="custom-control-input">
 									<label class="custom-control-label" for="{{id}}">{{label}}
-									{{#helpText}}
+									{{#if helpText}}
 									<small class="form-text text-muted">{{helpText}}</small>
-									{{/helpText}}
+									{{/if}}
 									</label>
 								</div>
-							{{/display.form.values}}
+							{{/each}}
 
-						{{/display.form.fieldType_isRadio}}
+						{{/if}}
 
-						{{#display.form.fieldType_isBoolean}}
+						{{#if display.form.fieldType_isBoolean}}
 						
 							<div class="custom-control custom-radio">
 								<input type="radio" name="{{display.form.name}}" value="true" id="yes_{{display.id}}" class="custom-control-input">
@@ -309,28 +266,28 @@
 								<label class="custom-control-label" for="no_{{display.id}}">No</label>
 							</div>
 
-						{{/display.form.fieldType_isBoolean}}
+						{{/if}}
 
-						{{#display.form.fieldType_isNumber}}
+						{{#if display.form.fieldType_isNumber}}
 						
 							<label for="{{id}}">{{label}}</label>
 							<input type="text" class="form-control" id="{{id}}" name="{{display.form.name}}">
 
-						{{/display.form.fieldType_isNumber}}
+						{{/if}}
 
-						{{#display.form.fieldType_isPercent}}
+						{{#if display.form.fieldType_isPercent}}
 						
 							<label for="{{id}}">{{label}}</label>
 							<input type="text" class="form-control" id="{{id}}" name="{{display.form.name}}">
 
-						{{/display.form.fieldType_isPercent}}
+						{{/if}}
 
 					</div>
 
 					<div class="continue">
-						{{^display._isFirst}}
+						{{#unless display._isFirst}}
 							<a href="#" class="btn btn-outline-primary" data-action="back">Back</a>
-						{{/display._isFirst}}
+						{{/unless}}
 						<button type="submit" data-id="{{display.id}}" class="btn btn-primary">Next</button>
 					</div>
 				</form>
@@ -367,16 +324,17 @@
 
 			<hr>
 			<p class="">
-				{{#display.summary}}
+				{{#if display.summary}}
 					{{display.summary}}
-				{{/display.summary}}
-				{{^display.summary}}
-					<span class="text-muted"><em>No summary provided.</em></span>
-				{{/display.summary}}
+				{{else}}
+					<small class="text-muted"><em>No summary provided.</em></small>
+				{{/if}}
 			</p>
-			{{#display.actions}}
-				<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
-			{{/display.actions}}
+			{{#if display.actions.length}}
+				{{#each display.actions}}
+					<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
+				{{/each}}
+			{{/if}}
 		</script>
 		
 		<script>window.jga=window.jga||{};window.jga.api = <%- JSON.stringify(api.data) %>;</script>

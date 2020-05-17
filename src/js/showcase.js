@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { createBrowserHistory } from "history";
+import Handlebars from "handlebars";
 import Loading from "./loading";
-import Mustache from "mustache";
 import numeral from "numeral";
 import qs from "querystring";
 import store from "store";
@@ -213,7 +213,7 @@ export default class showcase {
       this.api.display.form.fieldType_isPercent = this.api.display.form.fieldType == "Percent";
       this.api.display.form.fieldType_isSelect = this.api.display.form.fieldType == "Select";
 
-      str = Mustache.render($("#tmpl_adviceInputRequest").html(), this.api);
+      str = Handlebars.compile($("#tmpl_adviceInputRequest").html())(this.api);
       $(".advice").html(str);
       // set value
       this._setValue();
@@ -229,7 +229,7 @@ export default class showcase {
           summary: "This rule has been evaluated, see variable data for export."
         });
       }
-      str = Mustache.render($("#tmpl_adviceAdvice").html(), this.api);
+      str = Handlebars.compile($("#tmpl_adviceAdvice").html())(this.api);
       $(".advice").html(str);
     }
 
@@ -241,7 +241,7 @@ export default class showcase {
 	 */
   updateAdviceSetDetails(){
     // render
-    const str = Mustache.render($("#tmpl_adviceSetDetails").html(), this.api);
+    const str = Handlebars.compile($("#tmpl_adviceSetDetails").html())(this.api);
     $(".advice-set-details").html(str);
   }
 
@@ -260,9 +260,9 @@ export default class showcase {
     $(".assumptions-container").toggle(this.api.answers.length > 0);
 
     // render
-    const str = Mustache.render($("#tmpl_answersList").html(), this.api);
-    // const strVar = Mustache.render($("#tmpl_answersListByVariable").html(), this.api);
-    const strAssump = Mustache.render($("#tmpl_assumptionsList").html(), this.api);
+    const str = Handlebars.compile($("#tmpl_answersList").html())(this.api);
+    // const strVar = Handlebars.compile($("#tmpl_answersListByVariable").html(), this.api);
+    const strAssump = Handlebars.compile($("#tmpl_assumptionsList").html())(this.api);
     $(".answers").html(str);
     // $(".answersByVariable").html(strVar);
     $(".assumptions").html(strAssump);
@@ -274,14 +274,17 @@ export default class showcase {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
+    // massage data for handlebars templating
+    Object.keys(this.api.recommendations).forEach((key, idx) => {
+      const arr = this.api.recommendations[key];
+      const groupDisplayName = _.first(arr).expand.tagGroup.name;
+      this.api.recommendations[groupDisplayName] = arr;
+      delete this.api.recommendations[key];
+    });
 
     // render
-    const str1 = Mustache.render($("#tmpl_recommendationsAdviceList").html(), this.api);
-    const str2 = Mustache.render($("#tmpl_recommendationsToDoAdviceList").html(), this.api);
-    const str3 = Mustache.render($("#tmpl_recommendationsCompletedAdviceList").html(), this.api);
-    $(".list-advice-recommendations").html(str1);
-    $(".list-advice-todo").html(str2);
-    $(".list-advice-completed").html(str3);
+    const strAll = Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html())(this.api);
+    $(".list-all-recommendations").html(strAll);
   }
 
   /**
@@ -296,7 +299,7 @@ export default class showcase {
       return v;
     });
     // render
-    const str = Mustache.render($("#tmpl_variablesList").html(), this.api);
+    const str = Handlebars.compile($("#tmpl_variablesList").html())(this.api);
     $(".variables").html(str);
   }
 
