@@ -244,7 +244,7 @@
 						
 							{{#each display.form.values}}
 								<div class="custom-control custom-radio">
-									<input type="radio" name="{{../display.form.name}}" value="{{value}}" id="{{id}}" class="custom-control-input">
+									<input type="radio" name="{{../display.form.name}}" value="{{value}}" id="{{id}}" class="custom-control-input" required>
 									<label class="custom-control-label" for="{{id}}">{{label}}
 									{{#if helpText}}
 									<small class="form-text text-muted">{{helpText}}</small>
@@ -258,11 +258,11 @@
 						{{#if display.form.fieldType_isBoolean}}
 						
 							<div class="custom-control custom-radio">
-								<input type="radio" name="{{display.form.name}}" value="true" id="yes_{{display.id}}" class="custom-control-input">
+								<input type="radio" name="{{../display.form.name}}" value="true" id="yes_{{display.id}}" class="custom-control-input required">
 								<label class="custom-control-label" for="yes_{{display.id}}">Yes</label>
 							</div>
 							<div class="custom-control custom-radio">
-								<input type="radio" name="{{display.form.name}}" value="false" id="no_{{display.id}}" class="custom-control-input">
+								<input type="radio" name="{{../display.form.name}}" value="false" id="no_{{display.id}}" class="custom-control-input" required>
 								<label class="custom-control-label" for="no_{{display.id}}">No</label>
 							</div>
 
@@ -271,14 +271,14 @@
 						{{#if display.form.fieldType_isNumber}}
 						
 							<label for="{{id}}">{{label}}</label>
-							<input type="text" class="form-control" id="{{id}}" name="{{display.form.name}}">
+							<input type="text" class="form-control" id="{{id}}" name="{{../display.form.name}}" required>
 
 						{{/if}}
 
 						{{#if display.form.fieldType_isPercent}}
 						
 							<label for="{{id}}">{{label}}</label>
-							<input type="text" class="form-control" id="{{id}}" name="{{display.form.name}}">
+							<input type="text" class="form-control" id="{{id}}" name="{{../display.form.name}}"  required>
 
 						{{/if}}
 

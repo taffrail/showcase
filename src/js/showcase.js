@@ -231,6 +231,8 @@ export default class showcase {
       }
       str = Handlebars.compile($("#tmpl_adviceAdvice").html())(this.api);
       $(".advice").html(str);
+      // unhighlight active assumption/question
+      this._setAssumptionActive("advice");
     }
 
     this.updateRecommendationsList();
@@ -277,7 +279,11 @@ export default class showcase {
     // massage data for handlebars templating
     Object.keys(this.api.recommendations).forEach((key, idx) => {
       const arr = this.api.recommendations[key];
-      const groupDisplayName = _.first(arr).expand.tagGroup.name;
+      let groupDisplayName = "Recommendations";
+      try {
+        groupDisplayName = _.first(arr).expand.tagGroup.name;
+      // eslint-disable-next-line no-empty
+      } catch (e) {}
       this.api.recommendations[groupDisplayName] = arr;
       delete this.api.recommendations[key];
     });
@@ -334,9 +340,13 @@ export default class showcase {
   /**
    *
    */
-  _setAssumptionActive(){
+  _setAssumptionActive(isAdvice){
     const { id } = this.api.display;
-    $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+    if (isAdvice) {
+      $("ul li").siblings().removeClass("active");
+    } else {
+      $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+    }
   }
 
   /**
