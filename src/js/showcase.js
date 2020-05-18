@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { createBrowserHistory } from "history";
+import Inputmask from "inputmask";
 import Handlebars from "handlebars";
 import Loading from "./loading";
 import numeral from "numeral";
@@ -61,7 +62,27 @@ export default class showcase {
     $(".advice").on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
-      this._loadApi($form.serialize()).then(()=> {
+      // convert values from masked to unmasked for form submission
+      const $inputs = $form.find("input").filter(":not(:radio):not(:hidden)");
+      $inputs.each((i, el) => {
+        const $input = $(el);
+        const { inputmask } = $input.data();
+
+        if (inputmask) {
+          const unmaskedval = inputmask.unmaskedvalue();
+          inputmask.remove();
+          $input.val(unmaskedval);
+        }
+
+        // while we're here, convert percent to precision value
+        if ($input.is("input[data-type=Percent]")) {
+          $input.val($input.val() / 100);
+        }
+      });
+
+      const data = $form.serialize();
+
+      this._loadApi(data).then(()=> {
         // update content
         this.updatePanes();
         // pull querystring from API URL (which has latest passed data)
@@ -217,6 +238,8 @@ export default class showcase {
       $(".advice").html(str);
       // set value
       this._setValue();
+      // set input masks
+      this._handleInputMasks();
       // focus input
       this._focusFirstInput();
       // highlight active assumption/question
@@ -313,7 +336,7 @@ export default class showcase {
 	 *
 	 */
   _setValue() {
-    const { value } = this.api.display.form.result;
+    let { value } = this.api.display.form.result;
     if (!value || value == "\"null\"") { return; }
 
     const $formEls = $(".advice form").find("input,select");
@@ -324,9 +347,78 @@ export default class showcase {
           $el.prop("checked", true)
         }
       } else {
+        // precision-to-display
+        if (this.api.display.form.fieldType == "Percent") {
+          value = value * 100;
+        }
         $el.val(value);
       }
     });
+  }
+
+  /**
+   * Setup form input masks based on type
+   * https://github.com/RobinHerbots/Inputmask#mask
+   */
+  // eslint-disable-next-line complexity
+  _handleInputMasks(){
+    const $inputEl = $(".question").find("form").find("input").filter(":not(:radio):not(:hidden)");
+    if ($inputEl.length) {
+      const maskOpts = { showMaskOnHover: false };
+      const { fieldType, properties } = this.api.display.form;
+      const { range = {} } = properties;
+      let { format: formatStr = "" } = properties;
+
+      const { min, max } = range;
+      if (min !== "undefined") {
+        $inputEl.prop("min", min);
+      }
+      if (max !== "undefined") {
+        $inputEl.prop("max", max);
+      }
+
+      // coerce to string for conditional test below
+      formatStr = String(formatStr);
+
+      // https://github.com/RobinHerbots/Inputmask/blob/4.x/README_numeric.md#aliases
+      // https://github.com/RobinHerbots/Inputmask/blob/5.x/lib/extensions/inputmask.numeric.extensions.js#L442
+      switch (fieldType) {
+        case "Number":
+          maskOpts.alias = "numeric";
+          maskOpts.showMaskOnFocus = false;
+
+          // check format to see if we need a different mask
+          if (formatStr.includes("$")) {
+            maskOpts.alias = "currency";
+            maskOpts.digitsOptional = true;
+            maskOpts.prefix = "$ ";
+            maskOpts.showMaskOnFocus = true;
+          }
+          break;
+        case "Percent":
+          maskOpts.alias = "percentage";
+          // Get the number of decimal points if decimal is present
+          if (formatStr.indexOf(".") != -1){
+            maskOpts.digits = formatStr.indexOf("%") - formatStr.indexOf(".") - 1;
+          }
+          /* else {
+            maskOpts.digits = 2; // default to 2 decimal places
+          }*/
+          break;
+        case "Date":
+          maskOpts.alias = "datetime";
+          break;
+      }
+
+      // if min & max attrs are present, pass them to the mask
+      if (min){ maskOpts.min = min; }
+      if (max) { maskOpts.max = max; }
+
+      if (maskOpts.mask || maskOpts.alias) {
+        const im = new Inputmask(maskOpts).mask($inputEl.get(0));
+        $inputEl.data("inputmask", im);
+      }
+    }
   }
 
   /**

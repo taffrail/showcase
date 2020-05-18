@@ -270,15 +270,13 @@
 
 						{{#if display.form.fieldType_isNumber}}
 						
-							<label for="{{id}}">{{label}}</label>
-							<input type="text" class="form-control w-50" id="{{id}}" name="{{display.form.name}}" required>
+							<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
 
 						{{/if}}
 
 						{{#if display.form.fieldType_isPercent}}
 						
-							<label for="{{id}}">{{label}}</label>
-							<input type="text" class="form-control w-50" id="{{id}}" name="{{display.form.name}}"  required>
+							<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" data-type="{{display.form.fieldType}}" autocomplete="off" required>
 
 						{{/if}}
 
