@@ -341,12 +341,25 @@ export default class showcase {
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
     // massage data for handlebars templating
     Object.keys(this.api.recommendations).forEach((key, idx) => {
-      const arr = this.api.recommendations[key];
+      let arr = this.api.recommendations[key];
       let groupDisplayName = "Recommendations";
       try {
         groupDisplayName = _.first(arr).expand.tagGroup.name;
       // eslint-disable-next-line no-empty
       } catch (e) {}
+      arr = arr.map(a => {
+        // use thumbs up icon by default
+        let icon = "fad fa-thumbs-up";
+        // support To Do/Completed checklist icons
+        if (groupDisplayName.includes("To Do")) {
+          icon = "far fa-circle";
+        } else if (groupDisplayName.includes("Completed")) {
+          icon = "far fa-check-circle";
+        }
+        // save the helper for handlebars
+        a._icon = icon;
+        return a;
+      });
       this.api.recommendations[groupDisplayName] = arr;
       delete this.api.recommendations[key];
     });
