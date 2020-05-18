@@ -45,6 +45,7 @@ export default class showcase {
     this.handleClickOpenClassic();
     this.listenForUrlChanges();
     this.loadViewMode();
+    this._handleChartResize();
     this.handleClickToggleMode();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
@@ -252,8 +253,47 @@ export default class showcase {
           summary: "This rule has been evaluated, see variable data for export."
         });
       }
+
+      // determine if this is an interactive chart attachment
+      const { attachment } = this.api.display;
+      let isChart = false;
+      if (attachment) {
+        isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+        // handlebars helper
+        attachment._isInteractiveChart = isChart;
+      }
+
       str = Handlebars.compile($("#tmpl_adviceAdvice").html())(this.api);
       $(".advice").html(str);
+
+      // setup the chart...
+      if (isChart) {
+        // parent container
+        const containerW = $(".advice").width();
+
+        // specific data chart is expecting
+        // TODO: clean this up in the chart code
+        window.jga.config = {
+          adviceSetId: this.api.advice.id,
+          bgColor: "#fff",
+          colors: ["#605F5E", "#6D256C"],
+          width: containerW,
+          height: 400
+        }
+        window.jga.advice = {
+          session: Object.assign({
+            ruleSetId: this.api.advice._id,
+            ruleId: this.api.display.ruleId,
+          }, qs.parse(this.getQuerystringFromUrl(this.api.advice.apiUrl)))
+        }
+
+        // set chart container size
+        $(".advice-chart--interactive").css({
+          height: 400,
+          width: containerW
+        });
+      }
+
       // unhighlight active assumption/question
       this._setAssumptionActive("advice");
     }
@@ -439,6 +479,22 @@ export default class showcase {
     } else {
       $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
     }
+  }
+
+  _handleChartResize() {
+    let timer;
+    $(window).resize(() => {
+      if (timer) {
+        window.clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        if (this.api.display.type == "ADVICE" &&
+          this.api.display.attachment &&
+          this.api.display.attachment.contentType == "application/vnd+interactive.chart+html") {
+          this.updateMainPane();
+        }
+      }, 500);
+    });
   }
 
   /**
