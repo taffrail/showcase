@@ -127,7 +127,7 @@ export default class showcase {
    * Click handler for assumption or Q&A
    */
   handleClickQuesAns() {
-    $(".answers, .answersByVariable, .assumptions").on("click", ".a > a", e => {
+    $(".answers, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
