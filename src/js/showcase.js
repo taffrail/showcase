@@ -191,13 +191,9 @@ export default class showcase {
     this.$advice.on("click", "a[data-action=openClassicWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
-      const { ruleId } = $this.data();
-      this._loadApiRule(ruleId).then(api => {
-        const { data: { ruleSetId } } = api;
-        const href = $this.prop("href");
-        const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
-        window.open(`${href.replace("::ruleSetId::", ruleSetId)}?${queryString}`);
-      });
+      const href = $this.prop("href");
+      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      window.open(`${href}?${queryString}`);
     });
   }
 
