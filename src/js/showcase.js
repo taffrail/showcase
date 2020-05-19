@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 import _ from "lodash";
 import { createBrowserHistory } from "history";
 import Inputmask from "inputmask";
@@ -42,19 +43,20 @@ export default class showcase {
     this.initCache();
     this.updateAdviceSetDetails();
     this.updatePanes();
+
     // on page load, save current state
     this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
 
     // events
     this.handleClickOk();
     this.handleClickBack();
-    this.handleClickQuesAns();
+    this.handleClickAssumption();
     this.handleClickOpenDebug();
     this.handleClickOpenClassic();
     this.listenForUrlChanges();
     this.handleResizeChart();
     this.handleClickToggleMode();
-    $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
     this.toggleViewMode();
   }
 
@@ -63,7 +65,7 @@ export default class showcase {
    */
   updatePanes(){
     this.updateMainPane();
-    this.updateAnswersList();
+    this.updateAssumptionsList();
     this.updateVariablesList();
   }
 
@@ -124,9 +126,9 @@ export default class showcase {
   }
 
   /**
-   * Click handler for assumption or Q&A
+   * Click handler for assumptions or Q&A
    */
-  handleClickQuesAns() {
+  handleClickAssumption() {
     $(".answers, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
@@ -434,9 +436,9 @@ export default class showcase {
   }
 
   /**
-	 * Update answers/history list
+	 * Update assumptions/answers/history list
 	 */
-  updateAnswersList(){
+  updateAssumptionsList(){
     // add row # to list
     this.api.answers = this.api.answers.map(a => {
       a._count = a.idx + 1;
@@ -460,6 +462,7 @@ export default class showcase {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
+
     // massage data for handlebars templating
     Object.keys(this.api.recommendations).forEach((key, idx) => {
       let arr = this.api.recommendations[key];
@@ -468,6 +471,11 @@ export default class showcase {
         groupDisplayName = _.first(arr).expand.tagGroup.name;
       // eslint-disable-next-line no-empty
       } catch (e) {}
+
+      // if we have already grouped by name, don't continue
+      if (key == groupDisplayName) { return; }
+
+      // add icons
       arr = arr.map(a => {
         // use thumbs up icon by default
         let icon = "fad fa-thumbs-up";
@@ -481,13 +489,14 @@ export default class showcase {
         a._icon = icon;
         return a;
       });
+
       this.api.recommendations[groupDisplayName] = arr;
       delete this.api.recommendations[key];
     });
 
     // render
-    const strAll = this.TEMPLATES["Recommendations"](this.api);
-    $(".list-all-recommendations").html(strAll);
+    const str = this.TEMPLATES["Recommendations"](this.api);
+    $(".list-all-recommendations").html(str);
   }
 
   /**
@@ -497,9 +506,9 @@ export default class showcase {
   _setAssumptionActive(isAdvice){
     const { id } = this.api.display;
     if (isAdvice) {
-      $("ul li").siblings().removeClass("active");
+      $("ul,ol").find("li").siblings().removeClass("active");
     } else {
-      $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+      $("ul,ol").find(`li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
     }
   }
 
@@ -525,10 +534,11 @@ export default class showcase {
 	 * Set the form value from the API data
 	 */
   _setValue() {
-    let { value } = this.api.display.form.result;
+    const { display: { form: { fieldType, result } } } = this.api;
+    let { value } = result;
     if (!value || value == "\"null\"") { return; }
 
-    const $formEls = $(".advice form").find("input,select");
+    const $formEls = this.$advice.find("form").find("input,select");
     $formEls.each((i, el) => {
       const $el = $(el);
       if ($el.is(":radio")) {
