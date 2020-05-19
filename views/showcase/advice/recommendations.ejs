@@ -1,0 +1,23 @@
+<script id="tmpl_groupedRecommendationsAdviceList" type="text/x-handlebars-template">
+	{{#if _recommendationsExist}}
+		
+			{{#each recommendations}}
+				<div class="rounded bg-white mt-2">
+					<h6>{{@key}}</h6>
+					<ul class="advice-list recommendations fa-ul">
+						{{#each this}}
+							<li data-id="{{id}}" data-idx="{{idx}}">
+								<span class="fa-li">
+									<a href="https://app.justgoodadvice.com/advicesets/{{../../advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+										<i class="{{_icon}}"></i>
+									</a>
+								</span>
+								{{headline}}
+							</li>
+						{{/each}}
+					</ul>
+				</div>
+			{{/each}}
+		
+	{{/if}}
+</script>

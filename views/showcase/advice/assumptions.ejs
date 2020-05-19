@@ -1,0 +1,27 @@
+<script id="tmpl_assumptionsList" type="text/x-handlebars-template">
+	{{#each answers}}
+		<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">			
+			{{#if statement}}
+				<div class="a statement"><a href="#" class="stretched-link">
+					{{_count}}. {{statement}}
+				</a></div>
+			{{else}}
+				<div class="q">
+					{{_count}}.
+					{{#if expand.form.questionVariable}}
+						<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+					{{else}}
+						{{question}}
+					{{/if}}
+				</div>
+				<div class="a"><a href="#" class="stretched-link">
+					{{#if expand.form.questionVariable}}
+						{{expand.form.questionVariable.result.value}}
+					{{else}}
+						{{value}}
+					{{/if}}
+				</a></div>
+			{{/if}}
+		</li>
+	{{/each}}
+</script>

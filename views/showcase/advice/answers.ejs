@@ -1,0 +1,8 @@
+<script id="tmpl_answersList" type="text/x-handlebars-template">
+	{{#each answers}}
+		<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
+			<div class="q">{{question}}</div>
+			<div class="a"><a href="#" class="stretched-link">{{value}}</a></div>
+		</li>
+	{{/each}}
+</script>

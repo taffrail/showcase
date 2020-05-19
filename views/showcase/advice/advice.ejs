@@ -1,0 +1,50 @@
+<script id="tmpl_adviceAdvice" type="text/x-handlebars-template">
+	<header class="d-flex justify-content-between icon-row">
+		<h3>{{display.headline}}</h3>
+		<%- include("_dropdown"); %>
+	</header>
+
+	<hr>
+	<p class="">
+		{{#if display.summary}}
+			{{display.summary}}
+		{{else}}
+			<small class="text-muted"><em>No summary provided.</em></small>
+		{{/if}}
+	</p>
+	{{#if display.attachment}}
+		{{#if display.attachment._isInteractiveChart}}
+			<section class="advice-attachment advice-chart--interactive" id="{{display.attachment.id}}">
+				<scr{{!}}ipt>
+					var chartFrame = document.createElement('iframe');
+					chartFrame.frameBorder = '0';
+					chartFrame.scrolling = 'no';
+					chartFrame.allowTransparency = 'true';
+					chartFrame.allowFullscreen = 'true';
+					chartFrame.width = '100%';
+					chartFrame.height = '100%';
+					document.getElementById('{{display.attachment.id}}').appendChild(chartFrame);
+					chartFrame.src = '{{display.attachment.url}}';
+					chartFrame.onload = function(){
+						var data = {
+							advice: window.jga.advice,
+							config: window.jga.config
+						}
+						chartFrame.contentWindow.postMessage(data, "*");
+					}
+				</scr{{!}}ipt>
+			</section>
+		{{else}}
+			<section class="att">
+				<figure>
+					<img class="advice-attachment img-fluid" src="https://d1d53ugxmopqf1.cloudfront.net/fit-in/1000x563/filters:quality(75)/{{display.attachment.fileId}}">
+				</figure>
+			</section>
+		{{/if}}
+	{{/if}}
+	{{#if display.actions.length}}
+		{{#each display.actions}}
+			<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
+		{{/each}}
+	{{/if}}
+</script>
