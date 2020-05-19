@@ -28,11 +28,6 @@
       h1 {
         font-weight: 900; //heavy
       }
-
-      .tagged,
-      .refdocs {
-        font-size: $font-size-sm;
-      }
     }
 
     // all white panes
@@ -132,7 +127,6 @@
       }
 
       .answers,
-      .answersByVariable,
       .assumptions {
         li {
           border-radius: $border-radius;
@@ -148,12 +142,6 @@
         .q,
         .statement {
           font-weight: bold;
-        }
-      }
-
-      .answersByVariable {
-        li {
-          display: flex;
         }
       }
     }
