@@ -8,7 +8,7 @@ class AjaxLoading {
    * @param {string=} ajaxId Unique ID for spinner
    */
   static show($container, ajaxId = _.uniqueId("loading")) {
-    const imgWH = 32;
+    const imgWH = 44;
     const imgPath = "/img/Rainbow-1s-200px.svg";
 
     if ($(`#loader_${ajaxId}`).length) {

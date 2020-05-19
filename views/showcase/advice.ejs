@@ -27,7 +27,7 @@
   </head>
   <body class="showcase showcase--advice">
 
-		<header class="banner bg-stripes">
+		<header class="banner bg-stripes fixed-top">
 			<img src="/img/logo_white.svg" height="28">
 		</header>
 
@@ -44,17 +44,17 @@
 								<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="true">Your Answers</a>
 							</li>
 						</ul>
-						<div class="tab-content" id="pills-tabContent">
+						<div class="tab-content rounded-bottom" id="pills-tabContent">
 							<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
-								<ul class="assumptions list-unstyled"></ul>
+								<div class="assumptions"></div>
 							</div>
 							<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
-								<ul class="answers list-unstyled"></ul>
+								<div class="answers"></div>
 							</div>
 						</div>
 					</div>
-					<div>
-						<small><a href="/s/<%= api.data.advice.id %>/" class="text-muted">Reset</a></small>
+					<div class="reset">
+						<a href="/s/<%= api.data.advice.id %>/">Reset</a>
 					</div>
 				</div>
 				<div class="col-md-8 col-lg-7">
@@ -67,8 +67,8 @@
 							<div class="list-advice-completed"></div>
 							<div class="toggle-mode">
 								<a href="#" class="text-muted" data-action="toggle-mode">
-									<span>Switch mode</span>
-									<i class="fad fa-random"></i>
+									<span>Show data</span>
+									<i class="far fa-database"></i>
 								</a>
 							</div>
 						</div>
@@ -89,6 +89,13 @@
 				</div>
 			</div>
 		</div>
+
+		<footer class="container-fluid mt-4">
+			<hr />
+			<section>
+				<p><a href="#"><i class="far fa-envelope-open"></i> hello@justgoodadvice.com</a>. Made with <i class="fad fa-coffee"></i> in Boulder, Colorado.<br>&copy; <%= new Date().getFullYear() %> Just Good Advice, LLC.</p>
+			</section>
+		</footer>
 
 		<!--templates-->
 <%- include("advice/adviceSetDetails"); %>

@@ -48,16 +48,19 @@ export default class showcase {
     this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
 
     // events
-    this.handleClickOk();
+    this.handleClickContinue();
     this.handleClickBack();
     this.handleClickAssumption();
-    this.handleClickOpenDebug();
-    this.handleClickOpenClassic();
     this.listenForUrlChanges();
     this.handleResizeChart();
     this.handleClickToggleMode();
     // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
     this.toggleViewMode();
+
+    // advice builder pointers
+    this.handleClicksToAdviceBuilder();
+    this.handleClickOpenDebug();
+    this.handleClickOpenClassic();
   }
 
   /**
@@ -73,9 +76,11 @@ export default class showcase {
   /**
    * "Next" button handler
    */
-  handleClickOk() {
+  handleClickContinue() {
     this.$advice.on("submit", "form", e => {
       const $form = $(e.currentTarget);
+
+      $("html, body").animate({ scrollTop: 0 });
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -119,6 +124,7 @@ export default class showcase {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
+      $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
       this.api.display = display.expand;
       this.updateMainPane();
@@ -133,12 +139,28 @@ export default class showcase {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
+      $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
       const answer = this.api.answers.find((a) => { return a.idx == data.idx; });
       this.api.display = answer.expand;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
+    });
+  }
+
+  handleClicksToAdviceBuilder() {
+    $("body").on("click", "[data-advicebuilder]", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const { ruleId } = $this.data();
+      const href = $this.prop("href");
+
+      // get RuleSetId
+      this._loadApiRule(ruleId).then(api => {
+        const { data: { ruleSetId } } = api;
+        window.open(href.replace("::ruleSetId::", ruleSetId));
+      });
     });
   }
 
@@ -151,9 +173,13 @@ export default class showcase {
     this.$advice.on("click", "a[data-action=openDebugWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
-      const url = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
-      window.open(`${url}?${queryString}`);
+      const { ruleId } = $this.data();
+      this._loadApiRule(ruleId).then(api => {
+        const { data: { ruleSetId } } = api;
+        const href = $this.prop("href");
+        const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+        window.open(`${href.replace("::ruleSetId::", ruleSetId)}?${queryString}`);
+      });
     });
   }
 
@@ -165,9 +191,13 @@ export default class showcase {
     this.$advice.on("click", "a[data-action=openClassicWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
-      const url = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
-      window.open(`${url}?${queryString}`);
+      const { ruleId } = $this.data();
+      this._loadApiRule(ruleId).then(api => {
+        const { data: { ruleSetId } } = api;
+        const href = $this.prop("href");
+        const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+        window.open(`${href.replace("::ruleSetId::", ruleSetId)}?${queryString}`);
+      });
     });
   }
 
@@ -266,6 +296,52 @@ export default class showcase {
       Loading.hide(loadingId);
       return api;
     }).catch((jqXHR) => {
+      let err;
+      try {
+        err = jqXHR.responseJSON.error.message;
+      } catch (e){
+        err = jqXHR;
+      }
+      alert(err);
+    });
+  }
+
+  /**
+   * Helper API call to get parent ruleSetId for a given ruleId.
+   * This is only necessary because we want the showcase to deep link back
+   * to the Advice Builder app.
+   * @param {string} ruleId RuleId
+   * @returns Promise<jqXHR>
+   */
+  _loadApiRule(ruleId) {
+    if (!ruleId) { console.error("RuleId required."); }
+
+    // get from cache
+    if (this.api.rulesetMap && this.api.rulesetMap[ruleId]) {
+      return Promise.resolve({
+        data: {
+          ruleSetId: this.api.rulesetMap[ruleId]
+        }
+      });
+    }
+
+    const loadingId = Loading.show($("body"));
+    return $.ajax({
+      url: `https://app.justgoodadvice.com/api/rule/${ruleId}/node/${ruleId}`,
+      type: "GET",
+      dataType: "json",
+      headers: {
+        "Accept": "application/json; chartset=utf-8",
+        "Authorization": `Bearer ${this.config.api_key}`
+      }
+    }).then(api => {
+      Loading.hide(loadingId);
+      // cache it
+      this.api.rulesetMap = this.api.rulesetMap || {};
+      this.api.rulesetMap[ruleId] = api.data.ruleSetId;
+      return api;
+    }).catch((jqXHR) => {
+      Loading.hide(loadingId);
       let err;
       try {
         err = jqXHR.responseJSON.error.message;

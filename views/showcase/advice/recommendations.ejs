@@ -8,7 +8,7 @@
 						{{#each this}}
 							<li data-id="{{id}}" data-idx="{{idx}}">
 								<span class="fa-li">
-									<a href="https://app.justgoodadvice.com/advicesets/{{../../advice._id}}/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" target="_blank">
+									<a href="https://app.justgoodadvice.com/advicesets/::ruleSetId::/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" data-rule-id="{{expand.ruleId}}" data-advicebuilder>
 										<i class="{{_icon}}"></i>
 									</a>
 								</span>

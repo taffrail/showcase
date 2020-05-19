@@ -10,6 +10,7 @@
 .showcase {
   &.showcase--advice {
     background: $gray-300;
+    padding-top:  5rem;
 
     .banner {
       align-items: center;
@@ -17,6 +18,7 @@
       display: flex;
       height: 5rem;
       padding: .5rem ($grid-gutter-width/2);
+      width: 100%;
     }
 
     .bg-stripes {
@@ -28,6 +30,19 @@
       h1 {
         font-weight: 900; //heavy
       }
+    }
+    
+    .reset {
+      font-size: 70%;
+      margin-top: 1rem;
+
+      a {
+        color: $gray-500;
+      }
+    }
+
+    .dropdown-menu, .dropdown-header {
+      font-size: 90%;
     }
 
     // all white panes
@@ -71,7 +86,8 @@
     }
 
     .toggle-mode {
-      font-size: $font-size-sm;
+      color: $gray-500;
+      font-size: .75rem;
       margin-top: .5rem;
       text-align: right;
 
@@ -80,6 +96,8 @@
       }
 
       a:hover {
+        text-decoration: none;
+
         span {
           display: inline;
         }
@@ -116,6 +134,11 @@
     .assumptions-container {      
       font-size: 11px;
 
+      .nav-link:hover {
+        background-color: $gray-400;
+        border-color: $gray-200 $gray-200 $gray-200;
+      }
+
       .nav-link.active {
         background-color: $gray-200;
         border-bottom-color: $gray-200;
@@ -128,20 +151,60 @@
 
       .answers,
       .assumptions {
+        ol {
+          list-style-type: decimal;
+          padding-left: 1.5rem;
+        }
+
         li {
           border-radius: $border-radius;
-          margin-bottom: .33rem;
-          padding: .25rem;
+          color: $gray-600;
+          margin-bottom: .25rem;
+          padding: .33rem;
 
           &.active,
           &:hover {
             background-color: $gray-100;
+          }
+
+          a {
+            text-decoration: none;
           }
         }
 
         .q,
         .statement {
           font-weight: bold;
+        }
+      }
+
+      .answers {
+        .q {
+          color: $primary;
+        }
+        .a > a {
+          color: $body-color;
+        }
+      }
+    }
+  }
+
+  footer {
+    hr {
+      border-top-color: $gray-400;
+    }
+
+    section {
+      color: $gray-500;
+      font-size: .66rem;
+      text-align: right;
+
+      a {
+        color: $gray-500;
+        text-decoration: none;
+
+        &:hover {
+          color: $primary;
         }
       }
     }

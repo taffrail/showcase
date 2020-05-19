@@ -1,8 +1,11 @@
 <script id="tmpl_answersList" type="text/x-handlebars-template">
-	{{#each answers}}
-		<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
-			<div class="q">{{question}}</div>
-			<div class="a"><a href="#" class="stretched-link">{{value}}</a></div>
-		</li>
-	{{/each}}
+	<p class="p-2 mb-1">The questions and answers below are being used to provide the personalized recommendations shown to the right. <strong><i class="far fa-hand-pointer"></i> Press a question to change your answer.</strong></p>
+	<ol class="answers">
+		{{#each answers}}
+			<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
+				<div class="q">{{question}}</div>
+				<div class="a"><a href="#" class="stretched-link">{{value}}</a></div>
+			</li>
+		{{/each}}
+	</ol>
 </script>

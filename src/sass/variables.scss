@@ -20,7 +20,8 @@ $tertiary: map-get($theme-colors, 'tertiary');
 $gray: map-get($colors, 'gray');
 
 $zindex-modal-backdrop: 1040;
+$zindex-fixed: 1030;
 
 // loader
-$zindex-loading-mask: $zindex-modal-backdrop - 2;
-$zindex-loading-spinner: $zindex-loading-mask + 1;
+$zindex-loading-mask: $zindex-fixed - 2;
+$zindex-loading-spinner: $zindex-fixed + 1;

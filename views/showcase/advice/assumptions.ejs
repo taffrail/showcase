@@ -1,27 +1,29 @@
 <script id="tmpl_assumptionsList" type="text/x-handlebars-template">
-	{{#each answers}}
-		<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">			
-			{{#if statement}}
-				<div class="a statement"><a href="#" class="stretched-link">
-					{{_count}}. {{statement}}
-				</a></div>
-			{{else}}
-				<div class="q">
-					{{_count}}.
-					{{#if expand.form.questionVariable}}
-						<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
-					{{else}}
-						{{question}}
-					{{/if}}
-				</div>
-				<div class="a"><a href="#" class="stretched-link">
-					{{#if expand.form.questionVariable}}
-						{{expand.form.questionVariable.result.value}}
-					{{else}}
-						{{value}}
-					{{/if}}
-				</a></div>
-			{{/if}}
-		</li>
-	{{/each}}
+	<p class="p-2 mb-1">The assumptions below are being used to provide the personalized recommendations shown to the right. <br><strong><i class="far fa-hand-pointer"></i> Press an assumption to update your data.</strong></p>
+	<ol class="list-unstyled">
+		{{#each answers}}
+			<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
+				{{#if statement}}
+					<div class="a statement"><a href="#" class="stretched-link">
+						{{statement}}
+					</a></div>
+				{{else}}
+					<div class="q">
+						{{#if expand.form.questionVariable}}
+							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+						{{else}}
+							{{question}}
+						{{/if}}
+					</div>
+					<div class="a"><a href="#" class="stretched-link">
+						{{#if expand.form.questionVariable}}
+							{{expand.form.questionVariable.result.value}}
+						{{else}}
+							{{value}}
+						{{/if}}
+					</a></div>
+				{{/if}}
+			</li>
+		{{/each}}
+	</ol>
 </script>
