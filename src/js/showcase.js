@@ -294,6 +294,8 @@ export default class showcase {
     // update the window title
     this.windowTitle = `${this.api.advice.title} - ${this.api.advice.owner.name}`;
 
+    this._setCurrentIdx();
+
     // render
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
