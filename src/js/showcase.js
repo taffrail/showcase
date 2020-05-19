@@ -7,9 +7,12 @@ import numeral from "numeral";
 import qs from "querystring";
 import store from "store";
 
-const history = createBrowserHistory();
-
 export default class showcase {
+  constructor() {
+    this.history = createBrowserHistory();
+  }
+
+  // #region getter/setter
   get api() {
     return window.jga.api;
   }
@@ -30,12 +33,17 @@ export default class showcase {
   set windowTitle(title) {
     document.title = title;
   }
+  // #endregion
 
+  /**
+   * One-time initialization
+   */
   init() {
+    this.initCache();
     this.updateAdviceSetDetails();
     this.updatePanes();
     // on page load, save current state
-    history.replace(`${this.baseUrl}/${location.search}`, this.api);
+    this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
 
     // events
     this.handleClickOk();
@@ -44,14 +52,14 @@ export default class showcase {
     this.handleClickOpenDebug();
     this.handleClickOpenClassic();
     this.listenForUrlChanges();
-    this.loadViewMode();
-    this._handleChartResize();
+    this.handleResizeChart();
     this.handleClickToggleMode();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    this.toggleViewMode();
   }
 
   /**
-   *
+   * Update 3 panes. This fn is called each time the API updates.
    */
   updatePanes(){
     this.updateMainPane();
@@ -59,12 +67,16 @@ export default class showcase {
     this.updateVariablesList();
   }
 
+  // #region event handlers
+  /**
+   * "Next" button handler
+   */
   handleClickOk() {
-    $(".advice").on("submit", "form", e => {
+    this.$advice.on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
       // convert values from masked to unmasked for form submission
-      const $inputs = $form.find("input").filter(":not(:radio):not(:hidden)");
+      const $inputs = this._findFormInput($form);
       $inputs.each((i, el) => {
         const $input = $(el);
         const { inputmask } = $input.data();
@@ -89,24 +101,31 @@ export default class showcase {
         // pull querystring from API URL (which has latest passed data)
         const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
         // save state
-        history.push(`${this.baseUrl}/?${queryString}`, this.api);
+        this.history.push(`${this.baseUrl}/?${queryString}`, this.api);
       });
 
       return false; // don't submit form
     });
   }
 
+  /**
+   * "Back" button handler
+   */
   handleClickBack() {
-    $(".advice").on("click", "a[data-action=back]", e => {
+    this.$advice.on("click", "a[data-action=back]", e => {
       e.preventDefault();
       const { _currIdx } = this.api.display;
-      const ans = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
-      if (!ans) { return; }
-      this.api.display = ans.expand;
+      const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
+      if (!display) { return; }
+      // temp override `display` global prop to insert question into HTML
+      this.api.display = display.expand;
       this.updateMainPane();
     });
   }
 
+  /**
+   * Click handler for assumption or Q&A
+   */
   handleClickQuesAns() {
     $(".answers, .answersByVariable, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
@@ -114,15 +133,20 @@ export default class showcase {
       const data = $this.closest("li").data();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const ans = this.api.answers.find((a) => { return a.idx == data.idx; });
-      this.api.display = ans.expand;
-      this.api.display.idx = ans.idx;
+      const answer = this.api.answers.find((a) => { return a.idx == data.idx; });
+      this.api.display = answer.expand;
+      this.api.display.idx = answer.idx;
       this.updateMainPane();
     });
   }
 
+  // #region dropdown menu
+  /**
+   * Dropdown "Debug" menu click handler. Necessary to append current
+   * querystring to new URL before navigating.
+   */
   handleClickOpenDebug() {
-    $(".advice").on("click", "[data-action=openDebugWithQuerystring]", e => {
+    this.$advice.on("click", "a[data-action=openDebugWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const url = $this.prop("href");
@@ -131,8 +155,12 @@ export default class showcase {
     });
   }
 
+  /**
+   * Dropdown "Classic" menu click handler. Necessary to append current
+   * querystring to new URL before navigating.
+   */
   handleClickOpenClassic() {
-    $(".advice").on("click", "[data-action=openClassicWithQuerystring]", e => {
+    this.$advice.on("click", "a[data-action=openClassicWithQuerystring]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const url = $this.prop("href");
@@ -141,34 +169,45 @@ export default class showcase {
     });
   }
 
+  /**
+   * Toggle debug mode / variable visibility
+   */
   handleClickToggleMode() {
     $(".toggle-mode").on("click", "[data-action=toggle-mode]", e => {
       e.preventDefault();
       const isDevMode = store.get("showcase-dev-mode");
-      let newMode;
+      let newDevMode;
       if (isDevMode === true) {
-        newMode = false;
+        newDevMode = false;
       } else if (isDevMode === false) {
-        newMode = true;
+        newDevMode = true;
       } else {
-        newMode = false;
+        newDevMode = false;
       }
 
-      store.set("showcase-dev-mode", newMode);
-      this.loadViewMode(newMode);
+      store.set("showcase-dev-mode", newDevMode);
+      this.toggleViewMode(newDevMode);
     });
   }
+  // #endregion
 
-  loadViewMode(newMode = store.get("showcase-dev-mode")) {
-    if (newMode) {
+  /**
+   * Toggle debug mode / variable visibility and save it to localstore
+   * @param {boolean=} isDevMode Optional bool to switch mode
+   */
+  toggleViewMode(isDevMode = store.get("showcase-is-dev-mode")) {
+    if (isDevMode) {
       $(".variables-container").fadeIn("fast");
     } else {
       $(".variables-container").fadeOut("fast");
     }
   }
 
+  /**
+   * Listen on the browser history for POP actions to update the page.
+   */
   listenForUrlChanges() {
-    history.listen((location, action) => {
+    this.history.listen((location, action) => {
       if (action === "POP" && location.state) {
         this.api = location.state;
         this.updatePanes();
@@ -176,9 +215,36 @@ export default class showcase {
     });
   }
 
+  /**
+   * The interactive chart embed is inside an iframe and when the window resizes
+   * the iframe needs to be re-loaded.
+   */
+  handleResizeChart() {
+    let timer;
+    $(window).resize(() => {
+      if (this.api.display.type == "ADVICE" &&
+      this.api.display.attachment &&
+      this.api.display.attachment.contentType == "application/vnd+interactive.chart+html") {
+        if (timer) {
+          window.clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+          this.updateMainPane();
+        }, 500);
+      }
+    });
+  }
+  // #endregion
+
+  // #region data
+  /**
+   * Capture new form data, merge with current state and make new Advice API request.
+   * @param {object} newFormData Form data from input request.
+   * @returns Promise<jqXHR>
+   */
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
-    const currFormData = qs.parse(this.getQuerystringFromUrl(this.api.advice.apiUrl));
+    const currFormData = this.getQuerystringFromUrl(this.api.advice.apiUrl, true);
     const formData = _.assign({}, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.advice.apiUrl.split("?");
     const loadingId = Loading.show($(".row.no-gutters .advice"));
@@ -193,7 +259,7 @@ export default class showcase {
       },
       data: formData
     }).then(api => {
-      // update global
+      // update global!
       this.api = api.data;
       Loading.hide(loadingId);
       return api;
@@ -209,12 +275,142 @@ export default class showcase {
   }
 
   /**
+	 * Util to pick the querystring from a URL
+   * @param {string} url
+   * @param {boolean=} parse Optional bool to parse the URL into an object.
+   * @returns String or Object, depending on `parse`
+	 */
+  getQuerystringFromUrl(url, parse = false) {
+    const str = url.substring(url.indexOf("?") + 1);
+    return (parse) ? qs.parse(str) : str;
+  }
+  // #endregion
+
+  // #region templating
+  /**
 	 * Update center Advice/Question pane
 	 */
   updateMainPane(){
     // update the window title
     this.windowTitle = `${this.api.advice.title} - ${this.api.advice.owner.name}`;
 
+    // render
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this._updateForInputRequest();
+    } else {
+      this._updateForAdvice();
+    }
+
+    this.updateRecommendationsList();
+  }
+
+  // #region templating utils
+  /**
+   * Template update for INPUT_REQUEST
+   */
+  _updateForInputRequest() {
+    const { display: { form: { fieldType } } } = this.api;
+    this.api.display.form.fieldType_isRadio = fieldType == "Radio";
+    this.api.display.form.fieldType_isBoolean = fieldType == "Boolean";
+    this.api.display.form.fieldType_isFreetext = fieldType == "Freetext";
+    this.api.display.form.fieldType_isMultipleChoice = fieldType == "MultipleChoice";
+    this.api.display.form.fieldType_isNumber = fieldType == "Number";
+    this.api.display.form.fieldType_isPercent = fieldType == "Percent";
+    this.api.display.form.fieldType_isSelect = fieldType == "Select";
+
+    // render
+    const str = this.TEMPLATES["InputRequest"](this.api);
+    this.$advice.html(str);
+
+    // set value
+    this._setValue();
+    // set input masks
+    this._handleInputMasks();
+    // focus input
+    this._focusFirstInput();
+    // highlight active assumption/question
+    this._setAssumptionActive();
+  }
+
+  /**
+   * Template update for ADVICE
+   */
+  _updateForAdvice() {
+    const isUnreachable = this.api.display.id === "-32768";
+    if (isUnreachable){
+      this.api.display = Object.assign(this.api.display, {
+        headline: "Advice Engine Response",
+        summary: "This rule has been evaluated, see variable data for export."
+      });
+    }
+
+    // determine if this is an interactive chart attachment
+    const { attachment } = this.api.display;
+    let isChart = false;
+    if (attachment) {
+      isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+      // handlebars helper
+      attachment._isInteractiveChart = isChart;
+    }
+
+    // render
+    const str = this.TEMPLATES["Advice"](this.api);
+    this.$advice.html(str);
+
+    // setup the chart...
+    if (isChart) {
+      // parent container
+      const containerW = this.$advice.width();
+
+      // specific data chart is expecting
+      // TODO: clean this up in the chart code
+      window.jga.config = {
+        adviceSetId: this.api.advice.id,
+        bgColor: "#fff",
+        colors: ["#605F5E", "#6D256C"],
+        width: containerW,
+        height: 400
+      }
+      window.jga.advice = {
+        session: Object.assign({
+          ruleSetId: this.api.advice._id,
+          ruleId: this.api.display.ruleId,
+        }, this.getQuerystringFromUrl(this.api.advice.apiUrl, true))
+      }
+
+      // set chart container size
+      $(".advice-chart--interactive").css({
+        height: 400,
+        width: containerW
+      });
+    }
+
+    // unhighlight active assumption/question
+    this._setAssumptionActive("advice");
+  }
+
+  /**
+   * Slight speed update to cache frequently-used templates and selectors
+   */
+  initCache() {
+    // cache element selectors
+    this.$advice = $(".advice");
+    // cache templates
+    this.TEMPLATES = {
+      "AdviceSetDetails": Handlebars.compile($("#tmpl_adviceSetDetails").html()),
+      "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
+      "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
+      "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
+      "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
+      "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
+      "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+    };
+  }
+
+  /**
+   * Set an index on the `display` to allow navigating assumptions list
+   */
+  _setCurrentIdx() {
     // set the current index based on answers
     // only useful for going "back"
     let currIdx = _.findIndex(this.api.answers, (ans) => { return this.api.display.id == ans.id });
@@ -223,95 +419,20 @@ export default class showcase {
     }
     this.api.display._currIdx = currIdx;
     this.api.display._isFirst = currIdx === 0;
-
-    // render
-    let str;
-    if (this.api.display.type == "INPUT_REQUEST") {
-      this.api.display.form.fieldType_isRadio = this.api.display.form.fieldType == "Radio";
-      this.api.display.form.fieldType_isBoolean = this.api.display.form.fieldType == "Boolean";
-      this.api.display.form.fieldType_isFreetext = this.api.display.form.fieldType == "Freetext";
-      this.api.display.form.fieldType_isMultipleChoice = this.api.display.form.fieldType == "MultipleChoice";
-      this.api.display.form.fieldType_isNumber = this.api.display.form.fieldType == "Number";
-      this.api.display.form.fieldType_isPercent = this.api.display.form.fieldType == "Percent";
-      this.api.display.form.fieldType_isSelect = this.api.display.form.fieldType == "Select";
-
-      str = Handlebars.compile($("#tmpl_adviceInputRequest").html())(this.api);
-      $(".advice").html(str);
-      // set value
-      this._setValue();
-      // set input masks
-      this._handleInputMasks();
-      // focus input
-      this._focusFirstInput();
-      // highlight active assumption/question
-      this._setAssumptionActive();
-    } else {
-      const isUnreachable = this.api.display.id === "-32768";
-      if (isUnreachable){
-        this.api.display = Object.assign(this.api.display, {
-          headline: "Advice Engine Response",
-          summary: "This rule has been evaluated, see variable data for export."
-        });
-      }
-
-      // determine if this is an interactive chart attachment
-      const { attachment } = this.api.display;
-      let isChart = false;
-      if (attachment) {
-        isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-        // handlebars helper
-        attachment._isInteractiveChart = isChart;
-      }
-
-      str = Handlebars.compile($("#tmpl_adviceAdvice").html())(this.api);
-      $(".advice").html(str);
-
-      // setup the chart...
-      if (isChart) {
-        // parent container
-        const containerW = $(".advice").width();
-
-        // specific data chart is expecting
-        // TODO: clean this up in the chart code
-        window.jga.config = {
-          adviceSetId: this.api.advice.id,
-          bgColor: "#fff",
-          colors: ["#605F5E", "#6D256C"],
-          width: containerW,
-          height: 400
-        }
-        window.jga.advice = {
-          session: Object.assign({
-            ruleSetId: this.api.advice._id,
-            ruleId: this.api.display.ruleId,
-          }, qs.parse(this.getQuerystringFromUrl(this.api.advice.apiUrl)))
-        }
-
-        // set chart container size
-        $(".advice-chart--interactive").css({
-          height: 400,
-          width: containerW
-        });
-      }
-
-      // unhighlight active assumption/question
-      this._setAssumptionActive("advice");
-    }
-
-    this.updateRecommendationsList();
   }
+  // #endregion
 
   /**
 	 * Update Advice Set details (left side)
 	 */
   updateAdviceSetDetails(){
     // render
-    const str = Handlebars.compile($("#tmpl_adviceSetDetails").html())(this.api);
+    const str = this.TEMPLATES["AdviceSetDetails"](this.api);
     $(".advice-set-details").html(str);
   }
 
   /**
-	 * Update answers/history list (right side)
+	 * Update answers/history list
 	 */
   updateAnswersList(){
     // add row # to list
@@ -325,16 +446,14 @@ export default class showcase {
     $(".assumptions-container").toggle(this.api.answers.length > 0);
 
     // render
-    const str = Handlebars.compile($("#tmpl_answersList").html())(this.api);
-    // const strVar = Handlebars.compile($("#tmpl_answersListByVariable").html(), this.api);
-    const strAssump = Handlebars.compile($("#tmpl_assumptionsList").html())(this.api);
+    const str = this.TEMPLATES["QuestionsAnswers"](this.api);
+    const strAssump = this.TEMPLATES["Assumptions"](this.api);
     $(".answers").html(str);
-    // $(".answersByVariable").html(strVar);
     $(".assumptions").html(strAssump);
   }
 
   /**
-	 *
+	 * Update advice list by group
 	 */
   updateRecommendationsList() {
     // simple helper for UX
@@ -365,12 +484,25 @@ export default class showcase {
     });
 
     // render
-    const strAll = Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html())(this.api);
+    const strAll = this.TEMPLATES["Recommendations"](this.api);
     $(".list-all-recommendations").html(strAll);
   }
 
   /**
-	 * Update variables list (right side)
+   * Change the highlighted assumption in the list based on
+   * active display.
+   */
+  _setAssumptionActive(isAdvice){
+    const { id } = this.api.display;
+    if (isAdvice) {
+      $("ul li").siblings().removeClass("active");
+    } else {
+      $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+    }
+  }
+
+  /**
+	 * Update variables list
 	 */
   updateVariablesList(){
     // add formatted value to vars
@@ -381,12 +513,14 @@ export default class showcase {
       return v;
     });
     // render
-    const str = Handlebars.compile($("#tmpl_variablesList").html())(this.api);
+    const str = this.TEMPLATES["Variables"](this.api);
     $(".variables").html(str);
   }
+  // #endregion
 
+  // #region form utils
   /**
-	 *
+	 * Set the form value from the API data
 	 */
   _setValue() {
     let { value } = this.api.display.form.result;
@@ -401,7 +535,7 @@ export default class showcase {
         }
       } else {
         // precision-to-display
-        if (this.api.display.form.fieldType == "Percent") {
+        if (fieldType == "Percent") {
           value = value * 100;
         }
         $el.val(value);
@@ -415,19 +549,24 @@ export default class showcase {
    */
   // eslint-disable-next-line complexity
   _handleInputMasks(){
-    const $inputEl = $(".question").find("form").find("input").filter(":not(:radio):not(:hidden)");
+    const $inputEl = this._findFormInput(this.$advice.find("form"));
     if ($inputEl.length) {
-      const maskOpts = { showMaskOnHover: false };
+      const maskOpts = {
+        showMaskOnHover: false
+      };
       const { fieldType, properties } = this.api.display.form;
       const { range = {} } = properties;
       let { format: formatStr = "" } = properties;
 
+      // if min & max attrs are present, pass them to the mask
       const { min, max } = range;
       if (min !== "undefined") {
         $inputEl.prop("min", min);
+        maskOpts.min = min;
       }
       if (max !== "undefined") {
         $inputEl.prop("max", max);
+        maskOpts.max = max;
       }
 
       // coerce to string for conditional test below
@@ -454,18 +593,11 @@ export default class showcase {
           if (formatStr.indexOf(".") != -1){
             maskOpts.digits = formatStr.indexOf("%") - formatStr.indexOf(".") - 1;
           }
-          /* else {
-            maskOpts.digits = 2; // default to 2 decimal places
-          }*/
           break;
         case "Date":
           maskOpts.alias = "datetime";
           break;
       }
-
-      // if min & max attrs are present, pass them to the mask
-      if (min){ maskOpts.min = min; }
-      if (max) { maskOpts.max = max; }
 
       if (maskOpts.mask || maskOpts.alias) {
         const im = new Inputmask(maskOpts).mask($inputEl.get(0));
@@ -475,45 +607,20 @@ export default class showcase {
   }
 
   /**
-	 *
+	 * Focus the 1st visible input on the question form for quicker UX.
 	 */
   _focusFirstInput() {
     // focus 1st input
-    $(".advice form").find("input:not(:radio),textarea,select").filter(":visible").first().focus();
+    this._findFormInput(this.$advice.find("form"), "input,textarea,select").first().focus();
   }
 
   /**
-   *
+   * Find input element
+   * @param {jquery} $form Form element
+   * @param {string=} types Comma-separated list of HTML tags, e.g., "input,select"
    */
-  _setAssumptionActive(isAdvice){
-    const { id } = this.api.display;
-    if (isAdvice) {
-      $("ul li").siblings().removeClass("active");
-    } else {
-      $(`ul li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
-    }
+  _findFormInput($form, types = "input") {
+    return $form.find(types).filter(":not(:radio):not(:hidden)");
   }
-
-  _handleChartResize() {
-    let timer;
-    $(window).resize(() => {
-      if (timer) {
-        window.clearTimeout(timer);
-      }
-      timer = setTimeout(() => {
-        if (this.api.display.type == "ADVICE" &&
-          this.api.display.attachment &&
-          this.api.display.attachment.contentType == "application/vnd+interactive.chart+html") {
-          this.updateMainPane();
-        }
-      }, 500);
-    });
-  }
-
-  /**
-	 *
-	 */
-  getQuerystringFromUrl(url) {
-    return url.substring(url.indexOf("?") + 1);
-  }
+  // #endregion
 }
