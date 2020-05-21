@@ -550,7 +550,7 @@ export default class showcase {
         // support To Do/Completed checklist icons
         if (groupDisplayName.includes("To Do")) {
           icon = "far fa-circle";
-        } else if (groupDisplayName.includes("Completed")) {
+        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
           icon = "far fa-check-circle";
         }
         // save the helper for handlebars
