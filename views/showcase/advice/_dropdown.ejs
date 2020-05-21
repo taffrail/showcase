@@ -8,7 +8,7 @@
 		<a href="https://app.justgoodadvice.com/advicesets/::ruleSetId::/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" data-advicebuilder data-rule-id="{{display.ruleId}}" class="dropdown-item">
 			<i class="fad fa-pencil"></i> Edit in Advice Builder
 		</a>
-		<a href="https://app.justgoodadvice.com/advicesets/::ruleSetId::/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring" data-rule-id="{{display.ruleId}}">
+		<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
 			<i class="fad fa-debug"></i> Debug
 		</a>
 		<a href="https://app.justgoodadvice.com/_/advice/widget/{{advice.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
