@@ -9,15 +9,15 @@
 					</a></div>
 				{{else}}
 					<div class="q">
-						{{#if expand.form.questionVariable}}
-							<span class="text-monospace">{{expand.form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+						{{#if form.questionVariable}}
+							<span class="text-monospace">{{form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
 						{{else}}
 							{{question}}
 						{{/if}}
 					</div>
 					<div class="a"><a href="#" class="stretched-link">
-						{{#if expand.form.questionVariable}}
-							{{expand.form.questionVariable.result.value}}
+						{{#if form.questionVariable}}
+							{{form.questionVariable.result.value}}
 						{{else}}
 							{{value}}
 						{{/if}}

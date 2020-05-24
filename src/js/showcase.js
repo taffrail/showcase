@@ -28,7 +28,7 @@ export default class showcase {
   }
 
   get baseUrl() {
-    return `/s/${this.api.advice.id}`;
+    return `/s/${this.api.adviceset.id}`;
   }
 
   set windowTitle(title) {
@@ -67,6 +67,7 @@ export default class showcase {
    * Update 3 panes. This fn is called each time the API updates.
    */
   updatePanes(){
+    this.mapData();
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateVariablesList();
@@ -106,7 +107,7 @@ export default class showcase {
         // update content
         this.updatePanes();
         // pull querystring from API URL (which has latest passed data)
-        const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+        const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
         // save state
         this.history.push(`${this.baseUrl}/?${queryString}`, this.api);
       });
@@ -126,7 +127,7 @@ export default class showcase {
       if (!display) { return; }
       $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
-      this.api.display = display.expand;
+      this.api.display = display;
       this.updateMainPane();
     });
   }
@@ -143,7 +144,7 @@ export default class showcase {
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
       const answer = this.api.answers.find((a) => { return a.idx == data.idx; });
-      this.api.display = answer.expand;
+      this.api.display = answer;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
     });
@@ -174,7 +175,7 @@ export default class showcase {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
       window.open(`${href}?${queryString}`);
     });
   }
@@ -188,7 +189,7 @@ export default class showcase {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
       window.open(`${href}?${queryString}`);
     });
   }
@@ -268,9 +269,9 @@ export default class showcase {
    */
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
-    const currFormData = this.getQuerystringFromUrl(this.api.advice.apiUrl, true);
+    const currFormData = this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true);
     const formData = _.assign({}, currFormData, qs.parse(newFormData));
-    const [apiUrlWithoutQuerystring] = this.api.advice.apiUrl.split("?");
+    const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
     const loadingId = Loading.show($(".row.no-gutters .advice"));
 
     return $.ajax({
@@ -362,7 +363,7 @@ export default class showcase {
 	 */
   updateMainPane(){
     // update the window title
-    this.windowTitle = `${this.api.advice.title} - ${this.api.advice.owner.name}`;
+    this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
 
     this._setCurrentIdx();
 
@@ -437,7 +438,7 @@ export default class showcase {
       // specific data chart is expecting
       // TODO: clean this up in the chart code
       window.jga.config = {
-        adviceSetId: this.api.advice.id,
+        adviceSetId: this.api.adviceset.id,
         bgColor: "#fff",
         colors: ["#605F5E", "#6D256C"],
         width: containerW,
@@ -445,9 +446,9 @@ export default class showcase {
       }
       window.jga.advice = {
         session: Object.assign({
-          ruleSetId: this.api.advice._id,
+          ruleSetId: this.api.adviceset._id,
           ruleId: this.api.display.ruleId,
-        }, this.getQuerystringFromUrl(this.api.advice.apiUrl, true))
+        }, this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true))
       }
 
       // set chart container size
@@ -459,6 +460,25 @@ export default class showcase {
 
     // unhighlight active assumption/question
     this._setAssumptionActive("advice");
+  }
+
+  mapData() {
+    this.api.display = _.last(this.api.advice);
+    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+      a.idx = i;
+      a._count = a.idx + 1;
+      return a;
+    });
+    // remove last item, it's always an unanswered question
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this.api.answers = this.api.answers.slice(0, -1);
+    }
+    // remove last item, it's always an unanswered question
+    let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+    if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
+      allAdvice = allAdvice.slice(0, -1);
+    }
+    this.api.recommendations = _.groupBy(allAdvice);
   }
 
   /**
@@ -485,9 +505,9 @@ export default class showcase {
   _setCurrentIdx() {
     // set the current index based on answers
     // only useful for going "back"
-    let currIdx = _.findIndex(this.api.answers, (ans) => { return this.api.display.id == ans.id });
+    let currIdx = _.findIndex(this.api.advice, (ans) => { return this.api.display.id == ans.id });
     if (currIdx == -1) {
-      currIdx = this.api.answers.length;
+      currIdx = this.api.advice.length;
     }
     this.api.display._currIdx = currIdx;
     this.api.display._isFirst = currIdx === 0;
@@ -507,12 +527,6 @@ export default class showcase {
 	 * Update assumptions/answers/history list
 	 */
   updateAssumptionsList(){
-    // add row # to list
-    this.api.answers = this.api.answers.map(a => {
-      a._count = a.idx + 1;
-      return a;
-    });
-
     // do we have ANY assumptions/answers yet?
     // show or hide depending
     $(".assumptions-container").toggle(this.api.answers.length > 0);
@@ -536,7 +550,7 @@ export default class showcase {
       let arr = this.api.recommendations[key];
       let groupDisplayName = "Recommendations";
       try {
-        groupDisplayName = _.first(arr).expand.tagGroup.name;
+        groupDisplayName = _.first(arr).tagGroup.name;
       // eslint-disable-next-line no-empty
       } catch (e) {}
 
