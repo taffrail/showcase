@@ -478,7 +478,37 @@ export default class showcase {
     if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
       allAdvice = allAdvice.slice(0, -1);
     }
-    this.api.recommendations = _.groupBy(allAdvice);
+    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "ungrouped"; });
+    // massage data for handlebars templating
+    Object.keys(this.api.recommendations).forEach((key, idx) => {
+      let arr = this.api.recommendations[key];
+      let groupDisplayName = "Recommendations";
+      try {
+        groupDisplayName = _.first(arr).tagGroup.name;
+      // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      // add icons
+      arr = arr.map(a => {
+        // use thumbs up icon by default
+        let icon = "fad fa-thumbs-up";
+        // support To Do/Completed checklist icons
+        if (groupDisplayName.includes("To Do")) {
+          icon = "far fa-circle";
+        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
+          icon = "far fa-check-circle";
+        }
+        // save the helper for handlebars
+        a._icon = icon;
+        return a;
+      });
+
+      // if we have already grouped by name, don't continue
+      if (key == groupDisplayName) { return; }
+
+      this.api.recommendations[groupDisplayName] = arr;
+      delete this.api.recommendations[key];
+    });
   }
 
   /**
@@ -544,37 +574,6 @@ export default class showcase {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
-
-    // massage data for handlebars templating
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      let arr = this.api.recommendations[key];
-      let groupDisplayName = "Recommendations";
-      try {
-        groupDisplayName = _.first(arr).tagGroup.name;
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
-
-      // if we have already grouped by name, don't continue
-      if (key == groupDisplayName) { return; }
-
-      // add icons
-      arr = arr.map(a => {
-        // use thumbs up icon by default
-        let icon = "fad fa-thumbs-up";
-        // support To Do/Completed checklist icons
-        if (groupDisplayName.includes("To Do")) {
-          icon = "far fa-circle";
-        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-        return a;
-      });
-
-      this.api.recommendations[groupDisplayName] = arr;
-      delete this.api.recommendations[key];
-    });
 
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
