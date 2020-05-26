@@ -104,6 +104,12 @@
       }
     }
 
+    .advice-list {
+      li:not(:last-child) {
+        margin-bottom: .75rem;
+      }
+    }
+
     .advice-container {
       padding: .5rem;
     }
