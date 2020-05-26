@@ -11,6 +11,14 @@ import store from "store";
 export default class showcase {
   constructor() {
     this.history = createBrowserHistory();
+
+    // handlebars helpers
+    Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
+      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+    });
+    Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
+      return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
+    });
   }
 
   // #region getter/setter
@@ -495,23 +503,15 @@ export default class showcase {
     }
 
     // assumptions are grouped, answers are not
+    const ASSUMPTIONS_UNGROUPED = "ungrouped";
     this.api.assumptions = _.groupBy(this.api.answers, (a) => {
-      return (a.tagGroup) ? a.tagGroup.name : "Other";
+      return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
     });
 
     Object.keys(this.api.assumptions).forEach((key, idx) => {
-      const arr = this.api.assumptions[key];
+      if (key == ASSUMPTIONS_UNGROUPED) { return; }
 
-      // need to add an ID to each "Other" group
-      if (key == "Other" && arr.length) {
-        this.api.assumptions[key] = arr.map(a => {
-          a.tagGroup = {
-            name: "Other",
-            id: "other"
-          }
-          return a;
-        });
-      }
+      const arr = this.api.assumptions[key];
 
       // add `_isOpen` flag to each item
       this.api.assumptions[key] = arr.map(a => {
@@ -527,7 +527,7 @@ export default class showcase {
     }
 
     // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "ungrouped"; });
+    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED; });
     // massage data for handlebars templating
     Object.keys(this.api.recommendations).forEach((key, idx) => {
       let arr = this.api.recommendations[key];
