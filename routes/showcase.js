@@ -31,7 +31,7 @@ router.get("/:adviceSetId", (req, res, next) => {
       const api = JSON.parse(body);
       if (api.error) { return next(new Error(api.error.message)); }
 
-      return res.render("showcase/advice", {
+      return res.render("showcase/index", {
         api: api
       });
     } else {
