@@ -5,18 +5,18 @@
 
 	<div class="dropdown-menu" aria-labelledby="dropdownMenuLink{{display.id}}">
 		<div class="dropdown-header">ADVICE BUILDER</div>
-		<a href="https://app.justgoodadvice.com/advicesets/::ruleSetId::/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" data-advicebuilder data-rule-id="{{display.ruleId}}" class="dropdown-item">
+		<a href="https://app.justgoodadvice.com/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" data-rule-id="{{display.ruleId}}" class="dropdown-item" target="_blank">
 			<i class="fad fa-pencil"></i> Edit in Advice Builder
 		</a>
-		<a href="https://app.justgoodadvice.com/advicesets/{{advice._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
+		<a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
 			<i class="fad fa-debug"></i> Debug
 		</a>
-		<a href="https://app.justgoodadvice.com/_/advice/widget/{{advice.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
+		<a href="https://app.justgoodadvice.com/_/advice/widget/{{adviceset.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
 			<i class="fad fa-comments"></i> Classic
 		</a>
 		<div class="dropdown-divider"></div>
 		<div class="dropdown-header">DEVELOPERS</div>
-		<a href="{{advice.apiUrl}}" class="dropdown-item" target="_blank">
+		<a href="{{adviceset.apiUrl}}" class="dropdown-item" target="_blank">
 			<i class="fad fa-code"></i> Open API
 		</a>
 	</div>

@@ -11,6 +11,14 @@ import store from "store";
 export default class showcase {
   constructor() {
     this.history = createBrowserHistory();
+
+    // handlebars helpers
+    Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
+      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+    });
+    Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
+      return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
+    });
   }
 
   // #region getter/setter
@@ -28,7 +36,7 @@ export default class showcase {
   }
 
   get baseUrl() {
-    return `/s/${this.api.advice.id}`;
+    return `/s/${this.api.adviceset.id}`;
   }
 
   set windowTitle(title) {
@@ -51,6 +59,7 @@ export default class showcase {
     this.handleClickContinue();
     this.handleClickBack();
     this.handleClickAssumption();
+    this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
     this.handleResizeChart();
     this.handleClickToggleMode();
@@ -67,6 +76,7 @@ export default class showcase {
    * Update 3 panes. This fn is called each time the API updates.
    */
   updatePanes(){
+    this.mapData();
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateVariablesList();
@@ -106,7 +116,7 @@ export default class showcase {
         // update content
         this.updatePanes();
         // pull querystring from API URL (which has latest passed data)
-        const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+        const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
         // save state
         this.history.push(`${this.baseUrl}/?${queryString}`, this.api);
       });
@@ -126,7 +136,7 @@ export default class showcase {
       if (!display) { return; }
       $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
-      this.api.display = display.expand;
+      this.api.display = display;
       this.updateMainPane();
     });
   }
@@ -142,10 +152,26 @@ export default class showcase {
       $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const answer = this.api.answers.find((a) => { return a.idx == data.idx; });
-      this.api.display = answer.expand;
+      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
+      this.api.display = answer;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
+    });
+  }
+
+  /**
+   * Listener for pening/closing assumption groups
+   */
+  handleCollapseAssumptionGroup() {
+    $(".assumptions").on("show.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
+    });
+    $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
     });
   }
 
@@ -174,7 +200,7 @@ export default class showcase {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
       window.open(`${href}?${queryString}`);
     });
   }
@@ -188,7 +214,7 @@ export default class showcase {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.advice.apiUrl);
+      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
       window.open(`${href}?${queryString}`);
     });
   }
@@ -268,9 +294,9 @@ export default class showcase {
    */
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
-    const currFormData = this.getQuerystringFromUrl(this.api.advice.apiUrl, true);
+    const currFormData = this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true);
     const formData = _.assign({}, currFormData, qs.parse(newFormData));
-    const [apiUrlWithoutQuerystring] = this.api.advice.apiUrl.split("?");
+    const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
     const loadingId = Loading.show($(".row.no-gutters .advice"));
 
     return $.ajax({
@@ -362,7 +388,7 @@ export default class showcase {
 	 */
   updateMainPane(){
     // update the window title
-    this.windowTitle = `${this.api.advice.title} - ${this.api.advice.owner.name}`;
+    this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
 
     this._setCurrentIdx();
 
@@ -437,7 +463,7 @@ export default class showcase {
       // specific data chart is expecting
       // TODO: clean this up in the chart code
       window.jga.config = {
-        adviceSetId: this.api.advice.id,
+        adviceSetId: this.api.adviceset.id,
         bgColor: "#fff",
         colors: ["#605F5E", "#6D256C"],
         width: containerW,
@@ -445,9 +471,9 @@ export default class showcase {
       }
       window.jga.advice = {
         session: Object.assign({
-          ruleSetId: this.api.advice._id,
+          ruleSetId: this.api.adviceset._id,
           ruleId: this.api.display.ruleId,
-        }, this.getQuerystringFromUrl(this.api.advice.apiUrl, true))
+        }, this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true))
       }
 
       // set chart container size
@@ -459,6 +485,79 @@ export default class showcase {
 
     // unhighlight active assumption/question
     this._setAssumptionActive("advice");
+  }
+
+  mapData() {
+    // setup "display" card — either question or advice
+    this.api.display = _.last(this.api.advice) || {};
+    // build collection of just answers & assumptions
+    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+      a.idx = i;
+      a._count = i + 1;
+      return a;
+    });
+
+    // remove last item, it's always an unanswered question
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this.api.answers = this.api.answers.slice(0, -1);
+    }
+
+    // assumptions are grouped, answers are not
+    const ASSUMPTIONS_UNGROUPED = "ungrouped";
+    this.api.assumptions = _.groupBy(this.api.answers, (a) => {
+      return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
+    });
+
+    Object.keys(this.api.assumptions).forEach((key, idx) => {
+      if (key == ASSUMPTIONS_UNGROUPED) { return; }
+
+      const arr = this.api.assumptions[key];
+
+      // add `_isOpen` flag to each item
+      this.api.assumptions[key] = arr.map(a => {
+        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
+        return a;
+      });
+    });
+
+    // remove last item from list of advice IF it's the same as the `display`
+    let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+    if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
+      allAdvice = allAdvice.slice(0, -1);
+    }
+
+    // group all advice into bucketed recommendations
+    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED; });
+    // massage data for handlebars templating
+    Object.keys(this.api.recommendations).forEach((key, idx) => {
+      let arr = this.api.recommendations[key];
+      let groupDisplayName = "Recommendations";
+      try {
+        groupDisplayName = _.first(arr).tagGroup.name;
+      // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      // add icons
+      arr = arr.map(a => {
+        // use thumbs up icon by default
+        let icon = "fad fa-thumbs-up";
+        // support To Do/Completed checklist icons
+        if (groupDisplayName.includes("To Do")) {
+          icon = "far fa-circle";
+        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
+          icon = "far fa-check-circle";
+        }
+        // save the helper for handlebars
+        a._icon = icon;
+        return a;
+      });
+
+      // if we have already grouped by name, don't continue
+      if (key == groupDisplayName) { return; }
+
+      this.api.recommendations[groupDisplayName] = arr;
+      delete this.api.recommendations[key];
+    });
   }
 
   /**
@@ -507,15 +606,11 @@ export default class showcase {
 	 * Update assumptions/answers/history list
 	 */
   updateAssumptionsList(){
-    // add row # to list
-    this.api.answers = this.api.answers.map(a => {
-      a._count = a.idx + 1;
-      return a;
-    });
-
     // do we have ANY assumptions/answers yet?
     // show or hide depending
-    $(".assumptions-container").toggle(this.api.answers.length > 0);
+    // simple helper for UX
+    this.api._answersExist = this.api.answers.length > 0;
+    $(".assumptions-container").toggle(this.api._answersExist);
 
     // render
     const str = this.TEMPLATES["QuestionsAnswers"](this.api);
@@ -531,37 +626,6 @@ export default class showcase {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
 
-    // massage data for handlebars templating
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      let arr = this.api.recommendations[key];
-      let groupDisplayName = "Recommendations";
-      try {
-        groupDisplayName = _.first(arr).expand.tagGroup.name;
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
-
-      // if we have already grouped by name, don't continue
-      if (key == groupDisplayName) { return; }
-
-      // add icons
-      arr = arr.map(a => {
-        // use thumbs up icon by default
-        let icon = "fad fa-thumbs-up";
-        // support To Do/Completed checklist icons
-        if (groupDisplayName.includes("To Do")) {
-          icon = "far fa-circle";
-        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-        return a;
-      });
-
-      this.api.recommendations[groupDisplayName] = arr;
-      delete this.api.recommendations[key];
-    });
-
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
     $(".list-all-recommendations").html(str);
@@ -574,9 +638,9 @@ export default class showcase {
   _setAssumptionActive(isAdvice){
     const { id } = this.api.display;
     if (isAdvice) {
-      $("ul,ol").find("li").siblings().removeClass("active");
+      $(".assumptions, .answers").find("li").removeClass("active");
     } else {
-      $("ul,ol").find(`li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+      $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
     }
   }
 

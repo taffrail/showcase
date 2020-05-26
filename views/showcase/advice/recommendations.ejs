@@ -3,16 +3,23 @@
 		
 			{{#each recommendations}}
 				<div class="rounded bg-white mt-2">
-					<h6>{{@key}}</h6>
+					<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
 					<ul class="advice-list recommendations fa-ul">
 						{{#each this}}
 							<li data-id="{{id}}" data-idx="{{idx}}">
 								<span class="fa-li">
-									<a href="https://app.justgoodadvice.com/advicesets/::ruleSetId::/rules/{{expand.ruleId}}/show?selectedNodeId={{id}}" data-rule-id="{{expand.ruleId}}" data-advicebuilder>
+									<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}" data-rule-id="{{ruleId}}" target="_blank">
 										<i class="{{_icon}}"></i>
 									</a>
 								</span>
-								{{headline}}
+								{{#if summary}}
+									<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">{{headline}}</a>
+									<div class="collapse" id="collapse_{{id}}">
+										<p>{{summary}}</p>
+									</div>
+								{{else}}
+									{{headline}}
+								{{/if}}
 							</li>
 						{{/each}}
 					</ul>

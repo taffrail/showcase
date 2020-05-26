@@ -104,6 +104,12 @@
       }
     }
 
+    .advice-list {
+      li:not(:last-child) {
+        margin-bottom: .75rem;
+      }
+    }
+
     .advice-container {
       padding: .5rem;
     }
@@ -147,6 +153,17 @@
       .tab-content {
         background-color: $gray-200;
         padding: .25rem;
+      }
+
+      .assumption-group {
+        font-size: .9rem;
+        font-weight: 500;
+        line-height: 1.2;
+        margin-bottom: .5rem;
+
+        a {
+          color: $body-color;
+        }
       }
 
       .answers,
