@@ -463,7 +463,7 @@ export default class showcase {
   }
 
   mapData() {
-    this.api.display = _.last(this.api.advice);
+    this.api.display = _.last(this.api.advice) || {};
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       a._count = a.idx + 1;
