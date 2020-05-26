@@ -149,6 +149,17 @@
         padding: .25rem;
       }
 
+      .assumption-group {
+        font-size: .9rem;
+        font-weight: 500;
+        line-height: 1.2;
+        margin-bottom: .5rem;
+
+        a {
+          color: $body-color;
+        }
+      }
+
       .answers,
       .assumptions {
         ol {

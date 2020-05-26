@@ -51,6 +51,7 @@ export default class showcase {
     this.handleClickContinue();
     this.handleClickBack();
     this.handleClickAssumption();
+    this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
     this.handleResizeChart();
     this.handleClickToggleMode();
@@ -143,10 +144,26 @@ export default class showcase {
       $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const answer = this.api.answers.find((a) => { return a.idx == data.idx; });
+      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
       this.api.display = answer;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
+    });
+  }
+
+  /**
+   * Listener for pening/closing assumption groups
+   */
+  handleCollapseAssumptionGroup() {
+    $(".assumptions").on("show.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
+    });
+    $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
     });
   }
 
@@ -463,21 +480,53 @@ export default class showcase {
   }
 
   mapData() {
+    // setup "display" card — either question or advice
     this.api.display = _.last(this.api.advice) || {};
+    // build collection of just answers & assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
-      a._count = a.idx + 1;
+      a._count = i + 1;
       return a;
     });
+
     // remove last item, it's always an unanswered question
     if (this.api.display.type == "INPUT_REQUEST") {
       this.api.answers = this.api.answers.slice(0, -1);
     }
-    // remove last item, it's always an unanswered question
+
+    // assumptions are grouped, answers are not
+    this.api.assumptions = _.groupBy(this.api.answers, (a) => {
+      return (a.tagGroup) ? a.tagGroup.name : "Other";
+    });
+
+    Object.keys(this.api.assumptions).forEach((key, idx) => {
+      const arr = this.api.assumptions[key];
+
+      // need to add an ID to each "Other" group
+      if (key == "Other" && arr.length) {
+        this.api.assumptions[key] = arr.map(a => {
+          a.tagGroup = {
+            name: "Other",
+            id: "other"
+          }
+          return a;
+        });
+      }
+
+      // add `_isOpen` flag to each item
+      this.api.assumptions[key] = arr.map(a => {
+        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
+        return a;
+      });
+    });
+
+    // remove last item from list of advice IF it's the same as the `display`
     let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
     if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
       allAdvice = allAdvice.slice(0, -1);
     }
+
+    // group all advice into bucketed recommendations
     this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "ungrouped"; });
     // massage data for handlebars templating
     Object.keys(this.api.recommendations).forEach((key, idx) => {
@@ -535,9 +584,9 @@ export default class showcase {
   _setCurrentIdx() {
     // set the current index based on answers
     // only useful for going "back"
-    let currIdx = _.findIndex(this.api.advice, (ans) => { return this.api.display.id == ans.id });
+    let currIdx = _.findIndex(this.api.answers, (ans) => { return this.api.display.id == ans.id });
     if (currIdx == -1) {
-      currIdx = this.api.advice.length;
+      currIdx = this.api.answers.length;
     }
     this.api.display._currIdx = currIdx;
     this.api.display._isFirst = currIdx === 0;
@@ -559,7 +608,9 @@ export default class showcase {
   updateAssumptionsList(){
     // do we have ANY assumptions/answers yet?
     // show or hide depending
-    $(".assumptions-container").toggle(this.api.answers.length > 0);
+    // simple helper for UX
+    this.api._answersExist = this.api.answers.length > 0;
+    $(".assumptions-container").toggle(this.api._answersExist);
 
     // render
     const str = this.TEMPLATES["QuestionsAnswers"](this.api);
@@ -587,9 +638,9 @@ export default class showcase {
   _setAssumptionActive(isAdvice){
     const { id } = this.api.display;
     if (isAdvice) {
-      $("ul,ol").find("li").siblings().removeClass("active");
+      $(".assumptions, .answers").find("li").removeClass("active");
     } else {
-      $("ul,ol").find(`li[data-id=${id}]`).addClass("active").siblings().removeClass("active");
+      $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
     }
   }
 

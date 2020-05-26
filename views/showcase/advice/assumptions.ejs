@@ -1,29 +1,34 @@
 <script id="tmpl_assumptionsList" type="text/x-handlebars-template">
 	<p class="p-2 mb-1">The assumptions below are being used to provide the personalized recommendations shown to the right. <br><strong><i class="far fa-hand-pointer"></i> Press an assumption to update your data.</strong></p>
-	<ol class="list-unstyled">
-		{{#each answers}}
-			<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
-				{{#if statement}}
-					<div class="a statement"><a href="#" class="stretched-link">
-						{{statement}}
-					</a></div>
-				{{else}}
-					<div class="q">
-						{{#if form.questionVariable}}
-							<span class="text-monospace">{{form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+	{{#if _answersExist}}
+		{{#each assumptions}}
+			<div class="assumption-group"><a data-toggle="collapse" href="#collapse_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_{{@index}}">{{@key}}</a> <span class="text-muted">({{this.length}})</span></div>
+			<ol class="list-unstyled assumptions-list collapse {{#if this.0._isOpen}}show{{/if}}" id="collapse_{{@index}}">
+				{{#each this}}
+					<li data-id="{{id}}" data-group-id="{{tagGroup.id}}" data-idx="{{idx}}" class="qa position-relative">
+						{{#if statement}}
+							<div class="a statement"><a href="#" class="stretched-link">
+								{{statement}}
+							</a></div>
 						{{else}}
-							{{question}}
+							<div class="q">
+								{{#if form.questionVariable}}
+									<span class="text-monospace">{{form.questionVariable.name}}</span>&nbsp;&nbsp;&nbsp;
+								{{else}}
+									{{question}}
+								{{/if}}
+							</div>
+							<div class="a"><a href="#" class="stretched-link">
+								{{#if form.questionVariable}}
+									{{form.questionVariable.result.value}}
+								{{else}}
+									{{value}}
+								{{/if}}
+							</a></div>
 						{{/if}}
-					</div>
-					<div class="a"><a href="#" class="stretched-link">
-						{{#if form.questionVariable}}
-							{{form.questionVariable.result.value}}
-						{{else}}
-							{{value}}
-						{{/if}}
-					</a></div>
-				{{/if}}
-			</li>
+					</li>
+				{{/each}}
+			</ol>
 		{{/each}}
-	</ol>
+	{{/if}}
 </script>
