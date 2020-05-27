@@ -210,7 +210,7 @@ export default class showcase {
       e.preventDefault();
       const linkGenId = _.uniqueId("link-gen");
       // hit the API
-      $.post("/s/api/shorten", { long_url: this.api.adviceset.apiUrl }).then(bitly => {
+      $.post("/s/api/shorten", { long_url: window.location.href }).then(bitly => {
         // copy to clipboard
         return copy(bitly.link).then(() => {
           this.showToast(linkGenId, {
