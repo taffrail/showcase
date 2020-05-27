@@ -313,7 +313,6 @@ export default class showcase {
     // render
     $(".center-col").removeClass("transition-hide");
     $(".right-col").removeClass("centered");
-    $(".far-right-col-controls").hide();
 
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
@@ -322,19 +321,11 @@ export default class showcase {
       if (this.api.display._isLast) {
         $(".center-col").addClass("transition-hide");
         $(".right-col").addClass("centered");
-        setTimeout(() => {
-          $(".far-right-col-controls").fadeIn();
-        }, 750);
       }
       this._updateForAdvice();
     }
 
     this.updateRecommendationsList();
-
-    // reset controls
-    $(".far-right-col-controls").find("a[data-expand]").each((i, el) => {
-      this._toggleCollapseLink($(el), false);
-    });
   }
 
   // #region templating utils
