@@ -33,7 +33,7 @@
 			</div>
 		</header>
 		
-		<div class="container mt-4">
+		<main class="container mt-4">
 			<div class="row">
 				<div class="col-md-6">
 					<div class="advice-set-details">Loading...</div>
@@ -87,16 +87,28 @@
 						<div class="col-md-6 right-col">
 							<div class="list-all-recommendations"></div>
 						</div>
+						<div class="col-md-3 far-right-col-controls">
+							<section>
+								<h6>Advice</h6>
+								<nav class="nav flex-column">
+									<a class="nav-link" href="#" data-expand="assumptions"><i class="far fa-plus-square"></i> <span>Expand</span> Assumptions</a>
+									<a class="nav-link" href="#" data-expand="advice"><i class="far fa-plus-square"></i> <span>Expand</span> Advice</a>
+								</nav>
+							</section>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+			<div class="push"></div>
+		</main>
 
-		<footer class="container-fluid mt-4">
-			<hr />
-			<section>
-				<p><a href="#"><i class="far fa-envelope-open"></i> hello@justgoodadvice.com</a>. Made with <i class="fad fa-coffee"></i> in Boulder, Colorado.<br>&copy; <%= new Date().getFullYear() %> Just Good Advice, LLC.</p>
-			</section>
+		<footer class="footer">
+			<div class="container-fluid">
+				<hr />
+				<section>
+					<p><a href="#"><i class="far fa-envelope-open"></i> hello@justgoodadvice.com</a>. Made with <i class="fad fa-coffee"></i> in Boulder, Colorado.<br>&copy; <%= new Date().getFullYear() %> Just Good Advice, LLC.</p>
+				</section>
+			</div>
 		</footer>
 
 		<!--templates-->

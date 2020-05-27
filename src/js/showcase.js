@@ -61,6 +61,7 @@ export default class showcase {
     this.handleClickAssumption();
     this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
+    this.handleClickExpandControls();
     // this.handleResizeChart();
     // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
@@ -168,6 +169,32 @@ export default class showcase {
   }
 
   /**
+   * Handle expando/collapso links on sidebar
+   */
+  handleClickExpandControls() {
+    $(".far-right-col-controls").on("click", "a[data-expand]", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const { expand } = $this.data();
+
+      let $collapsibles;
+      if (expand == "assumptions") {
+        $collapsibles = $(".assumptions-list.collapse");
+      } else if (expand == "advice") {
+        $collapsibles = $(".advice-list").find(".collapse");
+      }
+
+      // open or close?
+      const collapse = $this.find("span").text().includes("Expand") ? "show" : "hide";
+
+      $collapsibles
+        .collapse(collapse)
+        .on("shown.bs.collapse", e => { this._toggleCollapseLink($this, true) })
+        .on("hidden.bs.collapse", e => { this._toggleCollapseLink($this, false) });
+    });
+  }
+
+  /**
    * Listen on the browser history for POP actions to update the page.
    */
   listenForUrlChanges() {
@@ -250,6 +277,7 @@ export default class showcase {
     // render
     $(".center-col").removeClass("transition-hide");
     $(".right-col").removeClass("centered");
+    $(".far-right-col-controls").hide();
 
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
@@ -258,11 +286,19 @@ export default class showcase {
       if (this.api.display._isLast) {
         $(".center-col").addClass("transition-hide");
         $(".right-col").addClass("centered");
+        setTimeout(() => {
+          $(".far-right-col-controls").fadeIn();
+        }, 750);
       }
       this._updateForAdvice();
     }
 
     this.updateRecommendationsList();
+
+    // reset controls
+    $(".far-right-col-controls").find("a[data-expand]").each((i, el) => {
+      this._toggleCollapseLink($(el), false);
+    });
   }
 
   // #region templating utils
@@ -664,6 +700,16 @@ export default class showcase {
         this.setupChart(true, chart.id);
       }, 1000);
     });
+  }
+
+  /**
+   *
+   * @param {jquery} $el Click target
+   * @param {boolean} shown Open or closed?
+   */
+  _toggleCollapseLink($el, shown) {
+    $el.find("span").text( shown ? "Collapse" : "Expand");
+    $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
   }
   // #endregion
 }

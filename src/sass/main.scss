@@ -7,6 +7,11 @@
 
 @import 'loading';
 
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
 .showcase {
   &.showcase--advice {
     background: $gray-300;
@@ -24,6 +29,12 @@
     .bg-stripes {
       background: $primary url('/img/slashes.png') right center no-repeat;
       background-size: 70%;
+    }
+
+    // wrapper
+    main.container {
+      margin-bottom: -5rem;
+      min-height: 100%;
     }
 
     .advice-set-details {
@@ -114,21 +125,21 @@
       }
     }
 
-    .toggle-mode {
-      color: $gray-500;
-      font-size: .75rem;
-      margin-top: .5rem;
-      text-align: right;
+    .far-right-col-controls {
+      section {
+        color: $gray-600;
+        padding: ($grid-gutter-width/2);
 
-      span {
-        display: none;
-      }
+        .nav {
+          font-size: 80%;
 
-      a:hover {
-        text-decoration: none;
+          .nav-link {
+            padding: .25rem 0;
+          }
+        }
 
-        span {
-          display: inline;
+        a {
+          color: $gray-600;
         }
       }
     }
@@ -233,7 +244,17 @@
     }
   }
 
+  .push {
+    height: 5rem;
+  }
+
   footer {
+    &.footer {
+      height: 5rem;
+      line-height: 1rem;
+      background: $gray-300;
+    }
+
     hr {
       border-top-color: $gray-400;
     }
