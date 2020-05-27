@@ -8,10 +8,10 @@
 		<a href="https://app.justgoodadvice.com/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" data-rule-id="{{display.ruleId}}" class="dropdown-item" target="_blank">
 			<i class="fad fa-pencil"></i> Edit in Advice Builder
 		</a>
-		<a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug" class="dropdown-item" data-action="openDebugWithQuerystring">
+		<a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug?{{adviceset._apiUrlQuery}}" class="dropdown-item" target="_blank">
 			<i class="fad fa-debug"></i> Debug
 		</a>
-		<a href="https://app.justgoodadvice.com/_/advice/widget/{{adviceset.id}}/_/01111J/" class="dropdown-item" data-action="openClassicWithQuerystring">
+		<a href="https://app.justgoodadvice.com/_/advice/widget/{{adviceset.id}}/_/01111J/?{{adviceset._apiUrlQuery}}" class="dropdown-item"  target="_blank">
 			<i class="fad fa-comments"></i> Classic
 		</a>
 		<div class="dropdown-divider"></div>

@@ -13,9 +13,6 @@ export default class showcase {
     this.history = createBrowserHistory();
 
     // handlebars helpers
-    Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
-      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
-    });
     Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
       return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
     });
@@ -62,14 +59,7 @@ export default class showcase {
     this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
     this.handleResizeChart();
-    this.handleClickToggleMode();
     // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
-    this.toggleViewMode();
-
-    // advice builder pointers
-    this.handleClicksToAdviceBuilder();
-    this.handleClickOpenDebug();
-    this.handleClickOpenClassic();
   }
 
   /**
@@ -115,10 +105,8 @@ export default class showcase {
       this._loadApi(data).then(()=> {
         // update content
         this.updatePanes();
-        // pull querystring from API URL (which has latest passed data)
-        const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
         // save state
-        this.history.push(`${this.baseUrl}/?${queryString}`, this.api);
+        this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
       });
 
       return false; // don't submit form
@@ -168,89 +156,12 @@ export default class showcase {
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
     });
+
     $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
     });
-  }
-
-  handleClicksToAdviceBuilder() {
-    $("body").on("click", "[data-advicebuilder]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const { ruleId } = $this.data();
-      const href = $this.prop("href");
-
-      // get RuleSetId
-      this._loadApiRule(ruleId).then(api => {
-        const { data: { ruleSetId } } = api;
-        window.open(href.replace("::ruleSetId::", ruleSetId));
-      });
-    });
-  }
-
-  // #region dropdown menu
-  /**
-   * Dropdown "Debug" menu click handler. Necessary to append current
-   * querystring to new URL before navigating.
-   */
-  handleClickOpenDebug() {
-    this.$advice.on("click", "a[data-action=openDebugWithQuerystring]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
-      window.open(`${href}?${queryString}`);
-    });
-  }
-
-  /**
-   * Dropdown "Classic" menu click handler. Necessary to append current
-   * querystring to new URL before navigating.
-   */
-  handleClickOpenClassic() {
-    this.$advice.on("click", "a[data-action=openClassicWithQuerystring]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
-      window.open(`${href}?${queryString}`);
-    });
-  }
-
-  /**
-   * Toggle debug mode / variable visibility
-   */
-  handleClickToggleMode() {
-    $(".toggle-mode").on("click", "[data-action=toggle-mode]", e => {
-      e.preventDefault();
-      const isDevMode = store.get("showcase-dev-mode");
-      let newDevMode;
-      if (isDevMode === true) {
-        newDevMode = false;
-      } else if (isDevMode === false) {
-        newDevMode = true;
-      } else {
-        newDevMode = false;
-      }
-
-      store.set("showcase-dev-mode", newDevMode);
-      this.toggleViewMode(newDevMode);
-    });
-  }
-  // #endregion
-
-  /**
-   * Toggle debug mode / variable visibility and save it to localstore
-   * @param {boolean=} isDevMode Optional bool to switch mode
-   */
-  toggleViewMode(isDevMode = store.get("showcase-is-dev-mode")) {
-    if (isDevMode) {
-      $(".variables-container").fadeIn("fast");
-    } else {
-      $(".variables-container").fadeOut("fast");
-    }
   }
 
   /**
@@ -294,10 +205,10 @@ export default class showcase {
    */
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
-    const currFormData = this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true);
+    const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
     const formData = _.assign({}, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
-    const loadingId = Loading.show($(".row.no-gutters .advice"));
+    const loadingId = Loading.show($(".row .advice"));
 
     return $.ajax({
       url: apiUrlWithoutQuerystring,
@@ -322,63 +233,6 @@ export default class showcase {
       }
       alert(err);
     });
-  }
-
-  /**
-   * Helper API call to get parent ruleSetId for a given ruleId.
-   * This is only necessary because we want the showcase to deep link back
-   * to the Advice Builder app.
-   * @param {string} ruleId RuleId
-   * @returns Promise<jqXHR>
-   */
-  _loadApiRule(ruleId) {
-    if (!ruleId) { console.error("RuleId required."); }
-
-    // get from cache
-    if (this.api.rulesetMap && this.api.rulesetMap[ruleId]) {
-      return Promise.resolve({
-        data: {
-          ruleSetId: this.api.rulesetMap[ruleId]
-        }
-      });
-    }
-
-    const loadingId = Loading.show($("body"));
-    return $.ajax({
-      url: `https://app.justgoodadvice.com/api/rule/${ruleId}/node/${ruleId}`,
-      type: "GET",
-      dataType: "json",
-      headers: {
-        "Accept": "application/json; chartset=utf-8",
-        "Authorization": `Bearer ${this.config.api_key}`
-      }
-    }).then(api => {
-      Loading.hide(loadingId);
-      // cache it
-      this.api.rulesetMap = this.api.rulesetMap || {};
-      this.api.rulesetMap[ruleId] = api.data.ruleSetId;
-      return api;
-    }).catch((jqXHR) => {
-      Loading.hide(loadingId);
-      let err;
-      try {
-        err = jqXHR.responseJSON.error.message;
-      } catch (e){
-        err = jqXHR;
-      }
-      alert(err);
-    });
-  }
-
-  /**
-	 * Util to pick the querystring from a URL
-   * @param {string} url
-   * @param {boolean=} parse Optional bool to parse the URL into an object.
-   * @returns String or Object, depending on `parse`
-	 */
-  getQuerystringFromUrl(url, parse = false) {
-    const str = url.substring(url.indexOf("?") + 1);
-    return (parse) ? qs.parse(str) : str;
   }
   // #endregion
 
@@ -473,7 +327,7 @@ export default class showcase {
         session: Object.assign({
           ruleSetId: this.api.adviceset._id,
           ruleId: this.api.display.ruleId,
-        }, this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true))
+        }, qs.parse(this.api.adviceset._apiUrlQuery))
       }
 
       // set chart container size
