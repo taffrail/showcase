@@ -1,6 +1,7 @@
 /* eslint-disable new-cap */
 import _ from "lodash";
 import { createBrowserHistory } from "history";
+import copy from "clipboard-copy";
 import Inputmask from "inputmask";
 import Handlebars from "handlebars";
 import Loading from "./loading";
@@ -62,6 +63,7 @@ export default class showcase {
     this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
     this.handleClickExpandControls();
+    this.handleCopyLink();
     // this.handleResizeChart();
     // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
@@ -159,12 +161,16 @@ export default class showcase {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
     });
 
     $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
     });
   }
 
@@ -172,7 +178,7 @@ export default class showcase {
    * Handle expando/collapso links on sidebar
    */
   handleClickExpandControls() {
-    $(".far-right-col-controls").on("click", "a[data-expand]", e => {
+    $("main").on("click", "a[data-expand]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const { expand } = $this.data();
@@ -185,13 +191,42 @@ export default class showcase {
       }
 
       // open or close?
-      const collapse = $this.find("span").text().includes("Expand") ? "show" : "hide";
+      const { collapsed = true } = $this.data();
+      const collapse = collapsed ? "show" : "hide";
       $collapsibles
         .collapse(collapse)
         .on("shown.bs.collapse", e => { this._toggleCollapseLink($this, true) })
         .on("hidden.bs.collapse", e => { this._toggleCollapseLink($this, false) });
 
       this._toggleCollapseLink($this, collapse == "show");
+    });
+  }
+
+  /**
+   * Handle click to generate and copy a short URL
+   */
+  handleCopyLink() {
+    $("body").on("click", "a.copy-url", e => {
+      e.preventDefault();
+      const linkGenId = _.uniqueId("link-gen");
+      // hit the API
+      $.post("/s/api/shorten", { long_url: this.api.adviceset.apiUrl }).then(bitly => {
+        // copy to clipboard
+        return copy(bitly.link).then(() => {
+          this.showToast(linkGenId, {
+            title: "Just Good Advice",
+            time: null,
+            message: "Link copied!"
+          });
+        });
+      }).catch(e => {
+        console.error(e);
+        this.showToast(linkGenId, {
+          title: "Oops",
+          time: null,
+          message: "Link copying error."
+        });
+      })
     });
   }
 
@@ -711,6 +746,27 @@ export default class showcase {
   _toggleCollapseLink($el, shown) {
     $el.find("span").text( shown ? "Collapse" : "Expand");
     $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
+    $el.data("collapsed", !shown);
+  }
+
+  /**
+   *
+   * @param {string=} id Optional ID
+   * @param {object} opts Toast options
+   */
+  showToast(id = _.uniqueId("toast"), opts = {}) {
+    if (!opts.id) {
+      opts.id = id;
+    }
+    const toast = Handlebars.compile($("#tmpl_toast").html())(opts);
+    // insert into DOM
+    $("#toastContainer").append(toast);
+    // init Toast component
+    $(`#${id}`).toast({
+      delay: 2000
+    }).on("hidden.bs.toast", function() {
+      $(this).remove(); // remove it when it's been hidden
+    }).toast("show"); // finally show it
   }
   // #endregion
 }

@@ -12,6 +12,21 @@ html, body {
   margin: 0;
 }
 
+#toastWrapper {
+  min-height: 200px;
+  min-width: 320px;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 9999999;
+
+  #toastContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
+
 .showcase {
   &.showcase--advice {
     background: $gray-300;
@@ -125,25 +140,6 @@ html, body {
       }
       > div {
         margin-bottom: 1rem;
-      }
-    }
-
-    .far-right-col-controls {
-      section {
-        color: $gray-600;
-        padding: ($grid-gutter-width/2);
-
-        .nav {
-          font-size: 80%;
-
-          .nav-link {
-            padding: .25rem 0;
-          }
-        }
-
-        a {
-          color: $gray-600;
-        }
       }
     }
 

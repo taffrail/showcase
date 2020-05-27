@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const request = require("request");
 const qs = require("querystring");
+const { BitlyClient } = require("bitly");
+const bitly = new BitlyClient(process.env.BITLY_TOKEN, {
+  domain: "advice.link"
+});
 
 router.get("/:adviceSetId", (req, res, next) => {
   const { adviceSetId } = req.params;
@@ -42,6 +46,17 @@ router.get("/:adviceSetId", (req, res, next) => {
       return res.status(resp.statusCode).send(body);
     }
   });
+});
+
+router.post("/api/shorten", (req, res, next) => {
+  bitly
+    .shorten(req.body.long_url)
+    .then((result) => {
+      return res.json(result);
+    })
+    .catch((error) => {
+      return res.status(500).json(error);
+    });
 });
 
 module.exports = router;

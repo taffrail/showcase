@@ -1,4 +1,11 @@
 <script id="tmpl_adviceSetDetails" type="text/x-handlebars-template">
-	<h2><a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/open-editor" target="_blank" class="text-body">{{adviceset.title}}</a></h2>
-	<p class="lead">{{adviceset.description}}</p>
+	<div class="showcase-header">
+		<div>
+			<h2><a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/open-editor" target="_blank" class="text-body">{{adviceset.title}}</a></h2>
+			<p class="lead">{{adviceset.description}}</p>
+		</div>
+		<div>
+			<a href="#" class="copy-url"><i class="far fa-link"></i> Copy link</a>
+		</div>
+	</div>
 </script>

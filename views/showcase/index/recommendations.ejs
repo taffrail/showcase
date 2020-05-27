@@ -3,7 +3,15 @@
 		
 			{{#each recommendations}}
 				<div class="rounded bg-white {{#if ../_isLast}}shadowed{{/if}}">
-					<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
+					{{#if @first}}
+						<header class="d-flex justify-content-between">
+							<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
+							
+							<%- include("_dropdown"); %>
+						</header>
+					{{else}}
+						<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
+					{{/if}}
 					<ul class="advice-list recommendations fa-ul">
 						{{#each this}}
 							<li data-id="{{id}}" data-idx="{{idx}}">
