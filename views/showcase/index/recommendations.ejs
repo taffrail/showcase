@@ -2,13 +2,13 @@
 	{{#if _recommendationsExist}}
 		
 			{{#each recommendations}}
-				<div class="rounded bg-white mt-2">
+				<div class="rounded bg-white {{#if ../_isLast}}shadowed{{/if}}">
 					<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
 					<ul class="advice-list recommendations fa-ul">
 						{{#each this}}
 							<li data-id="{{id}}" data-idx="{{idx}}">
 								<span class="fa-li">
-									<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}" data-rule-id="{{ruleId}}" target="_blank">
+									<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}" target="_blank">
 										<i class="{{_icon}}"></i>
 									</a>
 								</span>
@@ -16,6 +16,35 @@
 									<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">{{headline}}</a>
 									<div class="collapse" id="collapse_{{id}}">
 										<p class="text-muted"><small>{{summary}}</small></p>
+
+										{{#if attachment}}
+											{{#if attachment._isInteractiveChart}}
+												<section class="advice-attachment advice-chart--interactive" id="{{attachment.id}}" data-src="{{attachment.url}}">
+													<scr{{!}}ipt>
+														var chartFrame = document.createElement('iframe');
+														chartFrame.frameBorder = '0';
+														chartFrame.scrolling = 'no';
+														chartFrame.allowTransparency = 'true';
+														chartFrame.allowFullscreen = 'true';
+														chartFrame.width = '100%';
+														chartFrame.height = '100%';
+														document.getElementById('{{attachment.id}}').appendChild(chartFrame);
+													</scr{{!}}ipt>
+												</section>
+											{{else}}
+												<section class="att">
+													<figure>
+														<img class="advice-attachment img-fluid" src="https://d1d53ugxmopqf1.cloudfront.net/fit-in/1000x563/filters:quality(75)/{{attachment.fileId}}">
+													</figure>
+												</section>
+											{{/if}}
+										{{/if}}
+										{{#if actions.length}}
+											{{log actions}}
+											{{#each actions}}
+												<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
+											{{/each}}
+										{{/if}}
 									</div>
 								{{else}}
 									{{headline}}

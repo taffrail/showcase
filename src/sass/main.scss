@@ -54,7 +54,6 @@
     .advice {
       &.rounded {
         box-shadow: $dropdown-box-shadow;
-        margin-bottom: 2rem;
       }
 
       .icon-row {
@@ -82,6 +81,34 @@
             width: 100%;
           }
         }
+      }
+    }
+
+    .center-col {
+      transition:.3s;
+
+      &.transition-hide {
+        flex: 0 0 0%;
+        max-width: 0%;
+        padding: 0;
+        transition:.3s;
+        > div {
+          display: none;
+        }
+      }
+    }
+
+    .right-col {
+      transition: .2s;
+    }
+
+    .shadowed {
+      box-shadow: $dropdown-box-shadow;
+    }
+
+    .list-all-recommendations {
+      > div {
+        margin-bottom: 1rem;
       }
     }
 

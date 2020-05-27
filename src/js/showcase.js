@@ -4,7 +4,6 @@ import { createBrowserHistory } from "history";
 import Inputmask from "inputmask";
 import Handlebars from "handlebars";
 import Loading from "./loading";
-import numeral from "numeral";
 import qs from "querystring";
 import store from "store";
 
@@ -13,6 +12,10 @@ export default class showcase {
     this.history = createBrowserHistory();
 
     // handlebars helpers
+    Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
+      return (arg1=== arg2) ? options.fn(this) : options.inverse(this);
+    });
+
     Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
       return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
     });
@@ -58,7 +61,7 @@ export default class showcase {
     this.handleClickAssumption();
     this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
-    this.handleResizeChart();
+    // this.handleResizeChart();
     // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
 
@@ -183,9 +186,7 @@ export default class showcase {
   handleResizeChart() {
     let timer;
     $(window).resize(() => {
-      if (this.api.display.type == "ADVICE" &&
-      this.api.display.attachment &&
-      this.api.display.attachment.contentType == "application/vnd+interactive.chart+html") {
+      if (this.api.display.type == "ADVICE") {
         if (timer) {
           window.clearTimeout(timer);
         }
@@ -247,9 +248,22 @@ export default class showcase {
     this._setCurrentIdx();
 
     // render
+    // ensure center column is visible
+    $(".center-col").removeClass("transition-hide");
+    $(".right-col .bg-white").removeClass("shadowed");
+    // ensure right column is moved to right side
+    // $(".right-col").removeClass("col-md-5").addClass("col-md-4");
+
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
     } else {
+      // if this is the LAST advice, hide center column and move advice list into center focus
+      if (this.api.display._isLast) {
+        $(".center-col").addClass("transition-hide").one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", e => {
+        // $(".right-col").removeClass("col-md-4").addClass("col-md-5");
+          $(".right-col .bg-white").addClass("shadowed");
+        });
+      }
       this._updateForAdvice();
     }
 
@@ -261,15 +275,18 @@ export default class showcase {
    * Template update for INPUT_REQUEST
    */
   _updateForInputRequest() {
-    const { display: { form: { fieldType } } } = this.api;
-    this.api.display.form.fieldType_isRadio = fieldType == "Radio";
-    this.api.display.form.fieldType_isBoolean = fieldType == "Boolean";
-    this.api.display.form.fieldType_isFreetext = fieldType == "Freetext";
-    this.api.display.form.fieldType_isMultipleChoice = fieldType == "MultipleChoice";
-    this.api.display.form.fieldType_isNumber = fieldType == "Number";
-    this.api.display.form.fieldType_isPercent = fieldType == "Percent";
-    this.api.display.form.fieldType_isSelect = fieldType == "Select";
-
+    const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != "\"null\"";
+    // console.log(isLastAndAnswered)
+    if (isLastAndAnswered) {
+      // this.api.display = Object.assign(this.api.display, {
+      //   question: "Advice Engine Response",
+      //   explanation: "This rule has been evaluated, see variable data for export.",
+      //   form: {
+      //     fieldType: "NONE",
+      //     result: this.api.display.value
+      //   }
+      // });
+    }
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
     this.$advice.html(str);
@@ -299,55 +316,34 @@ export default class showcase {
     // determine if this is an interactive chart attachment
     const { attachment } = this.api.display;
     let isChart = false;
+    let chartId;
     if (attachment) {
       isChart = attachment.contentType == "application/vnd+interactive.chart+html";
       // handlebars helper
       attachment._isInteractiveChart = isChart;
+      chartId = attachment.id;
     }
 
     // render
     const str = this.TEMPLATES["Advice"](this.api);
     this.$advice.html(str);
 
-    // setup the chart...
-    if (isChart) {
-      // parent container
-      const containerW = this.$advice.width();
-
-      // specific data chart is expecting
-      // TODO: clean this up in the chart code
-      window.jga.config = {
-        adviceSetId: this.api.adviceset.id,
-        bgColor: "#fff",
-        colors: ["#605F5E", "#6D256C"],
-        width: containerW,
-        height: 400
-      }
-      window.jga.advice = {
-        session: Object.assign({
-          ruleSetId: this.api.adviceset._id,
-          ruleId: this.api.display.ruleId,
-        }, qs.parse(this.api.adviceset._apiUrlQuery))
-      }
-
-      // set chart container size
-      $(".advice-chart--interactive").css({
-        height: 400,
-        width: containerW
-      });
-    }
+    this.setupChart(isChart, chartId);
 
     // unhighlight active assumption/question
     this._setAssumptionActive("advice");
   }
 
+  /**
+   * Map data from API for this showcase's handlebars templates
+   */
   mapData() {
-    // setup "display" card — either question or advice
+    // setup "display" card — either question or "advice".
+    // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
-      a._count = i + 1;
       return a;
     });
 
@@ -362,55 +358,54 @@ export default class showcase {
       return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
     });
 
+    // go through each assumption group and set open/close state
     Object.keys(this.api.assumptions).forEach((key, idx) => {
       if (key == ASSUMPTIONS_UNGROUPED) { return; }
 
-      const arr = this.api.assumptions[key];
-
       // add `_isOpen` flag to each item
+      const arr = this.api.assumptions[key];
       this.api.assumptions[key] = arr.map(a => {
         a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
         return a;
       });
     });
 
-    // remove last item from list of advice IF it's the same as the `display`
-    let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
-    if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
-      allAdvice = allAdvice.slice(0, -1);
+    // if the `display` is the LAST advice node, set a flag
+    const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+    const lastAdvice = _.last(allAdvice);
+    if (lastAdvice && this.api.display.id == lastAdvice.id) {
+      // allAdvice = allAdvice.slice(0, -1);
+      lastAdvice._isLast = true;
     }
 
     // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED; });
-    // massage data for handlebars templating
+    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
+    // add icon
     Object.keys(this.api.recommendations).forEach((key, idx) => {
-      let arr = this.api.recommendations[key];
-      let groupDisplayName = "Recommendations";
-      try {
-        groupDisplayName = _.first(arr).tagGroup.name;
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
-
       // add icons
-      arr = arr.map(a => {
+      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
         let icon = "fad fa-thumbs-up";
         // support To Do/Completed checklist icons
-        if (groupDisplayName.includes("To Do")) {
+        if (key.includes("To Do")) {
           icon = "far fa-circle";
-        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
+        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
           icon = "far fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
+
+        // determine if this is an interactive chart attachment
+        const { attachment } = a;
+        let isChart = false;
+        if (attachment) {
+          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+          // handlebars helper
+          attachment._isInteractiveChart = isChart;
+        }
+
         return a;
       });
-
-      // if we have already grouped by name, don't continue
-      if (key == groupDisplayName) { return; }
-
-      this.api.recommendations[groupDisplayName] = arr;
-      delete this.api.recommendations[key];
     });
   }
 
@@ -483,6 +478,8 @@ export default class showcase {
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
     $(".list-all-recommendations").html(str);
+
+    this._setupChartsAll();
   }
 
   /**
@@ -502,13 +499,6 @@ export default class showcase {
 	 * Update variables list
 	 */
   updateVariablesList(){
-    // add formatted value to vars
-    this.api.variables = this.api.variables.map(v => {
-      if (v.format) {
-        v.valueF = numeral(v.value).format(v.format);
-      }
-      return v;
-    });
     // render
     const str = this.TEMPLATES["Variables"](this.api);
     $(".variables").html(str);
@@ -619,6 +609,66 @@ export default class showcase {
    */
   _findFormInput($form, types = "input") {
     return $form.find(types).filter(":not(:radio):not(:hidden)");
+  }
+
+  /**
+   * Sets up chart
+   * @param {boolean} isChart
+   */
+  setupChart(isChart, chartId) {
+    // setup the chart...
+    if (isChart) {
+      const $chart = $(`#${chartId}`);
+      const { src } = $chart.data();
+      // parent container
+      const containerW = $chart.parent().width();
+      const $iframe = $chart.find("iframe");
+      // set chart container size
+      $(`#${chartId}`).css({
+        height: 400,
+        width: containerW
+      });
+
+      $iframe.on("load", e => {
+        // specific data chart is expecting
+        // TODO: clean this up in the chart code
+        window.jga.config = {
+          adviceSetId: this.api.adviceset.id,
+          bgColor: "#fff",
+          colors: ["#605F5E", "#6D256C"],
+          width: containerW,
+          height: 400
+        }
+        window.jga.advice = {
+          session: Object.assign({
+            ruleSetId: this.api.adviceset._id,
+            ruleId: this.api.display.ruleId,
+          }, qs.parse(this.api.adviceset._apiUrlQuery))
+        }
+        const data = {
+          advice: window.jga.advice,
+          config: window.jga.config
+        }
+        $iframe.get(0).contentWindow.postMessage(data, "*");
+      });
+      $iframe.prop("src", src);
+    }
+  }
+
+  /**
+   * Sets up all charts
+   */
+  _setupChartsAll() {
+    // quickly find all charts and set them up
+    _.flatMap(this.api.recommendations).filter(a => {
+      return a.attachment && a.attachment._isInteractiveChart;
+    }).map(a => {
+      return a.attachment;
+    }).forEach(chart => {
+      setTimeout(() => {
+        this.setupChart(true, chart.id);
+      }, 1000);
+    });
   }
   // #endregion
 }

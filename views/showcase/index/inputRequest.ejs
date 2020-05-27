@@ -18,7 +18,7 @@
 
 			<div class="form-group">
 
-				{{#if display.form.fieldType_isRadio}}
+				{{#ifEquals display.form.fieldType "Radio"}}
 				
 					{{#each display.form.values}}
 						<div class="custom-control custom-radio">
@@ -31,9 +31,9 @@
 						</div>
 					{{/each}}
 
-				{{/if}}
+				{{/ifEquals}}
 
-				{{#if display.form.fieldType_isBoolean}}
+				{{#ifEquals display.form.fieldType "Boolean"}}
 
 					<div class="custom-control custom-radio">
 						<input type="radio" name="{{display.form.name}}" value="true" id="yes_{{display.id}}" class="custom-control-input required">
@@ -44,19 +44,19 @@
 						<label class="custom-control-label" for="no_{{display.id}}">No</label>
 					</div>
 
-				{{/if}}
+				{{/ifEquals}}
 
-				{{#if display.form.fieldType_isNumber}}
+				{{#ifEquals display.form.fieldType "Number"}}
 				
 					<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
 
-				{{/if}}
+				{{/ifEquals}}
 
-				{{#if display.form.fieldType_isPercent}}
+				{{#ifEquals display.form.fieldType "Percent"}}
 				
 					<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" data-type="{{display.form.fieldType}}" autocomplete="off" required>
 
-				{{/if}}
+				{{/ifEquals}}
 
 			</div>
 
