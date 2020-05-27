@@ -120,6 +120,9 @@ html, body {
     }
 
     .list-all-recommendations {
+      h6 {
+        margin-bottom: .75rem;
+      }
       > div {
         margin-bottom: 1rem;
       }
@@ -145,8 +148,10 @@ html, body {
     }
 
     .advice-list {
+      margin-bottom: 0;
+
       li:not(:last-child) {
-        margin-bottom: .75rem;
+        margin-bottom: .5rem;
       }
     }
 
@@ -215,7 +220,7 @@ html, body {
           border-radius: $border-radius;
           color: $gray-600;
           margin-bottom: .25rem;
-          padding: .33rem;
+          padding: .15rem;
 
           &.active,
           &:hover {

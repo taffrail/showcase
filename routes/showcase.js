@@ -15,6 +15,8 @@ router.get("/:adviceSetId", (req, res, next) => {
   });
   const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
 
+  console.warn(apiUrl);
+
   request.get(apiUrl, {
     headers: {
       "Accept": "application/json; charset=utf-8",
@@ -24,6 +26,7 @@ router.get("/:adviceSetId", (req, res, next) => {
     if (err) { return next(err); }
 
     if (resp.statusCode > 200) {
+      console.warn(resp);
       return next(new Error(resp.statusMessage));
     }
 
