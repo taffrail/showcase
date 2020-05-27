@@ -186,11 +186,12 @@ export default class showcase {
 
       // open or close?
       const collapse = $this.find("span").text().includes("Expand") ? "show" : "hide";
-
       $collapsibles
         .collapse(collapse)
         .on("shown.bs.collapse", e => { this._toggleCollapseLink($this, true) })
         .on("hidden.bs.collapse", e => { this._toggleCollapseLink($this, false) });
+
+      this._toggleCollapseLink($this, collapse == "show");
     });
   }
 
