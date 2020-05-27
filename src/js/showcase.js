@@ -248,21 +248,16 @@ export default class showcase {
     this._setCurrentIdx();
 
     // render
-    // ensure center column is visible
     $(".center-col").removeClass("transition-hide");
-    $(".right-col .bg-white").removeClass("shadowed");
-    // ensure right column is moved to right side
-    $(".right-col").removeClass("col-md-5").addClass("col-md-4");
+    $(".right-col").removeClass("centered");
 
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
     } else {
       // if this is the LAST advice, hide center column and move advice list into center focus
       if (this.api.display._isLast) {
-        $(".center-col").addClass("transition-hide").one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", e => {
-          $(".right-col").removeClass("col-md-4").addClass("col-md-5");
-          $(".right-col .bg-white").addClass("shadowed");
-        });
+        $(".center-col").addClass("transition-hide");
+        $(".right-col").addClass("centered");
       }
       this._updateForAdvice();
     }

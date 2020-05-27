@@ -84,6 +84,10 @@
       }
     }
 
+    .push-down {
+      margin-top: 34px; // height of tabs
+    }
+
     .center-col {
       transition:.3s;
 
@@ -91,19 +95,17 @@
         flex: 0 0 0%;
         max-width: 0%;
         padding: 0;
-        transition:.3s;
+        transition: .2s;
         > div {
           display: none;
         }
       }
     }
 
-    .right-col {
-      transition: .2s;
-    }
-
-    .shadowed {
-      box-shadow: $dropdown-box-shadow;
+    .centered {
+      .list-all-recommendations > div {
+        box-shadow: $dropdown-box-shadow;
+      }
     }
 
     .list-all-recommendations {
