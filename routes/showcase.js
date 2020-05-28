@@ -48,9 +48,30 @@ router.get("/:adviceSetId", (req, res, next) => {
   });
 });
 
-router.post("/api/shorten", (req, res, next) => {
+/**
+ * Shorten a long URL
+ */
+router.post("/api/shorten_only", (req, res, next) => {
   bitly
     .shorten(req.body.long_url)
+    .then((result) => {
+      return res.json(result);
+    })
+    .catch((error) => {
+      return res.status(500).json(error);
+    });
+});
+
+/**
+ * Shorten AND add title+tags to a URL
+ */
+router.post("/api/shorten", (req, res, next) => {
+  bitly
+    .bitlyRequest("bitlinks", {
+      long_url: req.body.long_url,
+      title: req.body.title,
+      tags: ["showcase"],
+    })
     .then((result) => {
       return res.json(result);
     })

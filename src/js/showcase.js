@@ -209,13 +209,30 @@ export default class showcase {
     $("body").on("click", "a.copy-url", e => {
       e.preventDefault();
       const linkGenId = _.uniqueId("link-gen");
-      // hit the API
-      $.post("/s/api/shorten", { long_url: window.location.href }).then(bitly => {
+      const url = window.location.href;
+
+      // we can't shorten localhost links
+      if (url.includes("localhost")) {
+        return copy(url).then(() => {
+          this.showToast(linkGenId, {
+            title: "Just Good Advice",
+            message: "Link copied!"
+          });
+        });
+      }
+
+      // hit the shorten API
+      const { display } = this.api;
+      const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
+
+      $.post("/s/api/shorten", {
+        long_url: url,
+        title: `${this.api.adviceset.title} - ${title}`
+      }).then(bitly => {
         // copy to clipboard
         return copy(bitly.link).then(() => {
           this.showToast(linkGenId, {
             title: "Just Good Advice",
-            time: null,
             message: "Link copied!"
           });
         });
@@ -223,7 +240,6 @@ export default class showcase {
         console.error(e);
         this.showToast(linkGenId, {
           title: "Oops",
-          time: null,
           message: "Link copying error."
         });
       })
