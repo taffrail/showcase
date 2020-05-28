@@ -4,6 +4,7 @@
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
+@import '../../node_modules/@fortawesome/fontawesome-pro/scss/brands';
 
 @import 'loading';
 
@@ -262,7 +263,7 @@ html, body {
 
     section {
       color: $gray-500;
-      font-size: .66rem;
+      font-size: 11px;
       text-align: right;
 
       a {

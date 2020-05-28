@@ -537,6 +537,7 @@ export default class showcase {
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
+    $(".reset").toggle(this.api._answersExist);
     $(".assumptions-container").toggle(this.api._answersExist);
     // only show expand button if there's grouped assumptions besides "ungrouped"
     $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
