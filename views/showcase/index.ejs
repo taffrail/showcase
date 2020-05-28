@@ -56,7 +56,7 @@
 						<div class="d-flex justify-content-between">
 							<ul class="nav nav-tabs" id="pills-tab" role="tablist">
 								<li class="nav-item" role="presentation">
-									<a class="nav-link active" id="pills-vars-tab" data-toggle="pill" href="#pills-vars" role="tab" aria-controls="pills-vars" aria-selected="true">Assumptions</a>
+									<a class="nav-link active" id="pills-assumptions-tab" data-toggle="pill" href="#pills-assumptions" role="tab" aria-controls="pills-assumptions" aria-selected="true">Assumptions</a>
 								</li>
 								<li class="nav-item" role="presentation">
 									<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="false">Answers</a>
@@ -65,14 +65,14 @@
 									<a class="nav-link" id="pills-var-tab" data-toggle="pill" href="#pills-var" role="tab" aria-controls="pills-var" aria-selected="false">Data</a>
 								</li>
 							</ul>
-							<ul class="nav nav-tabs" role="tablist">
+							<ul class="nav nav-tabs assumption-expander" role="tablist" style="display:none;">
 								<li class="nav-item" role="presentation">
-									<a class="nav-link" href="#" data-expand="assumptions" data-collapsed="true"><i class="far fa-plus-square"></i></a>
+									<a class="nav-link" href="#" data-expand="assumptions" data-collapsed="true" data-toggle="tooltip" title="Expand/collapse assumptions"><i class="far fa-plus-square"></i></a>
 								</li>
 							</ul>
 						</div>
 						<div class="tab-content rounded-bottom rounded-right" id="pills-tabContent">
-							<div class="tab-pane fade show active" id="pills-vars" role="tabpanel" aria-labelledby="pills-vars-tab">
+							<div class="tab-pane fade show active" id="pills-assumptions" role="tabpanel" aria-labelledby="pills-assumptions-tab">
 								<div class="assumptions"></div>
 							</div>
 							<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">

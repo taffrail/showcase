@@ -65,7 +65,7 @@ export default class showcase {
     this.handleClickExpandControls();
     this.handleCopyLink();
     // this.handleResizeChart();
-    // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
 
   /**
@@ -183,8 +183,11 @@ export default class showcase {
       const $this = $(e.currentTarget);
       const { expand } = $this.data();
 
+      $this.tooltip("hide");
+
       let $collapsibles;
       if (expand == "assumptions") {
+        $("#pills-assumptions-tab").click();
         $collapsibles = $(".assumptions-list.collapse");
       } else if (expand == "advice") {
         $collapsibles = $(".advice-list").find(".collapse");
@@ -286,7 +289,7 @@ export default class showcase {
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
     const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
-    const formData = _.assign({}, currFormData, qs.parse(newFormData));
+    const formData = _.assign({ include: ["filteredVars"] }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
     const loadingId = Loading.show($(".row .advice"));
 
@@ -534,6 +537,8 @@ export default class showcase {
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
     $(".assumptions-container").toggle(this.api._answersExist);
+    // only show expand button if there's grouped assumptions besides "ungrouped"
+    $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
     // render
     const str = this.TEMPLATES["QuestionsAnswers"](this.api);
