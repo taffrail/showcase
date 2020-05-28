@@ -1,10 +1,10 @@
 /* eslint-disable new-cap */
 import _ from "lodash";
 import { createBrowserHistory } from "history";
+import copy from "clipboard-copy";
 import Inputmask from "inputmask";
 import Handlebars from "handlebars";
 import Loading from "./loading";
-import numeral from "numeral";
 import qs from "querystring";
 import store from "store";
 
@@ -14,8 +14,9 @@ export default class showcase {
 
     // handlebars helpers
     Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
-      return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+      return (arg1=== arg2) ? options.fn(this) : options.inverse(this);
     });
+
     Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
       return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
     });
@@ -61,15 +62,10 @@ export default class showcase {
     this.handleClickAssumption();
     this.handleCollapseAssumptionGroup();
     this.listenForUrlChanges();
-    this.handleResizeChart();
-    this.handleClickToggleMode();
-    // $("body").tooltip({ selector: "[data-toggle=tooltip]" });
-    this.toggleViewMode();
-
-    // advice builder pointers
-    this.handleClicksToAdviceBuilder();
-    this.handleClickOpenDebug();
-    this.handleClickOpenClassic();
+    this.handleClickExpandControls();
+    this.handleCopyLink();
+    // this.handleResizeChart();
+    $("body").tooltip({ selector: "[data-toggle=tooltip]" });
   }
 
   /**
@@ -115,10 +111,8 @@ export default class showcase {
       this._loadApi(data).then(()=> {
         // update content
         this.updatePanes();
-        // pull querystring from API URL (which has latest passed data)
-        const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
         // save state
-        this.history.push(`${this.baseUrl}/?${queryString}`, this.api);
+        this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
       });
 
       return false; // don't submit form
@@ -167,90 +161,92 @@ export default class showcase {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
     });
+
     $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
-    });
-  }
-
-  handleClicksToAdviceBuilder() {
-    $("body").on("click", "[data-advicebuilder]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const { ruleId } = $this.data();
-      const href = $this.prop("href");
-
-      // get RuleSetId
-      this._loadApiRule(ruleId).then(api => {
-        const { data: { ruleSetId } } = api;
-        window.open(href.replace("::ruleSetId::", ruleSetId));
-      });
-    });
-  }
-
-  // #region dropdown menu
-  /**
-   * Dropdown "Debug" menu click handler. Necessary to append current
-   * querystring to new URL before navigating.
-   */
-  handleClickOpenDebug() {
-    this.$advice.on("click", "a[data-action=openDebugWithQuerystring]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
-      window.open(`${href}?${queryString}`);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
     });
   }
 
   /**
-   * Dropdown "Classic" menu click handler. Necessary to append current
-   * querystring to new URL before navigating.
+   * Handle expando/collapso links on sidebar
    */
-  handleClickOpenClassic() {
-    this.$advice.on("click", "a[data-action=openClassicWithQuerystring]", e => {
+  handleClickExpandControls() {
+    $("main").on("click", "a[data-expand]", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
-      const href = $this.prop("href");
-      const queryString = this.getQuerystringFromUrl(this.api.adviceset.apiUrl);
-      window.open(`${href}?${queryString}`);
-    });
-  }
+      const { expand } = $this.data();
 
-  /**
-   * Toggle debug mode / variable visibility
-   */
-  handleClickToggleMode() {
-    $(".toggle-mode").on("click", "[data-action=toggle-mode]", e => {
-      e.preventDefault();
-      const isDevMode = store.get("showcase-dev-mode");
-      let newDevMode;
-      if (isDevMode === true) {
-        newDevMode = false;
-      } else if (isDevMode === false) {
-        newDevMode = true;
-      } else {
-        newDevMode = false;
+      $this.tooltip("hide");
+
+      let $collapsibles;
+      if (expand == "assumptions") {
+        $("#pills-assumptions-tab").click();
+        $collapsibles = $(".assumptions-list.collapse");
+      } else if (expand == "advice") {
+        $collapsibles = $(".advice-list").find(".collapse");
       }
 
-      store.set("showcase-dev-mode", newDevMode);
-      this.toggleViewMode(newDevMode);
+      // open or close?
+      const { collapsed = true } = $this.data();
+      const collapse = collapsed ? "show" : "hide";
+      $collapsibles
+        .collapse(collapse)
+        .on("shown.bs.collapse", e => { this._toggleCollapseLink($this, true) })
+        .on("hidden.bs.collapse", e => { this._toggleCollapseLink($this, false) });
+
+      this._toggleCollapseLink($this, collapse == "show");
     });
   }
-  // #endregion
 
   /**
-   * Toggle debug mode / variable visibility and save it to localstore
-   * @param {boolean=} isDevMode Optional bool to switch mode
+   * Handle click to generate and copy a short URL
    */
-  toggleViewMode(isDevMode = store.get("showcase-is-dev-mode")) {
-    if (isDevMode) {
-      $(".variables-container").fadeIn("fast");
-    } else {
-      $(".variables-container").fadeOut("fast");
-    }
+  handleCopyLink() {
+    $("body").on("click", "a.copy-url", e => {
+      e.preventDefault();
+      const linkGenId = _.uniqueId("link-gen");
+      const url = window.location.href;
+
+      // we can't shorten localhost links
+      if (url.includes("localhost")) {
+        return copy(url).then(() => {
+          this.showToast(linkGenId, {
+            title: "Just Good Advice",
+            message: "Link copied!"
+          });
+        });
+      }
+
+      // hit the shorten API
+      const { display } = this.api;
+      const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
+
+      $.post("/s/api/shorten", {
+        long_url: url,
+        title: `${this.api.adviceset.title} - ${title}`
+      }).then(bitly => {
+        // copy to clipboard
+        return copy(bitly.link).then(() => {
+          this.showToast(linkGenId, {
+            title: "Just Good Advice",
+            message: "Link copied!"
+          });
+        });
+      }).catch(e => {
+        console.error(e);
+        this.showToast(linkGenId, {
+          title: "Oops",
+          message: "Link copying error."
+        });
+      })
+    });
   }
 
   /**
@@ -272,9 +268,7 @@ export default class showcase {
   handleResizeChart() {
     let timer;
     $(window).resize(() => {
-      if (this.api.display.type == "ADVICE" &&
-      this.api.display.attachment &&
-      this.api.display.attachment.contentType == "application/vnd+interactive.chart+html") {
+      if (this.api.display.type == "ADVICE") {
         if (timer) {
           window.clearTimeout(timer);
         }
@@ -294,10 +288,10 @@ export default class showcase {
    */
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
-    const currFormData = this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true);
-    const formData = _.assign({}, currFormData, qs.parse(newFormData));
+    const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
+    const formData = _.assign({ include: ["filteredVars"] }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
-    const loadingId = Loading.show($(".row.no-gutters .advice"));
+    const loadingId = Loading.show($(".row .advice"));
 
     return $.ajax({
       url: apiUrlWithoutQuerystring,
@@ -323,63 +317,6 @@ export default class showcase {
       alert(err);
     });
   }
-
-  /**
-   * Helper API call to get parent ruleSetId for a given ruleId.
-   * This is only necessary because we want the showcase to deep link back
-   * to the Advice Builder app.
-   * @param {string} ruleId RuleId
-   * @returns Promise<jqXHR>
-   */
-  _loadApiRule(ruleId) {
-    if (!ruleId) { console.error("RuleId required."); }
-
-    // get from cache
-    if (this.api.rulesetMap && this.api.rulesetMap[ruleId]) {
-      return Promise.resolve({
-        data: {
-          ruleSetId: this.api.rulesetMap[ruleId]
-        }
-      });
-    }
-
-    const loadingId = Loading.show($("body"));
-    return $.ajax({
-      url: `https://app.justgoodadvice.com/api/rule/${ruleId}/node/${ruleId}`,
-      type: "GET",
-      dataType: "json",
-      headers: {
-        "Accept": "application/json; chartset=utf-8",
-        "Authorization": `Bearer ${this.config.api_key}`
-      }
-    }).then(api => {
-      Loading.hide(loadingId);
-      // cache it
-      this.api.rulesetMap = this.api.rulesetMap || {};
-      this.api.rulesetMap[ruleId] = api.data.ruleSetId;
-      return api;
-    }).catch((jqXHR) => {
-      Loading.hide(loadingId);
-      let err;
-      try {
-        err = jqXHR.responseJSON.error.message;
-      } catch (e){
-        err = jqXHR;
-      }
-      alert(err);
-    });
-  }
-
-  /**
-	 * Util to pick the querystring from a URL
-   * @param {string} url
-   * @param {boolean=} parse Optional bool to parse the URL into an object.
-   * @returns String or Object, depending on `parse`
-	 */
-  getQuerystringFromUrl(url, parse = false) {
-    const str = url.substring(url.indexOf("?") + 1);
-    return (parse) ? qs.parse(str) : str;
-  }
   // #endregion
 
   // #region templating
@@ -393,9 +330,17 @@ export default class showcase {
     this._setCurrentIdx();
 
     // render
+    $(".center-col").removeClass("transition-hide");
+    $(".right-col").removeClass("centered");
+
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
     } else {
+      // if this is the LAST advice, hide center column and move advice list into center focus
+      if (this.api.display._isLast) {
+        $(".center-col").addClass("transition-hide");
+        $(".right-col").addClass("centered");
+      }
       this._updateForAdvice();
     }
 
@@ -407,15 +352,18 @@ export default class showcase {
    * Template update for INPUT_REQUEST
    */
   _updateForInputRequest() {
-    const { display: { form: { fieldType } } } = this.api;
-    this.api.display.form.fieldType_isRadio = fieldType == "Radio";
-    this.api.display.form.fieldType_isBoolean = fieldType == "Boolean";
-    this.api.display.form.fieldType_isFreetext = fieldType == "Freetext";
-    this.api.display.form.fieldType_isMultipleChoice = fieldType == "MultipleChoice";
-    this.api.display.form.fieldType_isNumber = fieldType == "Number";
-    this.api.display.form.fieldType_isPercent = fieldType == "Percent";
-    this.api.display.form.fieldType_isSelect = fieldType == "Select";
-
+    const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != "\"null\"";
+    // console.log(isLastAndAnswered)
+    if (isLastAndAnswered) {
+      // this.api.display = Object.assign(this.api.display, {
+      //   question: "Advice Engine Response",
+      //   explanation: "This rule has been evaluated, see variable data for export.",
+      //   form: {
+      //     fieldType: "NONE",
+      //     result: this.api.display.value
+      //   }
+      // });
+    }
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
     this.$advice.html(str);
@@ -445,55 +393,34 @@ export default class showcase {
     // determine if this is an interactive chart attachment
     const { attachment } = this.api.display;
     let isChart = false;
+    let chartId;
     if (attachment) {
       isChart = attachment.contentType == "application/vnd+interactive.chart+html";
       // handlebars helper
       attachment._isInteractiveChart = isChart;
+      chartId = attachment.id;
     }
 
     // render
     const str = this.TEMPLATES["Advice"](this.api);
     this.$advice.html(str);
 
-    // setup the chart...
-    if (isChart) {
-      // parent container
-      const containerW = this.$advice.width();
-
-      // specific data chart is expecting
-      // TODO: clean this up in the chart code
-      window.jga.config = {
-        adviceSetId: this.api.adviceset.id,
-        bgColor: "#fff",
-        colors: ["#605F5E", "#6D256C"],
-        width: containerW,
-        height: 400
-      }
-      window.jga.advice = {
-        session: Object.assign({
-          ruleSetId: this.api.adviceset._id,
-          ruleId: this.api.display.ruleId,
-        }, this.getQuerystringFromUrl(this.api.adviceset.apiUrl, true))
-      }
-
-      // set chart container size
-      $(".advice-chart--interactive").css({
-        height: 400,
-        width: containerW
-      });
-    }
+    this.setupChart(isChart, chartId);
 
     // unhighlight active assumption/question
     this._setAssumptionActive("advice");
   }
 
+  /**
+   * Map data from API for this showcase's handlebars templates
+   */
   mapData() {
-    // setup "display" card — either question or advice
+    // setup "display" card — either question or "advice".
+    // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
-      a._count = i + 1;
       return a;
     });
 
@@ -508,55 +435,55 @@ export default class showcase {
       return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
     });
 
+    // go through each assumption group and set open/close state
     Object.keys(this.api.assumptions).forEach((key, idx) => {
       if (key == ASSUMPTIONS_UNGROUPED) { return; }
 
-      const arr = this.api.assumptions[key];
-
       // add `_isOpen` flag to each item
+      const arr = this.api.assumptions[key];
       this.api.assumptions[key] = arr.map(a => {
         a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
         return a;
       });
     });
 
-    // remove last item from list of advice IF it's the same as the `display`
-    let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
-    if (this.api.display.type == "ADVICE" && this.api.display.id == _.last(allAdvice).id) {
-      allAdvice = allAdvice.slice(0, -1);
+    // if the `display` is the LAST advice node, set a flag
+    const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+    const lastAdvice = _.last(allAdvice);
+    if (lastAdvice && this.api.display.id == lastAdvice.id) {
+      // allAdvice = allAdvice.slice(0, -1);
+      lastAdvice._isLast = true;
     }
 
     // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED; });
-    // massage data for handlebars templating
+    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
+    // add icon
     Object.keys(this.api.recommendations).forEach((key, idx) => {
-      let arr = this.api.recommendations[key];
-      let groupDisplayName = "Recommendations";
-      try {
-        groupDisplayName = _.first(arr).tagGroup.name;
-      // eslint-disable-next-line no-empty
-      } catch (e) {}
-
       // add icons
-      arr = arr.map(a => {
+      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
-        let icon = "fad fa-thumbs-up";
+        // let icon = "fad fa-thumbs-up";
+        let icon = "fad fa-dot-circle";
         // support To Do/Completed checklist icons
-        if (groupDisplayName.includes("To Do")) {
-          icon = "far fa-circle";
-        } else if (groupDisplayName.includes("Completed") || groupDisplayName.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
+        if (key.includes("To Do")) {
+          icon = "fad fa-circle";
+        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
+          icon = "fad fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
+
+        // determine if this is an interactive chart attachment
+        const { attachment } = a;
+        let isChart = false;
+        if (attachment) {
+          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+          // handlebars helper
+          attachment._isInteractiveChart = isChart;
+        }
+
         return a;
       });
-
-      // if we have already grouped by name, don't continue
-      if (key == groupDisplayName) { return; }
-
-      this.api.recommendations[groupDisplayName] = arr;
-      delete this.api.recommendations[key];
     });
   }
 
@@ -610,7 +537,10 @@ export default class showcase {
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
+    $(".reset").toggle(this.api._answersExist);
     $(".assumptions-container").toggle(this.api._answersExist);
+    // only show expand button if there's grouped assumptions besides "ungrouped"
+    $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
     // render
     const str = this.TEMPLATES["QuestionsAnswers"](this.api);
@@ -629,6 +559,8 @@ export default class showcase {
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
     $(".list-all-recommendations").html(str);
+
+    this._setupChartsAll();
   }
 
   /**
@@ -648,13 +580,6 @@ export default class showcase {
 	 * Update variables list
 	 */
   updateVariablesList(){
-    // add formatted value to vars
-    this.api.variables = this.api.variables.map(v => {
-      if (v.format) {
-        v.valueF = numeral(v.value).format(v.format);
-      }
-      return v;
-    });
     // render
     const str = this.TEMPLATES["Variables"](this.api);
     $(".variables").html(str);
@@ -765,6 +690,97 @@ export default class showcase {
    */
   _findFormInput($form, types = "input") {
     return $form.find(types).filter(":not(:radio):not(:hidden)");
+  }
+
+  /**
+   * Sets up chart
+   * @param {boolean} isChart
+   */
+  setupChart(isChart, chartId) {
+    // setup the chart...
+    if (isChart) {
+      const $chart = $(`#${chartId}`);
+      const { src } = $chart.data();
+      // parent container
+      const containerW = $chart.parent().width();
+      const $iframe = $chart.find("iframe");
+      // set chart container size
+      $(`#${chartId}`).css({
+        height: 400,
+        width: containerW
+      });
+
+      $iframe.on("load", e => {
+        // specific data chart is expecting
+        // TODO: clean this up in the chart code
+        window.jga.config = {
+          adviceSetId: this.api.adviceset.id,
+          bgColor: "#fff",
+          colors: ["#605F5E", "#6D256C"],
+          width: containerW,
+          height: 400
+        }
+        window.jga.advice = {
+          session: Object.assign({
+            ruleSetId: this.api.adviceset._id,
+            ruleId: this.api.display.ruleId,
+          }, qs.parse(this.api.adviceset._apiUrlQuery))
+        }
+        const data = {
+          advice: window.jga.advice,
+          config: window.jga.config
+        }
+        $iframe.get(0).contentWindow.postMessage(data, "*");
+      });
+      $iframe.prop("src", src);
+    }
+  }
+
+  /**
+   * Sets up all charts
+   */
+  _setupChartsAll() {
+    // quickly find all charts and set them up
+    _.flatMap(this.api.recommendations).filter(a => {
+      return a.attachment && a.attachment._isInteractiveChart;
+    }).map(a => {
+      return a.attachment;
+    }).forEach(chart => {
+      setTimeout(() => {
+        this.setupChart(true, chart.id);
+      }, 1000);
+    });
+  }
+
+  /**
+   *
+   * @param {jquery} $el Click target
+   * @param {boolean} shown Open or closed?
+   */
+  _toggleCollapseLink($el, shown) {
+    $el.find("span").text( shown ? "Collapse" : "Expand");
+    $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
+    $el.data("collapsed", !shown);
+  }
+
+  /**
+   *
+   * @param {string=} id Optional ID
+   * @param {object} opts Toast options
+   */
+  showToast(id = _.uniqueId("toast"), opts = {}) {
+    if (!opts.id) {
+      opts.id = id;
+    }
+    const toast = Handlebars.compile($("#tmpl_toast").html())(opts);
+    // insert into DOM
+    $("#toastContainer").append(toast);
+    // init Toast component
+    $(`#${id}`).toast({
+      delay: 2000
+    }).on("hidden.bs.toast", function() {
+      $(this).remove(); // remove it when it's been hidden
+    }).toast("show"); // finally show it
   }
   // #endregion
 }

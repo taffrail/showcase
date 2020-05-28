@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const request = require("request");
 const qs = require("querystring");
+const { BitlyClient } = require("bitly");
+const bitly = new BitlyClient(process.env.BITLY_TOKEN, {
+  domain: "advice.link"
+});
 
 router.get("/:adviceSetId", (req, res, next) => {
   const { adviceSetId } = req.params;
@@ -15,6 +19,8 @@ router.get("/:adviceSetId", (req, res, next) => {
   });
   const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
 
+  console.warn(apiUrl);
+
   request.get(apiUrl, {
     headers: {
       "Accept": "application/json; charset=utf-8",
@@ -24,6 +30,7 @@ router.get("/:adviceSetId", (req, res, next) => {
     if (err) { return next(err); }
 
     if (resp.statusCode > 200) {
+      console.warn(resp);
       return next(new Error(resp.statusMessage));
     }
 
@@ -31,7 +38,7 @@ router.get("/:adviceSetId", (req, res, next) => {
       const api = JSON.parse(body);
       if (api.error) { return next(new Error(api.error.message)); }
 
-      return res.render("showcase/advice", {
+      return res.render("showcase/index", {
         api: api
       });
     } else {
@@ -39,6 +46,38 @@ router.get("/:adviceSetId", (req, res, next) => {
       return res.status(resp.statusCode).send(body);
     }
   });
+});
+
+/**
+ * Shorten a long URL
+ */
+router.post("/api/shorten_only", (req, res, next) => {
+  bitly
+    .shorten(req.body.long_url)
+    .then((result) => {
+      return res.json(result);
+    })
+    .catch((error) => {
+      return res.status(500).json(error);
+    });
+});
+
+/**
+ * Shorten AND add title+tags to a URL
+ */
+router.post("/api/shorten", (req, res, next) => {
+  bitly
+    .bitlyRequest("bitlinks", {
+      long_url: req.body.long_url,
+      title: req.body.title,
+      tags: ["showcase"],
+    })
+    .then((result) => {
+      return res.json(result);
+    })
+    .catch((error) => {
+      return res.status(500).json(error);
+    });
 });
 
 module.exports = router;

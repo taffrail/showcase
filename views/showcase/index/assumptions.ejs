@@ -1,5 +1,5 @@
 <script id="tmpl_assumptionsList" type="text/x-handlebars-template">
-	<p class="p-2 mb-1">The assumptions below are being used to provide the personalized recommendations shown to the right. <br><strong><i class="far fa-hand-pointer"></i> Press an assumption to update your data.</strong></p>
+	<p class="p-2 mb-1">Change the assumptions below and your personalized advice will update immediately.</p>
 	{{#if _answersExist}}
 		<ol class="list-unstyled assumptions-list">
 			{{#each assumptions.ungrouped}}
@@ -30,7 +30,7 @@
 
 		{{#each assumptions}}
 			{{#ifNotEquals @key "ungrouped"}}
-				<div class="assumption-group px-2"><a data-toggle="collapse" href="#collapse_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_{{@index}}">{{@key}}</a> <span class="text-muted">({{this.length}})</span></div>
+				<div class="assumption-group px-2"><a data-toggle="collapse" href="#collapse_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_{{@index}}"><i class="fad fa-chevron-{{#if this.0._isOpen}}down{{else}}right{{/if}}"></i> {{@key}}</a> <span class="text-muted">({{this.length}})</span></div>
 				<ol class="list-unstyled assumptions-list collapse {{#if this.0._isOpen}}show{{/if}}" id="collapse_{{@index}}">
 					{{#each this}}
 						<li data-id="{{id}}" data-group-id="{{tagGroup.id}}" data-idx="{{idx}}" class="qa position-relative">

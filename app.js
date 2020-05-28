@@ -4,6 +4,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const sassMiddleware = require("node-sass-middleware");
+const sslRedirect = require("heroku-ssl-redirect");
 
 const indexRouter = require("./routes/index");
 const showcaseRouter = require("./routes/showcase");
@@ -31,11 +32,18 @@ app.use((req, res, next) => {
   res.locals.WEB_HOST = process.env.WEB_HOST;
   res.locals.API_HOST = process.env.API_HOST;
   res.locals.API_KEY = process.env.API_KEY;
+  res.locals.GTAG_ID = process.env.GTAG_ID;
+  res.locals.INTERCOM_APP_ID = process.env.INTERCOM_APP_ID;
   next();
 });
 
 app.use("/", indexRouter);
 app.use("/s", showcaseRouter);
+
+// redirect all requests to HTTPS
+if (!process.env.WEB_HOST.includes("localhost")) {
+  app.use(sslRedirect());
+}
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

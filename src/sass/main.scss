@@ -4,8 +4,29 @@
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
+@import '../../node_modules/@fortawesome/fontawesome-pro/scss/brands';
 
 @import 'loading';
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#toastWrapper {
+  min-height: 200px;
+  min-width: 320px;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 9999999;
+
+  #toastContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
 
 .showcase {
   &.showcase--advice {
@@ -24,6 +45,12 @@
     .bg-stripes {
       background: $primary url('/img/slashes.png') right center no-repeat;
       background-size: 70%;
+    }
+
+    // wrapper
+    main.container {
+      margin-bottom: -5rem;
+      min-height: 100%;
     }
 
     .advice-set-details {
@@ -54,7 +81,6 @@
     .advice {
       &.rounded {
         box-shadow: $dropdown-box-shadow;
-        margin-bottom: 2rem;
       }
 
       .icon-row {
@@ -85,28 +111,44 @@
       }
     }
 
-    .toggle-mode {
-      color: $gray-500;
-      font-size: .75rem;
-      margin-top: .5rem;
-      text-align: right;
+    .push-down {
+      margin-top: 34px; // height of tabs
+    }
 
-      span {
-        display: none;
-      }
+    .center-col {
+      transition:.3s;
 
-      a:hover {
-        text-decoration: none;
-
-        span {
-          display: inline;
+      &.transition-hide {
+        flex: 0 0 0%;
+        max-width: 0%;
+        padding: 0;
+        transition: .2s;
+        > div {
+          display: none;
         }
       }
     }
 
-    .advice-list {
-      li:not(:last-child) {
+    .centered {
+      .list-all-recommendations > div {
+        box-shadow: $dropdown-box-shadow;
+      }
+    }
+
+    .list-all-recommendations {
+      h6 {
         margin-bottom: .75rem;
+      }
+      > div {
+        margin-bottom: 1rem;
+      }
+    }
+
+    .advice-list {
+      margin-bottom: 0;
+
+      li:not(:last-child) {
+        margin-bottom: .5rem;
       }
     }
 
@@ -116,8 +158,6 @@
 
     .variables-container {
       font-size: 11px;
-      margin-left: 1px;
-      margin-top: 2.5rem;
 
       .variables {
         font-family: $font-family-monospace;
@@ -177,7 +217,7 @@
           border-radius: $border-radius;
           color: $gray-600;
           margin-bottom: .25rem;
-          padding: .33rem;
+          padding: .15rem;
 
           &.active,
           &:hover {
@@ -206,14 +246,24 @@
     }
   }
 
+  .push {
+    height: 5rem;
+  }
+
   footer {
+    &.footer {
+      height: 5rem;
+      line-height: 1rem;
+      background: $gray-300;
+    }
+
     hr {
       border-top-color: $gray-400;
     }
 
     section {
       color: $gray-500;
-      font-size: .66rem;
+      font-size: 11px;
       text-align: right;
 
       a {

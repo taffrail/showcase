@@ -14,7 +14,7 @@
 	</p>
 	{{#if display.attachment}}
 		{{#if display.attachment._isInteractiveChart}}
-			<section class="advice-attachment advice-chart--interactive" id="{{display.attachment.id}}">
+			<section class="advice-attachment advice-chart--interactive" id="{{display.attachment.id}}" data-src="{{display.attachment.url}}">
 				<scr{{!}}ipt>
 					var chartFrame = document.createElement('iframe');
 					chartFrame.frameBorder = '0';
@@ -24,14 +24,6 @@
 					chartFrame.width = '100%';
 					chartFrame.height = '100%';
 					document.getElementById('{{display.attachment.id}}').appendChild(chartFrame);
-					chartFrame.src = '{{display.attachment.url}}';
-					chartFrame.onload = function(){
-						var data = {
-							advice: window.jga.advice,
-							config: window.jga.config
-						}
-						chartFrame.contentWindow.postMessage(data, "*");
-					}
 				</scr{{!}}ipt>
 			</section>
 		{{else}}
