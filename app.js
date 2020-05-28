@@ -33,6 +33,7 @@ app.use((req, res, next) => {
   res.locals.API_HOST = process.env.API_HOST;
   res.locals.API_KEY = process.env.API_KEY;
   res.locals.GTAG_ID = process.env.GTAG_ID;
+  res.locals.INTERCOM_APP_ID = process.env.INTERCOM_APP_ID;
   next();
 });
 
