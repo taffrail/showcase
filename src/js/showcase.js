@@ -462,12 +462,13 @@ export default class showcase {
       // add icons
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
-        let icon = "fad fa-thumbs-up";
+        // let icon = "fad fa-thumbs-up";
+        let icon = "fad fa-dot-circle";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
-          icon = "far fa-circle";
+          icon = "fad fa-circle";
         } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
+          icon = "fad fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
