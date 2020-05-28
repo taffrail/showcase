@@ -32,6 +32,7 @@ app.use((req, res, next) => {
   res.locals.WEB_HOST = process.env.WEB_HOST;
   res.locals.API_HOST = process.env.API_HOST;
   res.locals.API_KEY = process.env.API_KEY;
+  res.locals.GTAG_ID = process.env.GTAG_ID;
   next();
 });
 

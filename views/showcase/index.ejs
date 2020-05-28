@@ -24,6 +24,17 @@
 		<meta name="msapplication-TileColor" content="#ffffff">
 		<meta name="theme-color" content="#ffffff">
 		<script>window.jga=window.jga||{};window.jga.config={web_host:"<%= locals.WEB_HOST %>",api_host:"<%= locals.API_HOST %>",api_key:"<%= locals.API_KEY %>"};</script>
+		<% if (locals.GTAG_ID) { %>
+			<!-- Global site tag (gtag.js) - Google Analytics -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=<%= GTAG_ID %>"></script>
+			<script>
+				window.dataLayer = window.dataLayer || [];
+				function gtag(){dataLayer.push(arguments);}
+				gtag('js', new Date());
+
+				gtag('config', '<%= GTAG_ID %>');
+			</script>
+		<% } %>
   </head>
   <body class="showcase showcase--advice">
 
