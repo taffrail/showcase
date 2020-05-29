@@ -463,7 +463,7 @@ export default class showcase {
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
         // let icon = "fad fa-thumbs-up";
-        let icon = "fad fa-dot-circle";
+        let icon = "fad fa-arrow-circle-right";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
           icon = "fad fa-circle";
