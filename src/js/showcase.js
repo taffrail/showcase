@@ -289,7 +289,7 @@ export default class showcase {
   _loadApi(newFormData){
     // pull querystring from API URL (which has latest passed data)
     const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
-    const formData = _.assign({ include: ["filteredVars"] }, currFormData, qs.parse(newFormData));
+    const formData = _.assign({ include: ["filteredVars"], showcase: true }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
     const loadingId = Loading.show($(".row .advice"));
 

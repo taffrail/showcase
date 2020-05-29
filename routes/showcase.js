@@ -15,7 +15,7 @@ router.get("/:adviceSetId", (req, res, next) => {
 
   // advice
   const qrystr = Object.assign({}, req.query, {
-    include: ["filteredVars"]
+    include: ["filteredVars"], showcase: true
   });
   const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
 
