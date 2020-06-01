@@ -152,6 +152,14 @@ html, body {
       }
     }
 
+    .advice-attachment {
+      margin-right: 0;
+
+      &.advice-chart--interactive {
+        margin-left: -2.5rem;
+      }
+    }
+
     .advice-container {
       padding: .5rem;
     }
