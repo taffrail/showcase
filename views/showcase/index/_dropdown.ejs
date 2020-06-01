@@ -8,6 +8,7 @@
 		<a href="#" class="dropdown-item copy-url">
 			<i class="fad fa-link"></i> Copy Link
 		</a>
+		<div class="dropdown-divider"></div>
 		{{#if display}}
 			<div class="dropdown-header">ADVICE BUILDER</div>
 			<a href="https://app.justgoodadvice.com/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" class="dropdown-item" target="_blank">
@@ -16,15 +17,17 @@
 			<a href="https://app.justgoodadvice.com/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug?{{adviceset._apiUrlQuery}}" class="dropdown-item" target="_blank">
 				<i class="fad fa-debug"></i> Debug
 			</a>
-			<a href="https://app.justgoodadvice.com/_/advice/widget/{{adviceset.id}}/_/01111J/?{{adviceset._apiUrlQuery}}" class="dropdown-item"  target="_blank">
-				<i class="fad fa-comments"></i> Classic
-			</a>
 			<div class="dropdown-divider"></div>
 		{{else}}
-			<div class="dropdown-divider"></div>
+			<a href="https://app.justgoodadvice.com/advicesets/{{../adviceset._id}}/rules/{{this.0.ruleId}}/debug?{{../adviceset._apiUrlQuery}}" class="dropdown-item" target="_blank">
+				<i class="fad fa-debug"></i> Debug
+			</a>
 			<a class="dropdown-item" href="#" data-expand="advice"><i class="fad fa-plus-square"></i> <span>Expand</span> Advice</a>
 		{{/if}}
 		<div class="dropdown-header">DEVELOPERS</div>
+		<a href="https://app.justgoodadvice.com/_/advice/widget/{{adviceset.id}}/_/01111J/?{{adviceset._apiUrlQuery}}" class="dropdown-item"  target="_blank">
+			<i class="fad fa-comments"></i> Classic
+		</a>
 		<a href="{{adviceset.apiUrl}}" class="dropdown-item" target="_blank">
 			<i class="fad fa-code"></i> Open API
 		</a>
