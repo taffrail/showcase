@@ -21,13 +21,12 @@
 									</a>
 								</span>
 								{{#if summary}}
-									<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">{{headline}}</a>
-									<div class="collapse" id="collapse_{{id}}">
+									<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">{{headline}} {{#if attachment}}<i class="fad fa-image"></i>{{/if}}</a>
+									<div class="collapse {{#if attachment}}show{{/if}}" id="collapse_{{id}}">
 										<p class="text-muted"><small>{{summary}}</small></p>
-
 										{{#if attachment}}
 											{{#if attachment._isInteractiveChart}}
-												<section class="advice-attachment advice-chart--interactive" id="{{attachment.id}}" data-src="{{attachment.url}}">
+												<section class="advice-attachment advice-chart--interactive" id="{{id}}_{{@index}}" data-id="{{attachment.id}}" data-src="{{attachment.url}}">
 													<scr{{!}}ipt>
 														var chartFrame = document.createElement('iframe');
 														chartFrame.frameBorder = '0';
@@ -36,7 +35,7 @@
 														chartFrame.allowFullscreen = 'true';
 														chartFrame.width = '100%';
 														chartFrame.height = '100%';
-														document.getElementById('{{attachment.id}}').appendChild(chartFrame);
+														document.getElementById('{{id}}_{{@index}}').appendChild(chartFrame);
 													</scr{{!}}ipt>
 												</section>
 											{{else}}

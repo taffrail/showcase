@@ -75,6 +75,7 @@ export default class showcase {
     this.mapData();
     this.updateMainPane();
     this.updateAssumptionsList();
+    this.updateRecommendationsList();
     this.updateVariablesList();
   }
 
@@ -341,10 +342,9 @@ export default class showcase {
         $(".center-col").addClass("transition-hide");
         $(".right-col").addClass("centered");
       }
-      this._updateForAdvice();
+      // unused center pane
+      // this._updateForAdvice();
     }
-
-    this.updateRecommendationsList();
   }
 
   // #region templating utils
@@ -390,22 +390,9 @@ export default class showcase {
       });
     }
 
-    // determine if this is an interactive chart attachment
-    const { attachment } = this.api.display;
-    let isChart = false;
-    let chartId;
-    if (attachment) {
-      isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-      // handlebars helper
-      attachment._isInteractiveChart = isChart;
-      chartId = attachment.id;
-    }
-
     // render
     const str = this.TEMPLATES["Advice"](this.api);
     this.$advice.html(str);
-
-    this.setupChart(isChart, chartId);
 
     // unhighlight active assumption/question
     this._setAssumptionActive("advice");
@@ -699,13 +686,13 @@ export default class showcase {
   setupChart(isChart, chartId) {
     // setup the chart...
     if (isChart) {
-      const $chart = $(`#${chartId}`);
+      const $chart = $(`[data-id=${chartId}]`);
       const { src } = $chart.data();
       // parent container
       const containerW = $chart.parent().width();
       const $iframe = $chart.find("iframe");
       // set chart container size
-      $(`#${chartId}`).css({
+      $chart.css({
         height: 400,
         width: containerW
       });
@@ -748,7 +735,7 @@ export default class showcase {
     }).forEach(chart => {
       setTimeout(() => {
         this.setupChart(true, chart.id);
-      }, 1000);
+      }, 500);
     });
   }
 
