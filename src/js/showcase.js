@@ -5,6 +5,7 @@ import copy from "clipboard-copy";
 import Inputmask from "inputmask";
 import Handlebars from "handlebars";
 import Loading from "./loading";
+import Mousetrap from "mousetrap";
 import qs from "querystring";
 import store from "store";
 
@@ -66,6 +67,25 @@ export default class showcase {
     this.handleCopyLink();
     // this.handleResizeChart();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+
+    // keyboard shortcuts
+
+    // expand/collapse advice
+    Mousetrap.bind("a", () => {
+      $("a[data-expand=advice]").click();
+    });
+    // expand/collapse assumptions
+    Mousetrap.bind("s", () => {
+      $("a[data-expand=assumptions]").click();
+    });
+    // show toast with keyboard shortcut map
+    Mousetrap.bind("?", () => {
+      this.showToast(undefined,{
+        title: "Keyboard Shortcuts",
+        message: "Press <code>a</code> for advice.<br>Press <code>s</code> for assumptions.",
+        delay: 5000
+      });
+    });
   }
 
   /**
@@ -764,7 +784,7 @@ export default class showcase {
     $("#toastContainer").append(toast);
     // init Toast component
     $(`#${id}`).toast({
-      delay: 2000
+      delay: opts.delay || 2000
     }).on("hidden.bs.toast", function() {
       $(this).remove(); // remove it when it's been hidden
     }).toast("show"); // finally show it
