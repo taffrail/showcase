@@ -67,7 +67,6 @@ export default class showcaseMobile {
     this.listenForUrlChanges();
     this.handleClickExpandControls();
     this.handleCopyLink();
-    // // this.handleResizeChart();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
 
     // keyboard shortcuts
@@ -98,6 +97,7 @@ export default class showcaseMobile {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
+    this._scrollChatBubbles();
   }
 
   // #region event handlers
@@ -129,10 +129,12 @@ export default class showcaseMobile {
         $el.data("uxmode", "asst");
         $el.find("i").removeClass("fa-comment-lines").addClass("fa-comments-alt");
         $("body").addClass("uxmode-asst").removeClass("uxmode-app");
+        this._scrollChatBubbles();
       } else {
         $el.data("uxmode", "app");
         $el.find("i").addClass("fa-comment-lines").removeClass("fa-comments-alt");
         $("body").addClass("uxmode-app").removeClass("uxmode-asst");
+        this._scrollChatBubbles();
       }
     });
   }
@@ -152,8 +154,7 @@ export default class showcaseMobile {
     this.$advice.on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
-      // 80 = height of banner
-      $("html, body").animate({ scrollTop: $(".phone").offset().top - 90 });
+      this._scrollTop();
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -195,8 +196,7 @@ export default class showcaseMobile {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
-      // 80 = height of banner
-      $("html, body").animate({ scrollTop: $(".phone").offset().top - 90 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       this.api.display = display;
       this.updateMainPane();
@@ -207,19 +207,28 @@ export default class showcaseMobile {
    * Click handler for assumptions or Q&A
    */
   handleClickAssumption() {
-    $(".assumptions").on("click", ".a > a", e => {
+    $(".answers-chat-bubbles, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
-      // 80 = height of banner
-      $("html, body").animate({ scrollTop: $(".phone").offset().top - 90 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
       const assumption = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
       this.api.display = assumption;
       this.api.display.idx = assumption.idx;
-      $("a[data-sheet=assumptions]").first().click();
-      setTimeout(() => {this.updateMainPane();}, 300);
+      if ($this.parents(".answers-chat-bubbles").length) {
+        console.log(this.api.display)
+        const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
+        $bubbles.hide();
+        $bubbles.after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
+        this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
+      } else {
+        $("a[data-sheet=assumptions]").first().click();
+        setTimeout(() => {
+          this.updateMainPane();
+        }, 300);
+      }
     });
   }
 
@@ -330,24 +339,6 @@ export default class showcaseMobile {
       }
     });
   }
-
-  /**
-   * The interactive chart embed is inside an iframe and when the window resizes
-   * the iframe needs to be re-loaded.
-   */
-  handleResizeChart() {
-    let timer;
-    $(window).resize(() => {
-      if (this.api.display.type == "ADVICE") {
-        if (timer) {
-          window.clearTimeout(timer);
-        }
-        timer = setTimeout(() => {
-          this.updateMainPane();
-        }, 500);
-      }
-    });
-  }
   // #endregion
 
   // #region data
@@ -416,14 +407,14 @@ export default class showcaseMobile {
   /**
    * Template update for INPUT_REQUEST
    */
-  _updateForInputRequest() {
+  _updateForInputRequest($container = this.$advice) {
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
-    this.$advice.html(str);
+    $container.html(str);
 
     // hide "next" button unless it's a numeric input
     const isRadio = this.api.display.form.fieldType.match(/Radio|Boolean/);
-    this.$advice.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
+    $container.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
 
     // set value
     this._setValue();
@@ -442,7 +433,7 @@ export default class showcaseMobile {
     // setup "display" card — either question or "advice".
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
-    // build collection of just answers & assumptions
+    // build collection of just answers/assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
@@ -523,6 +514,7 @@ export default class showcaseMobile {
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
+      "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
     };
   }
 
@@ -562,6 +554,9 @@ export default class showcaseMobile {
     // render
     const strAssump = this.TEMPLATES["Assumptions"](this.api);
     $(".assumptions").html(strAssump);
+
+    const str = this.TEMPLATES["AnswerChatBubbles"](this.api);
+    $(".answers-chat-bubbles").html(str);
   }
 
   /**
@@ -768,6 +763,34 @@ export default class showcaseMobile {
     $el.find("span").text( shown ? "Collapse" : "Expand");
     $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
     $el.data("collapsed", !shown);
+  }
+
+  /**
+   * Helper to scroll to bottom of chat
+   */
+  _scrollChatBubbles() {
+    if ($("body").hasClass("uxmode-asst")) {
+      let top = $(".screen").get(0).scrollHeight;
+      if (this.api.display.type == "ADVICE") {
+        ({ top } = $(".screen").find(".list-all-recommendations").position());
+
+      }
+      setTimeout(() => {
+        $(".screen").animate({ scrollTop: top });
+      }, 300);
+    } else {
+      // move phone screen to top
+      $(".screen").animate({ scrollTop: 0 });
+    }
+  }
+
+  /**
+   * Helper to scroll to top
+   */
+  _scrollTop() {
+    // 80 = height of banner
+    const top = $(".phone").offset().top - 90;
+    $("html, body").animate({ scrollTop: top });
   }
 
   /**

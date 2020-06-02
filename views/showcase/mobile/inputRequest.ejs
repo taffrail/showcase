@@ -22,7 +22,7 @@
 		</header>
 		
 		<hr>
-		<form data-id="{{display.id}}">
+		<form data-id="{{display.id}}" class="type-{{display.form.fieldType}}">
 
 			<div class="form-group">
 
@@ -70,7 +70,7 @@
 
 			{{#unless display._isLast}}
 				<div class="continue">
-					<button type="submit" data-id="{{display.id}}" class="btn btn-sm btn-primary">Next</button>
+					<button type="submit" data-id="{{display.id}}" class="btn btn-sm btn-primary"><span>Next</span></button>
 				</div>
 			{{/unless}}
 		</form>

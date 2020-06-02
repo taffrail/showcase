@@ -4,7 +4,7 @@
 		{{#each answers}}
 			<li data-id="{{id}}" data-idx="{{idx}}" class="qa position-relative">
 				<div class="q">{{question}}</div>
-				<div class="a"><a href="#" class="stretched-link">{{answer}}</a></div>
+				<div class="a"><a href="#" class="stretched-link">{{#if answer}}{{answer}}{{else}}{{value}}{{/if}}</a></div>
 			</li>
 		{{/each}}
 	</ol>

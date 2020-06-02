@@ -60,6 +60,7 @@
 							<main class="screen">
 								<header class="title"><%= api.data.adviceset.title %></header>
 								<a class="action-assumptions" href="#" data-sheet="assumptions" data-toggle="tooltip" title="View assumptions"><i class="fal fa-clipboard-list-check"></i></a>
+								<div class="answers-chat-bubbles"></div>
 								<div class="advice"></div>
 								<div class="list-all-recommendations"></div>
 								<div id="sheet_assumptions" class="sheet screen-edge-padding">
@@ -90,6 +91,7 @@
 <%- include("mobile/inputRequest"); %>
 <%- include("mobile/recommendations"); %>
 <%- include("mobile/assumptions"); %>
+<%- include("mobile/answers-chatbubbles"); %>
 
 		<%- include("_footer"); %>
 		<%- include("_toast"); %>
