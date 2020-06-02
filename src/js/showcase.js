@@ -709,7 +709,7 @@ export default class showcase {
       const $chart = $(`[data-id=${chartId}]`);
       const { src } = $chart.data();
       // parent container
-      const containerW = $chart.parents(".rounded.bg-white").width();
+      const containerW = $chart.parents(".rounded.bg-white").outerWidth();
       const $iframe = $chart.find("iframe");
       // set chart container size
       $chart.css({
