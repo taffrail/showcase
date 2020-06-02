@@ -36,7 +36,7 @@
 			</script>
 		<% } %>
   </head>
-  <body class="showcase showcase--advice">
+  <body class="showcase showcase--advice showcase--advice_mobile">
 
 		<header class="banner bg-stripes fixed-top">
 			<div class="container">
@@ -51,80 +51,43 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-md-5 col-lg-3">			
-					<div class="assumptions-container rounded" style="display:none;">
-						<div class="d-flex justify-content-between">
-							<ul class="nav nav-tabs" id="pills-tab" role="tablist">
-								<li class="nav-item" role="presentation">
-									<a class="nav-link active" id="pills-assumptions-tab" data-toggle="pill" href="#pills-assumptions" role="tab" aria-controls="pills-assumptions" aria-selected="true">Assumptions</a>
-								</li>
-								<li class="nav-item" role="presentation">
-									<a class="nav-link" id="pills-qa-tab" data-toggle="pill" href="#pills-qa" role="tab" aria-controls="pills-qa" aria-selected="false">Answers</a>
-								</li>
-								<li class="nav-item" role="presentation">
-									<a class="nav-link" id="pills-var-tab" data-toggle="pill" href="#pills-var" role="tab" aria-controls="pills-var" aria-selected="false">Data</a>
-								</li>
-							</ul>
-							<ul class="nav nav-tabs assumption-expander" role="tablist" style="display:none;">
-								<li class="nav-item" role="presentation">
-									<a class="nav-link" href="#" data-expand="assumptions" data-collapsed="true" data-toggle="tooltip" title="Expand/collapse assumptions"><i class="fad fa-plus-square"></i></a>
-								</li>
-							</ul>
-						</div>
-						<div class="tab-content rounded-bottom rounded-right" id="pills-tabContent">
-							<div class="tab-pane fade show active" id="pills-assumptions" role="tabpanel" aria-labelledby="pills-assumptions-tab">
-								<div class="assumptions"></div>
-							</div>
-							<div class="tab-pane fade" id="pills-qa" role="tabpanel" aria-labelledby="pills-qa-tab">
-								<div class="answers"></div>
-							</div>
-							<div class="tab-pane fade" id="pills-var" role="tabpanel" aria-labelledby="pills-var-tab">
-								<div class="variables-container">
-									<table class="table table-borderless table-hover table-sm">
-										<thead>
-											<tr>
-												<th>Variable</th>
-												<th class="text-right">Vaue</th>
-											</tr>
-										</thead>
-										<tbody class="variables"></tbody>
-									</table>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="reset" style="display:none;">
-						<a href="/s/<%= api.data.adviceset.id %>/">Reset</a>
-					</div>
+				<div class="col-md-4">
+					left
 				</div>
-				<div class="col-md-7 col-lg-9 push-down">
-					<div class="row">
-						<div class="col-lg-5 center-col">
-							<div class="advice rounded bg-white"></div>
-						</div>
-						<div class="col-lg-7 right-col">
-							<div class="list-all-recommendations"></div>
-						</div>
-					</div>
+				<div class="col-md-8">
+					<section class="phone">
+						<section class="screenarea">
+							<main class="screen">
+								<header class="title"><%= api.data.adviceset.title %></header>
+								<a class="action-assumptions" href="#" data-sheet="assumptions"><i class="fad fa-clipboard-list-check"></i></a>
+								<div class="advice"></div>
+								<div class="list-all-recommendations"></div>
+							</main>
+							<footer class="tabbar">
+								<a href="/s/<%= api.data.adviceset.id %>/mobile"><i class="fad fa-home"></i></a>
+								<a href="#"><i class="fad fa-dollar-sign"></i></a>
+								<a href="#" class="center"><i class="fad fa-comments-alt"></i></a>
+								<a href="#"><i class="fad fa-user"></i></a>
+								<a href="#"><i class="fad fa-cog"></i></a>
+							</footer>
+						
+						</section>
+					</section>
 				</div>
 			</div>
 			<div class="push"></div>
 		</main>
 
-		<%- include("_footer"); %>
-
 		<!--templates-->
-<%- include("index/adviceSetDetails"); %>
-<%- include("index/inputRequest"); %>
-<%- include("index/advice"); %>
-<%- include("index/recommendations"); %>
+<%- include("mobile/adviceSetDetails"); %>
+<%- include("mobile/inputRequest"); %>
+<%- include("mobile/recommendations"); %>
+<%- include("mobile/assumptions"); %>
 
-<%- include("index/answers"); %>
-<%- include("index/assumptions"); %>
-<%- include("index/variables"); %>
-<%- include("_toast"); %>
+		<%- include("_footer"); %>
+		<%- include("_toast"); %>
 
-		<script type="text/javascript">window.jga=window.jga||{};window.jga.api = <%- JSON.stringify(api.data) %>;</script>
+		<script type="text/javascript">window.jga=window.jga||{};window.jga._isMobile=<%= locals.isMobile %>;window.jga.api = <%- JSON.stringify(api.data) %>;</script>
 		<script src="/jquery/dist/jquery.min.js" type="text/javascript"></script>
 		<script src="/bootstrap/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 		<script src="/dist/js/main.js" type="text/javascript"></script>

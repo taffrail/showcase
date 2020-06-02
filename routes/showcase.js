@@ -7,7 +7,7 @@ const bitly = new BitlyClient(process.env.BITLY_TOKEN, {
   domain: "advice.link"
 });
 
-router.get("/:adviceSetId", (req, res, next) => {
+router.get("/:adviceSetId/:mobile?", (req, res, next) => {
   const { adviceSetId } = req.params;
   if (!adviceSetId) {
     return next(new Error("Advice Set ID required"));
@@ -38,8 +38,12 @@ router.get("/:adviceSetId", (req, res, next) => {
       const api = JSON.parse(body);
       if (api.error) { return next(new Error(api.error.message)); }
 
-      return res.render("showcase/index", {
-        api: api
+      const isMobile = req.params.mobile == "mobile";
+      const template = isMobile ? "mobile" : "index";
+
+      return res.render(`showcase/${template}`, {
+        api: api,
+        isMobile: isMobile
       });
     } else {
       console.error("unexpected!");

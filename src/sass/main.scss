@@ -254,6 +254,153 @@ html, body {
     }
   }
 
+  &.showcase--advice_mobile {
+    .phone {
+      background: transparent url("/img/iPhonex@2x.png") top left no-repeat;
+      background-size: 58%;
+      height: 720px;
+      margin-top: 1rem;
+      position: relative;
+      width: 640px;
+
+      section.screenarea {
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        height: 643px;
+        left: 30px;
+        max-height: 643px;
+        position: absolute;
+        top: 48px;
+        width: 309px;
+
+        main.screen {
+          font-size: 85%;
+          height: 100%;
+          max-height: 100%;
+          overflow: auto;
+          padding: .25rem 0;
+        }
+
+        header.title {
+          font-weight: bold;
+          margin: .25rem 0 .75rem 0;
+          text-align: center;
+        }
+
+        .action-assumptions {
+          font-size: $font-size-lg;
+          position: absolute;
+          right: .5rem;
+          top: .3rem;
+        }
+
+        .recommendation-title {
+          border-top: 2px solid $primary;
+          padding-top: .5rem;
+        }
+
+        .screen-edge-padding  {
+          padding: 0 .5rem;
+        }
+
+        .fa-ul {
+          margin-left: 2rem;
+        }
+
+        .advice {
+          .question {
+            margin-bottom: 2rem;
+          }
+        }
+
+        footer.tabbar {
+          align-items: center;
+          border-top: 1px solid $gray-200;
+          display: flex;
+          height: 50px;
+          justify-content: space-evenly;
+          opacity: .7;
+
+          a {
+            color: $gray-600;
+            font-size: $font-size-lg;
+            text-align: center;
+            width: (100% - 25) / 4;
+          }
+
+          .center {
+            color: $primary;
+            font-size: 150%;
+            width: 25%;
+          }
+        }
+      }
+    }
+
+    .advice {
+      .question {
+        .lead {
+          font-size: $font-size-base;
+          line-height: 1.3rem;
+        }
+
+        .form-check-label .form-text {
+          color: $gray-600;
+          font-size: 75%;
+          line-height: 1rem;
+        }
+      }
+    }
+
+    .form-check {
+      padding-left: 0;
+      margin-bottom: .5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      input {
+        &[type='radio'] {
+          &:checked,
+          &:not(:checked) {
+            left: -9999px;
+            position: absolute;
+
+            + label {
+              @extend .btn;
+              @extend .btn-block;
+              @extend .btn-outline-primary;
+              cursor: pointer;
+
+              @media (min-width: breakpoint('md')) {
+                max-width: 75%;
+              }
+
+              &:hover {
+                background-color: $primary;
+                border-color: $primary;
+
+                .form-text {
+                  color: #fff;
+                  font-size: 75%;
+                  line-height: 1rem;
+                }
+              }
+            }
+          }
+
+          &:checked + label {
+            @extend .active;
+            background-color: $primary;
+            border-color: $primary;
+          }
+        }
+      }
+    }
+  }
+
   .push {
     height: 5rem;
   }
