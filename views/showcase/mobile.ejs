@@ -52,21 +52,28 @@
 			</div>
 			<div class="row">
 				<div class="col-md-4">
-					left
+					<div class="mt-3">This is an alternative interface for this &ldquo;<%= api.data.adviceset.title %>&rdquo; Advice. <a href="/s/<%= api.data.adviceset.id %>/?<%= api.data.adviceset._apiUrlQuery %>" class="text-primary">Switch to the main view</a>.</div>
 				</div>
 				<div class="col-md-8">
 					<section class="phone">
 						<section class="screenarea">
 							<main class="screen">
 								<header class="title"><%= api.data.adviceset.title %></header>
-								<a class="action-assumptions" href="#" data-sheet="assumptions"><i class="fad fa-clipboard-list-check"></i></a>
+								<a class="action-assumptions" href="#" data-sheet="assumptions" data-toggle="tooltip" title="View assumptions"><i class="fal fa-clipboard-list-check"></i></a>
 								<div class="advice"></div>
 								<div class="list-all-recommendations"></div>
+								<div id="sheet_assumptions" class="sheet screen-edge-padding">
+									<header>
+										<h6>Assumptions</h6>
+										<a href="#" data-sheet="assumptions"><i class="fal fa-times"></i></a>
+									</header>
+									<div class="assumptions"></div>
+								</div>
 							</main>
 							<footer class="tabbar">
-								<a href="/s/<%= api.data.adviceset.id %>/mobile"><i class="fad fa-home"></i></a>
+								<a href="/s/<%= api.data.adviceset.id %>/mobile" data-toggle="tooltip" title="Reset"><i class="fad fa-home"></i></a>
 								<a href="#"><i class="fad fa-dollar-sign"></i></a>
-								<a href="#" class="center"><i class="fad fa-comments-alt"></i></a>
+								<a href="#" class="center ux-app" data-uxmode="app" title="Toggle app mode" data-toggle="tooltip"><i class="fad fa-comment-lines"></i></a>
 								<a href="#"><i class="fad fa-user"></i></a>
 								<a href="#"><i class="fad fa-cog"></i></a>
 							</footer>

@@ -1,5 +1,13 @@
 <script id="tmpl_adviceInputRequest" type="text/x-handlebars-template">
+	<div class="continue screen-edge-padding">
+		{{#unless display._isFirst}}
+			<a href="#" class="btn btn-sm btn-outline-default" data-action="back"><i class="fal fa-chevron-left"></i></a>
+		{{/unless}}
+	</div>
 	<div class="question screen-edge-padding mt-4">
+		{{#if display._isFirst}}
+			<div><p class="lead">{{adviceset.description}}</p></div>
+		{{/if}}
 		<header class="d-flex justify-content-between icon-row">
 			{{#if display.explanation}}
 				<div>
@@ -48,24 +56,23 @@
 
 				{{#ifEquals display.form.fieldType "Number"}}
 				
-					<input type="text" class="form-control w-75" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
+					<input type="text" class="form-control" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
 
 				{{/ifEquals}}
 
 				{{#ifEquals display.form.fieldType "Percent"}}
 				
-					<input type="text" class="form-control w-75" id="{{display.id}}" name="{{display.form.name}}" data-type="{{display.form.fieldType}}" autocomplete="off" required>
+					<input type="text" class="form-control" id="{{display.id}}" name="{{display.form.name}}" data-type="{{display.form.fieldType}}" autocomplete="off" required>
 
 				{{/ifEquals}}
 
 			</div>
 
-			<div class="continue">
-				{{#unless display._isFirst}}
-					<a href="#" class="btn btn-sm btn-outline-primary" data-action="back">Back</a>
-				{{/unless}}
-				<button type="submit" data-id="{{display.id}}" class="btn btn-sm btn-primary">Next</button>
-			</div>
+			{{#unless display._isLast}}
+				<div class="continue">
+					<button type="submit" data-id="{{display.id}}" class="btn btn-sm btn-primary">Next</button>
+				</div>
+			{{/unless}}
 		</form>
 	</div>
 </script>

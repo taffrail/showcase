@@ -65,6 +65,7 @@ export default class showcase {
     this.listenForUrlChanges();
     this.handleClickExpandControls();
     this.handleCopyLink();
+    this.handleClickOpenMobile();
     // this.handleResizeChart();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
 
@@ -171,6 +172,13 @@ export default class showcase {
       this.api.display = answer;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
+    });
+  }
+
+  handleClickOpenMobile() {
+    $("main").on("click", "a.openmobile", e=> {
+      e.preventDefault();
+      location.href = `${this.baseUrl}/mobile?${this.api.adviceset._apiUrlQuery}`;
     });
   }
 
@@ -402,14 +410,6 @@ export default class showcase {
    * Template update for ADVICE
    */
   _updateForAdvice() {
-    const isUnreachable = this.api.display.id === "-32768";
-    if (isUnreachable){
-      this.api.display = Object.assign(this.api.display, {
-        headline: "Advice Engine Response",
-        summary: "This rule has been evaluated, see variable data for export."
-      });
-    }
-
     // render
     const str = this.TEMPLATES["Advice"](this.api);
     this.$advice.html(str);
@@ -545,6 +545,7 @@ export default class showcase {
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
     $(".reset").toggle(this.api._answersExist);
+    $(".openmobile").toggleClass("alone", !this.api._answersExist);
     $(".assumptions-container").toggle(this.api._answersExist);
     // only show expand button if there's grouped assumptions besides "ungrouped"
     $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
