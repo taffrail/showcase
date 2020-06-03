@@ -120,9 +120,9 @@ export default class showcaseMobile {
    * Handle click on tabbar chat icon to change to Virtual Assistant style
    */
   handleClickToggleUx() {
-    $(".tabbar").on("click", ".ux-app", e => {
+    $("main").on("click", ".ux-app", e => {
       e.preventDefault();
-      const $el = $(e.currentTarget);
+      const $el = $(".ux-app");
       $el.tooltip("hide");
       const { uxmode = "app" } = $el.data();
       if (uxmode == "app") {

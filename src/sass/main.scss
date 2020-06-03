@@ -29,6 +29,10 @@ html, body {
   }
 }
 
+.text-sm {
+  font-size: $font-size-sm;
+}
+
 .showcase {
   &.showcase--advice {
     background: $gray-300;
