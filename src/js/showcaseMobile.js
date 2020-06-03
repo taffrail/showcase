@@ -144,14 +144,14 @@ export default class showcaseMobile {
    */
   handleClickContinue() {
     // pressing radio button auto-advances to next
-    this.$advice.on("click", ".form-check label.form-check-label", e => {
+    $(".screen").on("click", ".form-check label.form-check-label", e => {
       const $lbl = $(e.currentTarget);
       $lbl.prev("input").prop("checked", true);
       const $form = $lbl.closest("form");
       $form.submit();
     });
 
-    this.$advice.on("submit", "form", e => {
+    $(".screen").on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
       this._scrollTop();
@@ -218,10 +218,9 @@ export default class showcaseMobile {
       this.api.display = assumption;
       this.api.display.idx = assumption.idx;
       if ($this.parents(".answers-chat-bubbles").length) {
-        console.log(this.api.display)
         const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
         $bubbles.hide();
-        $bubbles.after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
+        $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
         this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
       } else {
         $("a[data-sheet=assumptions]").first().click();
@@ -417,11 +416,11 @@ export default class showcaseMobile {
     $container.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
 
     // set value
-    this._setValue();
+    this._setValue($container);
     // set input masks
-    this._handleInputMasks();
+    this._handleInputMasks($container);
     // focus input
-    this._focusFirstInput();
+    this._focusFirstInput($container);
     // highlight active assumption/question
     this._setAssumptionActive();
   }
@@ -591,12 +590,12 @@ export default class showcaseMobile {
   /**
 	 * Set the form value from the API data
 	 */
-  _setValue() {
+  _setValue($container = this.$advice) {
     const { display: { form: { fieldType, result } } } = this.api;
     let { value } = result;
     if (!value || value == "\"null\"") { return; }
 
-    const $formEls = this.$advice.find("form").find("input,select");
+    const $formEls = $container.find("form").find("input,select");
     $formEls.each((i, el) => {
       const $el = $(el);
       if ($el.is(":radio")) {
@@ -618,8 +617,8 @@ export default class showcaseMobile {
    * https://github.com/RobinHerbots/Inputmask#mask
    */
   // eslint-disable-next-line complexity
-  _handleInputMasks(){
-    const $inputEl = this._findFormInput(this.$advice.find("form"));
+  _handleInputMasks($container = this.$advice){
+    const $inputEl = this._findFormInput($container.find("form"));
     if ($inputEl.length) {
       const maskOpts = {
         showMaskOnHover: false
@@ -679,9 +678,9 @@ export default class showcaseMobile {
   /**
 	 * Focus the 1st visible input on the question form for quicker UX.
 	 */
-  _focusFirstInput() {
+  _focusFirstInput($container = this.$advice) {
     // focus 1st input
-    this._findFormInput(this.$advice.find("form"), "input,textarea,select").first().focus();
+    this._findFormInput($container.find("form"), "input,textarea,select").first().focus();
   }
 
   /**
@@ -770,12 +769,8 @@ export default class showcaseMobile {
    */
   _scrollChatBubbles() {
     if ($("body").hasClass("uxmode-asst")) {
-      let top = $(".screen").get(0).scrollHeight;
-      if (this.api.display.type == "ADVICE") {
-        ({ top } = $(".screen").find(".list-all-recommendations").position());
-
-      }
       setTimeout(() => {
+        const top = $(".screen").get(0).scrollHeight;
         $(".screen").animate({ scrollTop: top });
       }, 300);
     } else {

@@ -288,6 +288,10 @@ html, body {
       display: none;
     }
 
+    .changing {
+      margin-bottom: 1rem;
+    }
+
     .action-assumptions {
       display: none;
     }
@@ -322,6 +326,7 @@ html, body {
           height: 100%;
           max-height: 100%;
           overflow: auto;
+          position: relative;
           padding: .25rem 0;
         }
 
@@ -564,6 +569,7 @@ html, body {
   $me-bg-color: $primary_mobile;
   
   &.showcase--advice_mobile.uxmode-asst {
+    // cribbed from https://codepen.io/samuelkraft/pen/Farhl
     .bubble {
       max-width: 255px;
       word-wrap: break-word;
