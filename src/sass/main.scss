@@ -284,18 +284,6 @@ html, body {
       top: .3rem;
     }
 
-    .changing > .continue {
-      display: none;
-    }
-
-    .changing {
-      margin-bottom: 1rem;
-    }
-
-    .action-assumptions {
-      display: none;
-    }
-
     main {
       a {
         color: $primary_mobile;
@@ -337,6 +325,7 @@ html, body {
         }
 
         .action-assumptions {
+          display: block;
           font-size: $font-size-lg;
           position: absolute;
           right: .5rem;
@@ -569,9 +558,21 @@ html, body {
   $me-bg-color: $primary_mobile;
   
   &.showcase--advice_mobile.uxmode-asst {
+    .changing > .continue {
+      display: none;
+    }
+
+    .changing {
+      margin-bottom: 1rem;
+    }
+
+    .action-assumptions {
+      display: none !important;
+    }
+
     // cribbed from https://codepen.io/samuelkraft/pen/Farhl
     .bubble {
-      max-width: 255px;
+      max-width: 245px;
       word-wrap: break-word;
       margin-bottom: 12px;
       line-height: 24px;
