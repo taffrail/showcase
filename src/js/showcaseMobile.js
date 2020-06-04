@@ -9,7 +9,7 @@ import Mousetrap from "mousetrap";
 import qs from "querystring";
 import store from "store";
 
-export default class showcase {
+export default class showcaseMobile {
   constructor() {
     this.history = createBrowserHistory();
 
@@ -38,7 +38,7 @@ export default class showcase {
   }
 
   get baseUrl() {
-    return `/s/${this.api.adviceset.id}`;
+    return `/s/${this.api.adviceset.id}/mobile`;
   }
 
   set windowTitle(title) {
@@ -58,6 +58,8 @@ export default class showcase {
     this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
 
     // events
+    this.handleClickSheet();
+    this.handleClickToggleUx();
     this.handleClickContinue();
     this.handleClickBack();
     this.handleClickAssumption();
@@ -65,8 +67,6 @@ export default class showcase {
     this.listenForUrlChanges();
     this.handleClickExpandControls();
     this.handleCopyLink();
-    this.handleClickOpenMobile();
-    // this.handleResizeChart();
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
 
     // keyboard shortcuts
@@ -97,18 +97,64 @@ export default class showcase {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
-    this.updateVariablesList();
+    this._scrollChatBubbles();
   }
 
   // #region event handlers
   /**
+   * Open/close a sheet
+   */
+  handleClickSheet() {
+    $(".screen").on("click", "a[data-sheet]", e => {
+      e.preventDefault();
+      const $el = $(e.currentTarget);
+      const { sheet } = $el.data();
+      $el.tooltip("hide");
+      if (sheet == "assumptions") {
+        $("#sheet_assumptions").toggleClass("show");
+      }
+    });
+  }
+
+  /**
+   * Handle click on tabbar chat icon to change to Virtual Assistant style
+   */
+  handleClickToggleUx() {
+    $("main").on("click", ".ux-app", e => {
+      e.preventDefault();
+      const $el = $(".ux-app");
+      $el.tooltip("hide");
+      const { uxmode = "app" } = $el.data();
+      if (uxmode == "app") {
+        $el.data("uxmode", "asst");
+        $el.find("i").removeClass("fa-comment-lines").addClass("fa-comments-alt");
+        $("body").addClass("uxmode-asst").removeClass("uxmode-app");
+        this._scrollChatBubbles();
+      } else {
+        $el.data("uxmode", "app");
+        $el.find("i").addClass("fa-comment-lines").removeClass("fa-comments-alt");
+        $("body").addClass("uxmode-app").removeClass("uxmode-asst");
+        this._scrollChatBubbles();
+      }
+    });
+  }
+
+  /**
    * "Next" button handler
    */
   handleClickContinue() {
-    this.$advice.on("submit", "form", e => {
+    // pressing radio button auto-advances to next
+    $(".screen").on("click", ".form-check label.form-check-label", e => {
+      const $lbl = $(e.currentTarget);
+      $lbl.prev("input").prop("checked", true);
+      const $form = $lbl.closest("form");
+      $form.submit();
+    });
+
+    $(".screen").on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -131,7 +177,7 @@ export default class showcase {
       const data = $form.serialize();
 
       this._loadApi(data).then(()=> {
-        // update content
+      // update content
         this.updatePanes();
         // save state
         this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
@@ -150,7 +196,7 @@ export default class showcase {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       this.api.display = display;
       this.updateMainPane();
@@ -161,24 +207,27 @@ export default class showcase {
    * Click handler for assumptions or Q&A
    */
   handleClickAssumption() {
-    $(".answers, .assumptions").on("click", ".a > a", e => {
+    $(".answers-chat-bubbles, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
-      this.api.display = answer;
-      this.api.display.idx = answer.idx;
-      this.updateMainPane();
-    });
-  }
-
-  handleClickOpenMobile() {
-    $("main").on("click", "a.openmobile", e=> {
-      e.preventDefault();
-      location.href = `${this.baseUrl}/mobile?${this.api.adviceset._apiUrlQuery}`;
+      const assumption = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
+      this.api.display = assumption;
+      this.api.display.idx = assumption.idx;
+      if ($this.parents(".answers-chat-bubbles").length) {
+        const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
+        $bubbles.hide();
+        $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
+        this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
+      } else {
+        $("a[data-sheet=assumptions]").first().click();
+        setTimeout(() => {
+          this.updateMainPane();
+        }, 300);
+      }
     });
   }
 
@@ -289,24 +338,6 @@ export default class showcase {
       }
     });
   }
-
-  /**
-   * The interactive chart embed is inside an iframe and when the window resizes
-   * the iframe needs to be re-loaded.
-   */
-  handleResizeChart() {
-    let timer;
-    $(window).resize(() => {
-      if (this.api.display.type == "ADVICE") {
-        if (timer) {
-          window.clearTimeout(timer);
-        }
-        timer = setTimeout(() => {
-          this.updateMainPane();
-        }, 500);
-      }
-    });
-  }
   // #endregion
 
   // #region data
@@ -320,7 +351,7 @@ export default class showcase {
     const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
     const formData = _.assign({ include: ["filteredVars"], showcase: true }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
-    const loadingId = Loading.show($(".row .advice"));
+    const loadingId = Loading.show($("main.screen"));
 
     return $.ajax({
       url: apiUrlWithoutQuerystring,
@@ -359,19 +390,15 @@ export default class showcase {
     this._setCurrentIdx();
 
     // render
-    $(".center-col").removeClass("transition-hide");
-    $(".right-col").removeClass("centered");
-
     if (this.api.display.type == "INPUT_REQUEST") {
+      $(".advice").slideDown(300);
       this._updateForInputRequest();
     } else {
-      // if this is the LAST advice, hide center column and move advice list into center focus
+      // must be advice
       if (this.api.display._isLast) {
-        $(".center-col").addClass("transition-hide");
-        $(".right-col").addClass("centered");
+        // since it's "last", hide the question.
+        $(".advice").slideUp(300);
       }
-      // unused center pane
-      // this._updateForAdvice();
     }
   }
 
@@ -379,43 +406,23 @@ export default class showcase {
   /**
    * Template update for INPUT_REQUEST
    */
-  _updateForInputRequest() {
-    const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != "\"null\"";
-    // console.log(isLastAndAnswered)
-    if (isLastAndAnswered) {
-      // this.api.display = Object.assign(this.api.display, {
-      //   question: "Advice Engine Response",
-      //   explanation: "This rule has been evaluated, see variable data for export.",
-      //   form: {
-      //     fieldType: "NONE",
-      //     result: this.api.display.value
-      //   }
-      // });
-    }
+  _updateForInputRequest($container = this.$advice) {
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
-    this.$advice.html(str);
+    $container.html(str);
+
+    // hide "next" button unless it's a numeric input
+    const isRadio = this.api.display.form.fieldType.match(/Radio|Boolean/);
+    $container.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
 
     // set value
-    this._setValue();
+    this._setValue($container);
     // set input masks
-    this._handleInputMasks();
+    this._handleInputMasks($container);
     // focus input
-    this._focusFirstInput();
+    this._focusFirstInput($container);
     // highlight active assumption/question
     this._setAssumptionActive();
-  }
-
-  /**
-   * Template update for ADVICE
-   */
-  _updateForAdvice() {
-    // render
-    const str = this.TEMPLATES["Advice"](this.api);
-    this.$advice.html(str);
-
-    // unhighlight active assumption/question
-    this._setAssumptionActive("advice");
   }
 
   /**
@@ -425,7 +432,7 @@ export default class showcase {
     // setup "display" card — either question or "advice".
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
-    // build collection of just answers & assumptions
+    // build collection of just answers/assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
@@ -469,13 +476,13 @@ export default class showcase {
       // add icons
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
-        // let icon = "fad fa-thumbs-up";
-        let icon = "fad fa-arrow-circle-right";
+        // let icon = "fal fa-thumbs-up";
+        let icon = "fal fa-arrow-circle-right";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
-          icon = "fad fa-circle";
+          icon = "fal fa-circle";
         } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fad fa-check-circle";
+          icon = "fal fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
@@ -504,11 +511,9 @@ export default class showcase {
     this.TEMPLATES = {
       "AdviceSetDetails": Handlebars.compile($("#tmpl_adviceSetDetails").html()),
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
-      "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
-      "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
-      "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+      "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
     };
   }
 
@@ -544,17 +549,13 @@ export default class showcase {
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
-    $(".reset").toggle(this.api._answersExist);
-    $(".openmobile").toggleClass("alone", !this.api._answersExist);
-    $(".assumptions-container").toggle(this.api._answersExist);
-    // only show expand button if there's grouped assumptions besides "ungrouped"
-    $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
     // render
-    const str = this.TEMPLATES["QuestionsAnswers"](this.api);
     const strAssump = this.TEMPLATES["Assumptions"](this.api);
-    $(".answers").html(str);
     $(".assumptions").html(strAssump);
+
+    const str = this.TEMPLATES["AnswerChatBubbles"](this.api);
+    $(".answers-chat-bubbles").html(str);
   }
 
   /**
@@ -583,27 +584,18 @@ export default class showcase {
       $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
     }
   }
-
-  /**
-	 * Update variables list
-	 */
-  updateVariablesList(){
-    // render
-    const str = this.TEMPLATES["Variables"](this.api);
-    $(".variables").html(str);
-  }
   // #endregion
 
   // #region form utils
   /**
 	 * Set the form value from the API data
 	 */
-  _setValue() {
+  _setValue($container = this.$advice) {
     const { display: { form: { fieldType, result } } } = this.api;
     let { value } = result;
     if (!value || value == "\"null\"") { return; }
 
-    const $formEls = this.$advice.find("form").find("input,select");
+    const $formEls = $container.find("form").find("input,select");
     $formEls.each((i, el) => {
       const $el = $(el);
       if ($el.is(":radio")) {
@@ -625,8 +617,8 @@ export default class showcase {
    * https://github.com/RobinHerbots/Inputmask#mask
    */
   // eslint-disable-next-line complexity
-  _handleInputMasks(){
-    const $inputEl = this._findFormInput(this.$advice.find("form"));
+  _handleInputMasks($container = this.$advice){
+    const $inputEl = this._findFormInput($container.find("form"));
     if ($inputEl.length) {
       const maskOpts = {
         showMaskOnHover: false
@@ -686,9 +678,9 @@ export default class showcase {
   /**
 	 * Focus the 1st visible input on the question form for quicker UX.
 	 */
-  _focusFirstInput() {
+  _focusFirstInput($container = this.$advice) {
     // focus 1st input
-    this._findFormInput(this.$advice.find("form"), "input,textarea,select").first().focus();
+    this._findFormInput($container.find("form"), "input,textarea,select").first().focus();
   }
 
   /**
@@ -708,13 +700,14 @@ export default class showcase {
     // setup the chart...
     if (isChart) {
       const $chart = $(`[data-id=${chartId}]`);
+      if (!$chart.length) { return; }
       const { src } = $chart.data();
       // parent container
-      const containerW = $chart.parents(".rounded.bg-white").outerWidth();
+      const containerW = $chart.parents(".list-all-recommendations").outerWidth();
       const $iframe = $chart.find("iframe");
       // set chart container size
       $chart.css({
-        height: 400,
+        height: 350,
         width: containerW
       });
 
@@ -724,9 +717,9 @@ export default class showcase {
         window.jga.config = {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: ["#605F5E", "#6D256C"],
+          colors: ["#605F5E", "#0B5D1E"],
           width: containerW,
-          height: 400
+          height: 350
         }
         window.jga.advice = {
           session: Object.assign({
@@ -769,6 +762,30 @@ export default class showcase {
     $el.find("span").text( shown ? "Collapse" : "Expand");
     $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
     $el.data("collapsed", !shown);
+  }
+
+  /**
+   * Helper to scroll to bottom of chat
+   */
+  _scrollChatBubbles() {
+    if ($("body").hasClass("uxmode-asst")) {
+      setTimeout(() => {
+        const top = $(".screen").get(0).scrollHeight;
+        $(".screen").animate({ scrollTop: top });
+      }, 300);
+    } else {
+      // move phone screen to top
+      $(".screen").animate({ scrollTop: 0 });
+    }
+  }
+
+  /**
+   * Helper to scroll to top
+   */
+  _scrollTop() {
+    // 80 = height of banner
+    const top = $(".phone").offset().top - 90;
+    $("html, body").animate({ scrollTop: top });
   }
 
   /**
