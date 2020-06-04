@@ -1,0 +1,292 @@
+// use green as primary color to show alternate appearance
+  // https://coolors.co/0dab76-139a43-0b5d1e-053b06-000000
+
+  $primary_mobile: #0B5D1E;
+  $primary_mobile_dark: #053B06;
+  $primary_mobile_light: #139A43;
+  
+  &.showcase--advice_mobile {
+    .bg-stripes {
+      background: $primary_mobile none;
+      background-size: 70%;
+    }
+
+    .answers-chat-bubbles {
+      display: none;
+    }
+
+    .advice > .continue {
+      left: .5rem;
+      padding-left: 0;
+      position: absolute;
+      top: .3rem;
+    }
+
+    main {
+      a {
+        color: $primary_mobile;
+      }
+    }
+
+    .phone {
+      background: transparent url("/img/iPhonex@2x.png") top left no-repeat;
+      background-size: 58%;
+      height: 720px;
+      margin-top: 1rem;
+      position: relative;
+      width: 640px;
+
+      section.screenarea {
+        background-color: transparent;
+        display: flex;
+        flex-direction: column;
+        height: 643px;
+        left: 30px;
+        max-height: 643px;
+        position: absolute;
+        top: 48px;
+        width: 309px;
+
+        main.screen {
+          font-size: 85%;
+          height: 100%;
+          max-height: 100%;
+          overflow: auto;
+          position: relative;
+          padding: .25rem 0;
+        }
+
+        header.title {
+          font-weight: bold;
+          margin: .25rem 0 .75rem 0;
+          text-align: center;
+        }
+
+        .action-assumptions {
+          display: block;
+          font-size: $font-size-lg;
+          position: absolute;
+          right: .5rem;
+          top: .3rem;
+          z-index: $zindex-fixed - 2;
+        }
+
+        .recommendation-title {
+          border-top: 2px solid $primary_mobile;
+          margin-top: 1rem;
+          padding-top: .5rem;
+
+          h6 {
+            margin-bottom: 0;
+          }
+        }
+
+        .screen-edge-padding  {
+          padding: 0 .5rem;
+        }
+
+        .fa-ul {
+          margin-left: 2rem;
+        }
+
+        .advice {
+          .question {
+            margin-bottom: 2rem;
+          }
+        }
+
+        .advice-attachment {
+          margin-right: 0;
+    
+          &.advice-chart--interactive {
+            margin-left: -2.5rem;
+          }
+        }
+
+        footer.tabbar {
+          align-items: center;
+          background-color: #fff;
+          border-bottom-left-radius: 32px;
+          border-bottom-right-radius: 32px;
+          border-top: 1px solid $gray-200;
+          display: flex;
+          height: 50px;
+          justify-content: space-evenly;
+          z-index: $zindex-fixed;
+
+          a {
+            color: $gray-600;
+            font-size: $font-size-lg;
+            opacity: .7;
+            text-align: center;
+            width: (100% - 25) / 4;
+          }
+
+          .center {
+            color: $primary_mobile;
+            font-size: 150%;
+            width: 25%;
+          }
+        }
+
+        .sheet {
+          background-color: #fff;
+          border-bottom-left-radius: 32px;
+          border-bottom-right-radius: 32px;
+          border-top-left-radius: $border-radius;
+          border-top-right-radius: $border-radius;
+          box-shadow: 0 -6px 5px rgba(0,0,0,0.175); // top only
+          height: 0;
+          opacity: 0;
+          overflow: auto;
+          position: absolute;
+          top: 100%;
+          transition: all .3s;
+          width: 100%;
+          z-index: $zindex-fixed - 1;
+
+          &.show {
+            height: 90%;
+            opacity: 1;
+            top: 1.3rem;
+          }
+
+          &.screen-edge-padding {
+            padding: 0 1rem !important;
+          }
+
+          header {
+            align-items: baseline;
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+          }
+        }
+      }
+    }
+
+    .advice {
+      .question {
+        .lead {
+          font-size: $font-size-base;
+          line-height: 1.3rem;
+        }
+
+        header {
+          align-items: baseline;
+
+          h5 {
+            margin-bottom: 0;
+          }
+        }
+
+        .form-check-label .form-text {
+          color: $gray-600;
+          font-size: 75%;
+          line-height: 1rem;
+        }
+      }
+    }
+
+    .assumption-group {
+      font-size: .9rem;
+      font-weight: 500;
+      line-height: 1.2;
+      margin-bottom: .5rem;
+
+      a {
+        color: $body-color;
+      }
+    }
+
+    .assumptions {
+      ol {
+        list-style-type: decimal;
+        padding-left: 1.5rem;
+      }
+
+      li {
+        border-radius: $border-radius;
+        color: $gray-600;
+        margin-bottom: .25rem;
+        padding: .15rem 0;
+
+        &.active,
+        &:hover {
+          background-color: $gray-100;
+        }
+
+        a {
+          text-decoration: none;
+        }
+      }
+
+      .q,
+      .statement {
+        font-weight: bold;
+      }
+    }
+
+    .btn-primary {
+      background-color: $primary_mobile;
+      border-color: $primary_mobile;
+
+      &:hover {
+        background-color: $primary_mobile_dark;
+        border-color: $primary_mobile_dark;
+      }
+    }
+
+    .form-control {
+      &:focus {
+        border-color: $primary_mobile_light;
+        box-shadow: 0 0 0 0.2rem rgba($primary_mobile, .25);
+      }
+    }
+
+    .form-check {
+      padding-left: 0;
+      margin-bottom: .5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      input {
+        &[type='radio'] {
+          &:checked,
+          &:not(:checked) {
+            left: -9999px;
+            position: absolute;
+
+            + label {
+              @extend .btn;
+              @extend .btn-block;
+              @extend .btn-outline-primary;
+              border-color: $primary_mobile !important;
+              color: $primary_mobile;
+              
+              cursor: pointer;
+
+              &:hover {
+                background-color: $primary_mobile !important;
+                border-color: $primary_mobile !important;
+
+                .form-text {
+                  color: #fff;
+                  font-size: 75%;
+                  line-height: 1rem;
+                }
+              }
+            }
+          }
+
+          &:checked + label {
+            @extend .active;
+            background-color: $primary_mobile !important;
+            border-color: $primary_mobile !important;
+          }
+        }
+      }
+    }
+  }
