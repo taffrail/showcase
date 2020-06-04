@@ -50,41 +50,45 @@ export default class showcase {
    * One-time initialization
    */
   init() {
+    window.jga.api.adviceset.apiUrl = `${this.config.api_host}/_/advice/api/${this.api.adviceset.id}`;
     this.initCache();
-    this.updateAdviceSetDetails();
-    this.updatePanes();
+    const [,querystring] = location.search.split("?");
+    this._loadApi(querystring).then(api => {
+      this.updateAdviceSetDetails();
+      this.updatePanes();
 
-    // on page load, save current state
-    this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
+      // on page load, save current state
+      this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
 
-    // events
-    this.handleClickContinue();
-    this.handleClickBack();
-    this.handleClickAssumption();
-    this.handleCollapseAssumptionGroup();
-    this.listenForUrlChanges();
-    this.handleClickExpandControls();
-    this.handleCopyLink();
-    this.handleClickOpenMobile();
-    // this.handleResizeChart();
-    $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+      // events
+      this.handleClickContinue();
+      this.handleClickBack();
+      this.handleClickAssumption();
+      this.handleCollapseAssumptionGroup();
+      this.listenForUrlChanges();
+      this.handleClickExpandControls();
+      this.handleCopyLink();
+      this.handleClickOpenMobile();
+      // this.handleResizeChart();
+      $("body").tooltip({ selector: "[data-toggle=tooltip]" });
 
-    // keyboard shortcuts
+      // keyboard shortcuts
 
-    // expand/collapse advice
-    Mousetrap.bind("a", () => {
-      $("a[data-expand=advice]").click();
-    });
-    // expand/collapse assumptions
-    Mousetrap.bind("s", () => {
-      $("a[data-expand=assumptions]").click();
-    });
-    // show toast with keyboard shortcut map
-    Mousetrap.bind("?", () => {
-      this.showToast(undefined,{
-        title: "Keyboard Shortcuts",
-        message: "Press <code>a</code> for advice.<br>Press <code>s</code> for assumptions.",
-        delay: 5000
+      // expand/collapse advice
+      Mousetrap.bind("a", () => {
+        $("a[data-expand=advice]").click();
+      });
+      // expand/collapse assumptions
+      Mousetrap.bind("s", () => {
+        $("a[data-expand=assumptions]").click();
+      });
+      // show toast with keyboard shortcut map
+      Mousetrap.bind("?", () => {
+        this.showToast(undefined,{
+          title: "Keyboard Shortcuts",
+          message: "Press <code>a</code> for advice.<br>Press <code>s</code> for assumptions.",
+          delay: 5000
+        });
       });
     });
   }

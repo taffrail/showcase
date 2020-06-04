@@ -1,4 +1,5 @@
 const express = require("express");
+const isbot = require("isbot");
 const router = express.Router();
 const request = require("request");
 const qs = require("querystring");
@@ -7,48 +8,59 @@ const bitly = new BitlyClient(process.env.BITLY_TOKEN, {
   domain: "advice.link"
 });
 
-router.get("/:adviceSetId/:mobile?", (req, res, next) => {
+// serve OG meta tags to bots since this app is sorta like a SPA
+const botMiddleware = (req, res, next) => {
   const { adviceSetId } = req.params;
-  if (!adviceSetId) {
-    return next(new Error("Advice Set ID required"));
+  const { nobot } = req.query;
+  if (nobot == 1) {
+    return next();
   }
 
-  // advice
-  const qrystr = Object.assign({}, req.query, {
-    include: ["filteredVars"], showcase: true
-  });
-  const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
+  if (isbot(req.get("user-agent"))) {
+    // get data from Advice API for meta tags
+    // and prerendering basic HTML structure
+    const qrystr = Object.assign({}, req.query, {
+      include: ["filteredVars"], showcase: true
+    });
+    const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
+    request.get(apiUrl, {
+      headers: {
+        "Accept": "application/json; charset=utf-8",
+        "Authorization": `Bearer ${process.env.API_KEY}`
+      }
+    }, (err, resp, body) => {
+      if (err) { return next(err); }
 
-  console.warn(apiUrl);
+      if (resp.statusCode > 200) {
+        console.warn(resp);
+        return next(new Error(resp.statusMessage));
+      }
 
-  request.get(apiUrl, {
-    headers: {
-      "Accept": "application/json; charset=utf-8",
-      "Authorization": `Bearer ${process.env.API_KEY}`
-    }
-  }, (err, resp, body) => {
-    if (err) { return next(err); }
+      if (!err && resp.statusCode == 200) {
+        const api = JSON.parse(body);
+        if (api.error) { return next(new Error(api.error.message)); }
 
-    if (resp.statusCode > 200) {
-      console.warn(resp);
-      return next(new Error(resp.statusMessage));
-    }
+        return res.render("showcase/bot", {
+          api: api
+        });
+      } else {
+        console.error("unexpected!");
+        return res.status(resp.statusCode).send(body);
+      }
+    });
+  } else {
+    return next();
+  }
+}
 
-    if (!err && resp.statusCode == 200) {
-      const api = JSON.parse(body);
-      if (api.error) { return next(new Error(api.error.message)); }
+router.get("/:adviceSetId/:mobile?", botMiddleware, (req, res, next) => {
+  const { adviceSetId } = req.params;
+  const isMobile = req.params.mobile == "mobile";
+  const template = isMobile ? "mobile" : "index";
 
-      const isMobile = req.params.mobile == "mobile";
-      const template = isMobile ? "mobile" : "index";
-
-      return res.render(`showcase/${template}`, {
-        api: api,
-        isMobile: isMobile
-      });
-    } else {
-      console.error("unexpected!");
-      return res.status(resp.statusCode).send(body);
-    }
+  return res.render(`showcase/${template}`, {
+    adviceSetId: adviceSetId,
+    isMobile: isMobile
   });
 });
 
