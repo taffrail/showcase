@@ -170,6 +170,7 @@ $me-bg-color: $primary_mobile_asst_light;
                         &:hover,
                         &:active {
                           background-color: $primary_mobile_asst !important;
+                          -webkit-text-fill-color: $white;
                         }
                       }
                     }
@@ -178,6 +179,7 @@ $me-bg-color: $primary_mobile_asst_light;
                       @extend .active;
                       background-color: $me-bg-color !important;
                       border-color: $me-bg-color !important;
+                      -webkit-text-fill-color: $white;
                     }
                   }
                 }
@@ -206,6 +208,7 @@ $me-bg-color: $primary_mobile_asst_light;
               text-align: right;
     
               button {
+                -webkit-text-fill-color: $white;
                 @extend %fa-icon;
                 @extend .far;
                 background-color: $me-bg-color;
