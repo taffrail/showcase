@@ -277,6 +277,11 @@ html, body {
   $primary_mobile_light: #139A43;
   
   &.showcase--advice_mobile {
+    .bg-stripes {
+      background: $primary_mobile none;
+      background-size: 70%;
+    }
+
     .answers-chat-bubbles {
       display: none;
     }
