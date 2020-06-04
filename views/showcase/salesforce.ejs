@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<%- include("partials/_head"); %>
+  </head>
+  <body class="showcase showcase--advice showcase--advice_salesforce">
+
+		<header class="banner bg-stripes fixed-top">
+			<div class="container">
+				<img src="/img/logo_white.svg" height="28">
+			</div>
+		</header>
+		
+		<main class="container">
+			<header class="row">
+				<div class="col-md-6">
+					<div class="advice-set-details"><h2>&nbsp;</h2><p class="lead text-muted">Loading...</p></div>
+				</div>
+				<div class="col-md-6 demo-nav">
+					<ul class="nav nav-pills">
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="full">Main</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="mobile">Mobile</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="asst">Virtual Assistant</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link active" href="#" data-target="salesforce">Salesforce</a>
+						</li>
+					</ul>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-md-12">
+					
+			</div>
+			<div class="push"></div>
+		</main>
+
+		<!--templates-->
+
+
+		<%- include("partials/_footer"); %>
+		<%- include("partials/_toast"); %>
+
+<div id="__init" data-page-init="showcaseSalesforce"></div>
+
+		<%- include("partials/_footer_js"); %>
+  </body>
+</html>

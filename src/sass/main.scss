@@ -19,7 +19,7 @@ html, body {
   min-width: 320px;
   position: fixed;
   right: 1rem;
-  top: 1rem;
+  top: 9.5rem; // below the navbar
   z-index: 9999999;
 
   #toastContainer {
@@ -40,6 +40,7 @@ html, body {
   @import "showcase";
   @import "showcase_mobile";
   @import "showcase_virtual_asst";
+  @import "showcase_salesforce";
 
   .push {
     height: $footer-height;

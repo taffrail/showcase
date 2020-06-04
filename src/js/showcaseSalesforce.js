@@ -6,7 +6,7 @@ import qs from "querystring";
 import store from "store";
 import ShowcasePage from "./showcasePage";
 
-export default class showcaseFull extends ShowcasePage {
+export default class showcaseSalesforce extends ShowcasePage {
   /**
    * One-time initialization
    */

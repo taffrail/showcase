@@ -1,8 +1,33 @@
+// use blue as primary color to show alternate appearance
+// https://coolors.co/e63946-f1faee-a8dadc-457b9d-1d3557
+
+$primary_mobile_asst: #1D3557;
+$primary_mobile_asst_dark: #14253D;
+$primary_mobile_asst_light: #457B9D;
 $them-bg-color: #E5E5EA;
-  // $me-bg-color: #0B93F6;
-  $me-bg-color: $primary_mobile;
+// $me-bg-color: #0B93F6;
+$me-bg-color: $primary_mobile_asst_light;
+
+&.showcase--advice_mobile.showcase--advice_mobile-asst {
+  .bg-stripes {
+    background: $primary_mobile_asst none;
+    background-size: 70%;
+  }
+
+  main {
+    a {
+      color: $primary_mobile_asst;
+    }
+  }
+
+  .demo-nav {
+    .active {
+      background-color: $primary_mobile_asst;
+      color: $white;
+    }
+  }
   
-  &.showcase--advice_mobile.uxmode-asst {
+  &.uxmode-asst {
     .changing > .continue {
       display: none;
     }
@@ -88,121 +113,136 @@ $them-bg-color: #E5E5EA;
       display: block;
     }
 
-    main.screen {
-      .question {
-        header {
-          @extend .bubble;
-          @extend .from-them;
-        }
-
-        header + hr {
-          display: none;
-        }
-
-        .lead {
-          font-size: 90%;
-          line-height: 1rem;
-        }
-
-        .form-check {
-          input[type='radio'] {
-            &:checked,
-            &:not(:checked) {
-              all: unset;
-
-              + label {
-                all: unset;
-              }
-            }
-          }
-        }
-
-        form {
-          .form-text {
-            display: none;
-          }
-
-          &.type-Boolean,
-          &.type-Radio {
-            .form-group {
+    .phone {
+      section.screenarea {
+        main.screen {
+          .question {
+            header {
               @extend .bubble;
-              @extend .from-me;
-
+              @extend .from-them;
+            }
+    
+            header + hr {
+              display: none;
+            }
+    
+            .lead {
+              font-size: 90%;
+              line-height: 1rem;
+            }
+    
+            .form-check {
               input[type='radio'] {
                 &:checked,
                 &:not(:checked) {
+                  all: unset;
+    
                   + label {
-                    cursor: pointer;
-                    background-color: transparent;
-                    border-radius: $border-radius;
-                    display: block;
-                    padding: 0 1rem 0 0;
-                    text-align: right;
-                    width: 100%;
-
-                    &:hover,
-                    &:active {
-                      background-color: $primary_mobile_dark !important;
-                    }
+                    all: unset;
                   }
-                }
-
-                &:checked + label {
-                  @extend .active;
-                  background-color: $me-bg-color !important;
-                  border-color: $me-bg-color !important;
                 }
               }
             }
-          }
-
-          &.type-Number,
-          &.type-Percent {
-            display: flex;
-            justify-content: flex-end;
-
-            .form-group {
-              margin-bottom: 0;
+    
+            form {
+              .form-text {
+                display: none;
+              }
+    
+              &.type-Boolean,
+              &.type-Radio {
+                .form-group {
+                  @extend .bubble;
+                  @extend .from-me;
+    
+                  input[type='radio'] {
+                    &:checked,
+                    &:not(:checked) {
+                      + label {
+                        cursor: pointer;
+                        background-color: transparent;
+                        border-radius: $border-radius;
+                        display: block;
+                        padding: 0 1rem 0 0;
+                        text-align: right;
+                        width: 100%;
+    
+                        &:hover,
+                        &:active {
+                          background-color: $primary_mobile_asst !important;
+                        }
+                      }
+                    }
+    
+                    &:checked + label {
+                      @extend .active;
+                      background-color: $me-bg-color !important;
+                      border-color: $me-bg-color !important;
+                    }
+                  }
+                }
+              }
+    
+              &.type-Number,
+              &.type-Percent {
+                display: flex;
+                justify-content: flex-end;
+    
+                .form-group {
+                  margin-bottom: 0;
+                }
+    
+                .form-control {
+                  &:focus {
+                    border-color: $me-bg-color;
+                    box-shadow: 0 0 0 0.2rem rgba($me-bg-color, .25);
+                  }
+                }
+              }
             }
-
-            .form-control {
-              &:focus {
+            
+            .continue {
+              margin-left: .5rem;
+              text-align: right;
+    
+              button {
+                @extend %fa-icon;
+                @extend .far;
+                background-color: $me-bg-color;
                 border-color: $me-bg-color;
-                box-shadow: 0 0 0 0.2rem rgba($me-bg-color, .25);
+                border-radius: 50%;
+                font-size: $font-size-lg;
+                width: 36px;
+                height: 36px;
+                
+                &:focus {
+                  border-color: $me-bg-color;
+                  box-shadow: 0 0 0 0.2rem rgba($me-bg-color, .25);
+                }
+    
+                &:before {
+                  color: $white;
+                  content: fa-content($fa-var-arrow-up);
+                }
+    
+                span {
+                  display: none;
+                }
               }
             }
           }
         }
-        
-        .continue {
-          margin-left: .5rem;
-          text-align: right;
 
-          button {
-            @extend %fa-icon;
-            @extend .far;
-            background-color: $me-bg-color;
-            border-color: $me-bg-color;
-            border-radius: 50%;
-            font-size: $font-size-lg;
-            width: 36px;
-            height: 36px;
-            
-            &:focus {
-              border-color: $me-bg-color;
-              box-shadow: 0 0 0 0.2rem rgba($me-bg-color, .25);
-            }
+        .recommendation-title {
+          border-color: $primary_mobile_asst;
+        }
 
-            &:before {
-              color: $white;
-              content: fa-content($fa-var-arrow-up);
-            }
-
-            span {
-              display: none;
-            }
+        footer.tabbar {
+          .center {
+            color: $primary_mobile_asst_dark;
           }
         }
       }
     }
   }
+}

@@ -16,6 +16,20 @@
 		background-size: 70%;
 	}
 
+	main > header {
+		> div {
+			margin-top: 2.5rem;
+		}
+
+		.demo-nav {
+			font-size: $font-size-sm;
+
+			.nav {
+				justify-content: flex-end;
+			}
+		}
+	}
+
 	// wrapper
 	main.container {
 		margin-bottom: -($footer-height);
@@ -24,6 +38,7 @@
 
 	.advice-set-details {
 		min-height: 76px;
+		
 		h1 {
 			font-weight: 900; //heavy
 		}

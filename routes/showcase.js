@@ -53,10 +53,11 @@ const botMiddleware = (req, res, next) => {
   }
 }
 
-router.get("/:adviceSetId/:mobile?", botMiddleware, (req, res, next) => {
-  const { adviceSetId } = req.params;
-  const isMobile = req.params.mobile == "mobile";
-  const template = isMobile ? "mobile" : "index";
+router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
+  const { adviceSetId, view = "index" } = req.params;
+  const allowedViews = ["index", "mobile", "virtual-assistant", "salesforce"];
+  const template = (allowedViews.includes(view)) ? view : allowedViews[0];
+  const isMobile = view == "mobile" || view == "virtual-assistant";
 
   return res.render(`showcase/${template}`, {
     adviceSetId: adviceSetId,

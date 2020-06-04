@@ -1,0 +1,30 @@
+// use blueishgreen as primary color to show alternate appearance
+// https://coolors.co/283d3b-197278-edddd4-c44536-772e25
+
+$primary_sf: #197278;
+$primary_sf_dark: #283D3B;
+$primary_sf_light: #EDDDD4;
+$them-bg-color: #E5E5EA;
+// $me-bg-color: #0B93F6;
+$me-bg-color: $primary_sf_light;
+
+&.showcase--advice_salesforce {
+  .bg-stripes {
+    background: $primary_sf none;
+    background-size: 70%;
+  }
+
+  main {
+    a {
+      color: $primary_sf;
+    }
+  }
+
+  .demo-nav {
+    .active {
+      background-color: $primary_sf;
+      color: $white;
+    }
+	}
+	
+}
