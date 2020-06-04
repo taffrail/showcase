@@ -43,7 +43,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
   updatePanes(){
     this.mapData();
     this.updateMainPane();
-    this.updateAssumptionsList();
+    this.updateChatHistory();
     this.updateRecommendationsList();
     this._scrollChatBubbles();
   }
@@ -273,24 +273,6 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.api.answers = this.api.answers.slice(0, -1);
     }
 
-    // assumptions are grouped, answers are not
-    const ASSUMPTIONS_UNGROUPED = "ungrouped";
-    this.api.assumptions = _.groupBy(this.api.answers, (a) => {
-      return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
-    });
-
-    // go through each assumption group and set open/close state
-    Object.keys(this.api.assumptions).forEach((key, idx) => {
-      if (key == ASSUMPTIONS_UNGROUPED) { return; }
-
-      // add `_isOpen` flag to each item
-      const arr = this.api.assumptions[key];
-      this.api.assumptions[key] = arr.map(a => {
-        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
-        return a;
-      });
-    });
-
     // if the `display` is the LAST advice node, set a flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
     const lastAdvice = _.last(allAdvice);
@@ -361,15 +343,11 @@ export default class showcaseVirtualAsst extends ShowcasePage {
   /**
 	 * Update assumptions/answers/history list
 	 */
-  updateAssumptionsList(){
+  updateChatHistory(){
     // do we have ANY assumptions/answers yet?
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
-
-    // render
-    const strAssump = this.TEMPLATES["Assumptions"](this.api);
-    $(".assumptions").html(strAssump);
 
     const str = this.TEMPLATES["AnswerChatBubbles"](this.api);
     $(".answers-chat-bubbles").html(str);
