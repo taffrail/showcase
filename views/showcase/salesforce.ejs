@@ -13,9 +13,7 @@
 		
 		<main class="container">
 			<header class="row">
-				<div class="col-md-6">
-					<div class="advice-set-details"><h2>&nbsp;</h2><p class="lead text-muted">Loading...</p></div>
-				</div>
+				<div class="col-md-6">&nbsp;</div>
 				<div class="col-md-6 demo-nav">
 					<ul class="nav nav-pills">
 						<li class="nav-item">
@@ -34,17 +32,41 @@
 				</div>
 			</header>
 			<div class="row">
-				<div class="col-md-12">
-					
+				<div class="col-12 sf-header"></div>
+			</div>
+			<div class="row no-gutters mx-n3">
+				<div class="col-8 sf-left"></div>
+				<div class="col-4 sf-right">
+					<div class="advice-card">
+						<div class="column-card">
+							<div class="advice">
+								<header class="column-card-header"><span>Just Good Advice</span></header>
+								<section class="raised-card">
+									<aside>
+
+									</aside>
+									<div class="list-all-recommendations"></div>
+								</section>
+							</div>
+						</div>
+					</div>
+					<div class="sf-related"></div>
+				</div>
 			</div>
 			<div class="push"></div>
 		</main>
 
-		<!--templates-->
-
-
 		<%- include("partials/_footer"); %>
 		<%- include("partials/_toast"); %>
+
+		<!--templates-->
+<%- include("salesforce/adviceSetDetails"); %>
+<%- include("salesforce/inputRequest"); %>
+<%- include("salesforce/advice"); %>
+<%- include("salesforce/recommendations"); %>
+
+<%- include("salesforce/answers"); %>
+<%- include("salesforce/assumptions"); %>
 
 <div id="__init" data-page-init="showcaseSalesforce"></div>
 

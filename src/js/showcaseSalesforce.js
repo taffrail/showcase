@@ -7,27 +7,34 @@ import store from "store";
 import ShowcasePage from "./showcasePage";
 
 export default class showcaseSalesforce extends ShowcasePage {
+  // #region getter/setter
+  // override
+  get baseUrl() {
+    return `/s/${this.api.adviceset.id}/salesforce`;
+  }
+  // #endregion
   /**
    * One-time initialization
    */
   init() {
     super.init();
     this.initCache();
+
+    // events
+    this.handleClickContinue();
+    this.handleClickBack();
+    this.handleClickAssumption();
+    this.handleCollapseAssumptionGroup();
+    this.listenForUrlChanges();
+    this.handleClickExpandControls();
+
     const [,querystring] = location.search.split("?");
-    this._loadApi(querystring, $(".row .advice")).then(api => {
+    this._loadApi(querystring, $(".column-card")).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
-      this.updateAdviceSetDetails();
+      // this.updateAdviceSetDetails();
       this.updatePanes();
-      // events
-      this.handleClickContinue();
-      this.handleClickBack();
-      this.handleClickAssumption();
-      this.handleCollapseAssumptionGroup();
-      this.listenForUrlChanges();
-      this.handleClickExpandControls();
-      // this.handleResizeChart();
 
       // keyboard shortcuts
 
@@ -58,7 +65,6 @@ export default class showcaseSalesforce extends ShowcasePage {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
-    this.updateVariablesList();
   }
 
   // #region event handlers
@@ -68,8 +74,6 @@ export default class showcaseSalesforce extends ShowcasePage {
   handleClickContinue() {
     this.$advice.on("submit", "form", e => {
       const $form = $(e.currentTarget);
-
-      $("html, body").animate({ scrollTop: 0 });
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -91,7 +95,7 @@ export default class showcaseSalesforce extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $(".row .advice")).then(()=> {
+      this._loadApi(data, $(".column-card")).then(()=> {
         // update content
         this.updatePanes();
         // save state
@@ -111,7 +115,6 @@ export default class showcaseSalesforce extends ShowcasePage {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
-      $("html, body").animate({ scrollTop: 0 });
       // temp override `display` global prop to insert question into HTML
       this.api.display = display;
       this.updateMainPane();
@@ -187,24 +190,6 @@ export default class showcaseSalesforce extends ShowcasePage {
       this._toggleCollapseLink($this, collapse == "show");
     });
   }
-
-  /**
-   * The interactive chart embed is inside an iframe and when the window resizes
-   * the iframe needs to be re-loaded.
-   */
-  handleResizeChart() {
-    let timer;
-    $(window).resize(() => {
-      if (this.api.display.type == "ADVICE") {
-        if (timer) {
-          window.clearTimeout(timer);
-        }
-        timer = setTimeout(() => {
-          this.updateMainPane();
-        }, 500);
-      }
-    });
-  }
   // #endregion
 
   // #region templating
@@ -218,19 +203,14 @@ export default class showcaseSalesforce extends ShowcasePage {
     this._setCurrentIdx();
 
     // render
-    $(".center-col").removeClass("transition-hide");
-    $(".right-col").removeClass("centered");
-
     if (this.api.display.type == "INPUT_REQUEST") {
+      this.$advice.find("aside").slideDown(300);
       this._updateForInputRequest();
     } else {
       // if this is the LAST advice, hide center column and move advice list into center focus
       if (this.api.display._isLast) {
-        $(".center-col").addClass("transition-hide");
-        $(".right-col").addClass("centered");
+        this.$advice.find("aside").slideUp(300);
       }
-      // unused center pane
-      // this._updateForAdvice();
     }
   }
 
@@ -253,7 +233,7 @@ export default class showcaseSalesforce extends ShowcasePage {
     }
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
-    this.$advice.html(str);
+    this.$advice.find("aside").html(str);
 
     // set value
     this._setValue();
@@ -285,7 +265,9 @@ export default class showcaseSalesforce extends ShowcasePage {
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
-    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+    this.api.answers = this.api.advice.map(a => {
+      return this._forAdvisor(a);
+    }).filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
     });
@@ -329,12 +311,12 @@ export default class showcaseSalesforce extends ShowcasePage {
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
         // let icon = "fad fa-thumbs-up";
-        let icon = "fad fa-arrow-circle-right";
+        let icon = "far fa-arrow-right";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
-          icon = "fad fa-circle";
+          icon = "far fa-circle";
         } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fad fa-check-circle";
+          icon = "far fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
@@ -365,7 +347,6 @@ export default class showcaseSalesforce extends ShowcasePage {
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
-      "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
     };
@@ -426,15 +407,6 @@ export default class showcaseSalesforce extends ShowcasePage {
       $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
     }
   }
-
-  /**
-	 * Update variables list
-	 */
-  updateVariablesList(){
-    // render
-    const str = this.TEMPLATES["Variables"](this.api);
-    $(".variables").html(str);
-  }
   // #endregion
 
   /**
@@ -461,7 +433,7 @@ export default class showcaseSalesforce extends ShowcasePage {
         window.jga.config = {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: ["#605F5E", "#6D256C"],
+          colors: ["#605F5E", "#006dcc"],
           width: containerW,
           height: 400
         }
@@ -506,6 +478,22 @@ export default class showcaseSalesforce extends ShowcasePage {
     $el.find("span").text( shown ? "Collapse" : "Expand");
     $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
     $el.data("collapsed", !shown);
+  }
+
+  _forAdvisor(obj) {
+    const mapObj = {
+      my: "your",
+      My: "Your",
+      me: "you"
+    };
+
+    if (obj.tagGroup) {
+      obj.tagGroup.name = obj.tagGroup.name.replace(/my|My|me/gi, (matched) => {
+        return mapObj[matched];
+      });
+    }
+
+    return obj;
   }
   // #endregion
 }
