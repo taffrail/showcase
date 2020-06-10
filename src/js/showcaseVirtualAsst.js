@@ -1,12 +1,18 @@
 /* eslint-disable new-cap */
 import _ from "lodash";
 import Handlebars from "handlebars";
-import Mousetrap from "mousetrap";
 import qs from "querystring";
 import store from "store";
 import ShowcasePage from "./showcasePage";
 
-export default class showcaseFull extends ShowcasePage {
+export default class showcaseVirtualAsst extends ShowcasePage {
+  // #region getter/setter
+  // override
+  get baseUrl() {
+    return `/s/${this.api.adviceset.id}/virtual-assistant`;
+  }
+  // #endregion
+
   /**
    * One-time initialization
    */
@@ -14,39 +20,20 @@ export default class showcaseFull extends ShowcasePage {
     super.init();
     this.initCache();
     const [,querystring] = location.search.split("?");
-    this._loadApi(querystring, $(".row .advice")).then(api => {
+    this._loadApi(querystring, $("main.screen")).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
       this.updateAdviceSetDetails();
       this.updatePanes();
       // events
+      this.handleClickSheet();
       this.handleClickContinue();
       this.handleClickBack();
       this.handleClickAssumption();
       this.handleCollapseAssumptionGroup();
       this.listenForUrlChanges();
       this.handleClickExpandControls();
-      // this.handleResizeChart();
-
-      // keyboard shortcuts
-
-      // expand/collapse advice
-      Mousetrap.bind("a", () => {
-        $("a[data-expand=advice]").click();
-      });
-      // expand/collapse assumptions
-      Mousetrap.bind("s", () => {
-        $("a[data-expand=assumptions]").click();
-      });
-      // show toast with keyboard shortcut map
-      Mousetrap.bind("?", () => {
-        this.showToast(undefined,{
-          title: "Keyboard Shortcuts",
-          message: "Press <code>a</code> for advice.<br>Press <code>s</code> for assumptions.",
-          delay: 5000
-        });
-      });
     });
   }
 
@@ -56,20 +43,43 @@ export default class showcaseFull extends ShowcasePage {
   updatePanes(){
     this.mapData();
     this.updateMainPane();
-    this.updateAssumptionsList();
+    this.updateChatHistory();
     this.updateRecommendationsList();
-    this.updateVariablesList();
+    this._scrollChatBubbles();
   }
 
   // #region event handlers
   /**
+   * Open/close a sheet
+   */
+  handleClickSheet() {
+    $(".screen").on("click", "a[data-sheet]", e => {
+      e.preventDefault();
+      const $el = $(e.currentTarget);
+      const { sheet } = $el.data();
+      $el.tooltip("hide");
+      if (sheet == "assumptions") {
+        $("#sheet_assumptions").toggleClass("show");
+      }
+    });
+  }
+
+  /**
    * "Next" button handler
    */
   handleClickContinue() {
-    this.$advice.on("submit", "form", e => {
+    // pressing radio button auto-advances to next
+    $(".screen").on("click", ".form-check label.form-check-label", e => {
+      const $lbl = $(e.currentTarget);
+      $lbl.prev("input").prop("checked", true);
+      const $form = $lbl.closest("form");
+      $form.submit();
+    });
+
+    $(".screen").on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -91,8 +101,8 @@ export default class showcaseFull extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $(".row .advice")).then(()=> {
-        // update content
+      this._loadApi(data, $("main.screen")).then(()=> {
+      // update content
         this.updatePanes();
         // save state
         this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
@@ -111,7 +121,7 @@ export default class showcaseFull extends ShowcasePage {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       this.api.display = display;
       this.updateMainPane();
@@ -122,17 +132,27 @@ export default class showcaseFull extends ShowcasePage {
    * Click handler for assumptions or Q&A
    */
   handleClickAssumption() {
-    $(".answers, .assumptions").on("click", ".a > a", e => {
+    $(".answers-chat-bubbles, .assumptions").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
-      $("html, body").animate({ scrollTop: 0 });
+      this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
-      this.api.display = answer;
-      this.api.display.idx = answer.idx;
-      this.updateMainPane();
+      const assumption = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
+      this.api.display = assumption;
+      this.api.display.idx = assumption.idx;
+      if ($this.parents(".answers-chat-bubbles").length) {
+        const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
+        $bubbles.hide();
+        $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
+        this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
+      } else {
+        $("a[data-sheet=assumptions]").first().click();
+        setTimeout(() => {
+          this.updateMainPane();
+        }, 300);
+      }
     });
   }
 
@@ -187,25 +207,9 @@ export default class showcaseFull extends ShowcasePage {
       this._toggleCollapseLink($this, collapse == "show");
     });
   }
-
-  /**
-   * The interactive chart embed is inside an iframe and when the window resizes
-   * the iframe needs to be re-loaded.
-   */
-  handleResizeChart() {
-    let timer;
-    $(window).resize(() => {
-      if (this.api.display.type == "ADVICE") {
-        if (timer) {
-          window.clearTimeout(timer);
-        }
-        timer = setTimeout(() => {
-          this.updateMainPane();
-        }, 500);
-      }
-    });
-  }
   // #endregion
+
+
 
   // #region templating
   /**
@@ -218,19 +222,15 @@ export default class showcaseFull extends ShowcasePage {
     this._setCurrentIdx();
 
     // render
-    $(".center-col").removeClass("transition-hide");
-    $(".right-col").removeClass("centered");
-
     if (this.api.display.type == "INPUT_REQUEST") {
+      $(".advice").slideDown(300);
       this._updateForInputRequest();
     } else {
-      // if this is the LAST advice, hide center column and move advice list into center focus
+      // must be advice
       if (this.api.display._isLast) {
-        $(".center-col").addClass("transition-hide");
-        $(".right-col").addClass("centered");
+        // since it's "last", hide the question.
+        $(".advice").slideUp(300);
       }
-      // unused center pane
-      // this._updateForAdvice();
     }
   }
 
@@ -238,43 +238,21 @@ export default class showcaseFull extends ShowcasePage {
   /**
    * Template update for INPUT_REQUEST
    */
-  _updateForInputRequest() {
-    const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != "\"null\"";
-    // console.log(isLastAndAnswered)
-    if (isLastAndAnswered) {
-      // this.api.display = Object.assign(this.api.display, {
-      //   question: "Advice Engine Response",
-      //   explanation: "This rule has been evaluated, see variable data for export.",
-      //   form: {
-      //     fieldType: "NONE",
-      //     result: this.api.display.value
-      //   }
-      // });
-    }
+  _updateForInputRequest($container = this.$advice) {
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
-    this.$advice.html(str);
+    $container.html(str);
+
+    // hide "next" button unless it's a numeric input
+    const isRadio = this.api.display.form.fieldType.match(/Radio|Boolean/);
+    $container.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
 
     // set value
-    this._setValue();
+    this._setValue($container);
     // set input masks
-    this._handleInputMasks();
+    this._handleInputMasks($container);
     // focus input
-    this._focusFirstInput();
-    // highlight active assumption/question
-    this._setAssumptionActive();
-  }
-
-  /**
-   * Template update for ADVICE
-   */
-  _updateForAdvice() {
-    // render
-    const str = this.TEMPLATES["Advice"](this.api);
-    this.$advice.html(str);
-
-    // unhighlight active assumption/question
-    this._setAssumptionActive("advice");
+    this._focusFirstInput($container);
   }
 
   /**
@@ -284,7 +262,7 @@ export default class showcaseFull extends ShowcasePage {
     // setup "display" card — either question or "advice".
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
-    // build collection of just answers & assumptions
+    // build collection of just answers/assumptions
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
@@ -294,24 +272,6 @@ export default class showcaseFull extends ShowcasePage {
     if (this.api.display.type == "INPUT_REQUEST") {
       this.api.answers = this.api.answers.slice(0, -1);
     }
-
-    // assumptions are grouped, answers are not
-    const ASSUMPTIONS_UNGROUPED = "ungrouped";
-    this.api.assumptions = _.groupBy(this.api.answers, (a) => {
-      return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
-    });
-
-    // go through each assumption group and set open/close state
-    Object.keys(this.api.assumptions).forEach((key, idx) => {
-      if (key == ASSUMPTIONS_UNGROUPED) { return; }
-
-      // add `_isOpen` flag to each item
-      const arr = this.api.assumptions[key];
-      this.api.assumptions[key] = arr.map(a => {
-        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
-        return a;
-      });
-    });
 
     // if the `display` is the LAST advice node, set a flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
@@ -328,13 +288,13 @@ export default class showcaseFull extends ShowcasePage {
       // add icons
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
-        // let icon = "fad fa-thumbs-up";
-        let icon = "fad fa-arrow-circle-right";
+        // let icon = "fal fa-thumbs-up";
+        let icon = "fal fa-arrow-circle-right";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
-          icon = "fad fa-circle";
+          icon = "fal fa-circle";
         } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fad fa-check-circle";
+          icon = "fal fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;
@@ -363,11 +323,9 @@ export default class showcaseFull extends ShowcasePage {
     this.TEMPLATES = {
       "AdviceSetDetails": Handlebars.compile($("#tmpl_adviceSetDetails").html()),
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
-      "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
-      "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
-      "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+      "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
     };
   }
   // #endregion
@@ -379,25 +337,20 @@ export default class showcaseFull extends ShowcasePage {
     // render
     const str = this.TEMPLATES["AdviceSetDetails"](this.api);
     $(".advice-set-details").html(str);
+    $(".screen header.title").html(this.api.adviceset.title);
   }
 
   /**
 	 * Update assumptions/answers/history list
 	 */
-  updateAssumptionsList(){
+  updateChatHistory(){
     // do we have ANY assumptions/answers yet?
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
-    $(".assumptions-container").toggle(this.api._answersExist);
-    // only show expand button if there's grouped assumptions besides "ungrouped"
-    $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
-    // render
-    const str = this.TEMPLATES["QuestionsAnswers"](this.api);
-    const strAssump = this.TEMPLATES["Assumptions"](this.api);
-    $(".answers").html(str);
-    $(".assumptions").html(strAssump);
+    const str = this.TEMPLATES["AnswerChatBubbles"](this.api);
+    $(".answers-chat-bubbles").html(str);
   }
 
   /**
@@ -413,30 +366,9 @@ export default class showcaseFull extends ShowcasePage {
 
     this._setupChartsAll();
   }
-
-  /**
-   * Change the highlighted assumption in the list based on
-   * active display.
-   */
-  _setAssumptionActive(isAdvice){
-    const { id } = this.api.display;
-    if (isAdvice) {
-      $(".assumptions, .answers").find("li").removeClass("active");
-    } else {
-      $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
-    }
-  }
-
-  /**
-	 * Update variables list
-	 */
-  updateVariablesList(){
-    // render
-    const str = this.TEMPLATES["Variables"](this.api);
-    $(".variables").html(str);
-  }
   // #endregion
 
+  // #region charts
   /**
    * Sets up chart
    * @param {boolean} isChart
@@ -445,13 +377,14 @@ export default class showcaseFull extends ShowcasePage {
     // setup the chart...
     if (isChart) {
       const $chart = $(`[data-id=${chartId}]`);
+      if (!$chart.length) { return; }
       const { src } = $chart.data();
       // parent container
-      const containerW = $chart.parents(".rounded.bg-white").outerWidth();
+      const containerW = $chart.parents(".list-all-recommendations").outerWidth();
       const $iframe = $chart.find("iframe");
       // set chart container size
       $chart.css({
-        height: 400,
+        height: 350,
         width: containerW
       });
 
@@ -461,9 +394,9 @@ export default class showcaseFull extends ShowcasePage {
         window.jga.config = {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: ["#605F5E", "#6D256C"],
+          colors: ["#605F5E", "#457B9D"],
           width: containerW,
-          height: 400
+          height: 350
         }
         window.jga.advice = {
           session: Object.assign({
@@ -506,6 +439,30 @@ export default class showcaseFull extends ShowcasePage {
     $el.find("span").text( shown ? "Collapse" : "Expand");
     $el.find("i").addClass( shown ? "fa-minus-square" : "fa-plus-square").removeClass( !shown ? "fa-minus-square" : "fa-plus-square");
     $el.data("collapsed", !shown);
+  }
+
+  /**
+   * Helper to scroll to bottom of chat
+   */
+  _scrollChatBubbles() {
+    if ($("body").hasClass("uxmode-asst")) {
+      setTimeout(() => {
+        const top = $(".screen").get(0).scrollHeight;
+        $(".screen").animate({ scrollTop: top });
+      }, 300);
+    } else {
+      // move phone screen to top
+      $(".screen").animate({ scrollTop: 0 });
+    }
+  }
+
+  /**
+   * Helper to scroll to top
+   */
+  _scrollTop() {
+    // 80 = height of banner
+    const top = $(".phone").offset().top - 90;
+    $("html, body").animate({ scrollTop: top });
   }
   // #endregion
 }
