@@ -1,6 +1,11 @@
 {
   "name": "justgoodadvice-showcase",
   "version": "1.0.0",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JustGoodAdvice/showcase.git"
+  },
   "scripts": {
     "start": "node ./bin/www",
     "postinstall": "gulp postdeploy"
