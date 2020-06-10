@@ -78,6 +78,20 @@ export default class ShowcasePage {
       },
       data: formData
     }).then(api => {
+      // Advice API (preview mode) can return HTTP 200 (success)
+      // with an error, so we'll inject that error into the `adviceset`
+      // place, so the error shows up on top.
+      if (api.error) {
+        this.api = {
+          adviceset: {
+            title: "Error",
+            description: api.error.message
+          }
+        }
+        Loading.hide(loadingId);
+        return Promise.reject(new Error(api.error.message));
+      }
+
       // update global!
       this.api = api.data;
       Loading.hide(loadingId);
@@ -89,7 +103,11 @@ export default class ShowcasePage {
       } catch (e){
         err = jqXHR;
       }
-      alert(err);
+      this.showToast(undefined, {
+        title: "Just Good Advice",
+        message: `${err}`,
+        delay: 10000
+      });
     });
   }
 
