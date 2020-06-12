@@ -2,7 +2,6 @@
 import _ from "lodash";
 import Handlebars from "handlebars";
 import qs from "querystring";
-import store from "store";
 import ShowcasePage from "./showcasePage";
 
 export default class showcaseVirtualAsst extends ShowcasePage {
@@ -27,13 +26,10 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.updateAdviceSetDetails();
       this.updatePanes();
       // events
-      this.handleClickSheet();
       this.handleClickContinue();
       this.handleClickBack();
-      this.handleClickAssumption();
-      this.handleCollapseAssumptionGroup();
+      this.handleClickBubble();
       this.listenForUrlChanges();
-      this.handleClickExpandControls();
     });
   }
 
@@ -49,21 +45,6 @@ export default class showcaseVirtualAsst extends ShowcasePage {
   }
 
   // #region event handlers
-  /**
-   * Open/close a sheet
-   */
-  handleClickSheet() {
-    $(".screen").on("click", "a[data-sheet]", e => {
-      e.preventDefault();
-      const $el = $(e.currentTarget);
-      const { sheet } = $el.data();
-      $el.tooltip("hide");
-      if (sheet == "assumptions") {
-        $("#sheet_assumptions").toggleClass("show");
-      }
-    });
-  }
-
   /**
    * "Next" button handler
    */
@@ -129,82 +110,23 @@ export default class showcaseVirtualAsst extends ShowcasePage {
   }
 
   /**
-   * Click handler for assumptions or Q&A
+   * Click handler for clicking on a bubble to change answer
    */
-  handleClickAssumption() {
-    $(".answers-chat-bubbles, .assumptions").on("click", ".a > a", e => {
+  handleClickBubble() {
+    $(".answers-chat-bubbles").on("click", ".a > a", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
       this._scrollTop();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
-      const assumption = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
-      this.api.display = assumption;
-      this.api.display.idx = assumption.idx;
-      if ($this.parents(".answers-chat-bubbles").length) {
-        const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
-        $bubbles.hide();
-        $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
-        this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
-      } else {
-        $("a[data-sheet=assumptions]").first().click();
-        setTimeout(() => {
-          this.updateMainPane();
-        }, 300);
-      }
-    });
-  }
-
-  /**
-   * Listener for pening/closing assumption groups
-   */
-  handleCollapseAssumptionGroup() {
-    $(".assumptions").on("show.bs.collapse", "ol.assumptions-list.collapse", (e) => {
-      const $this = $(e.currentTarget);
-      const { groupId } = $this.find("li").first().data();
-      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
-      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
-      $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
-    });
-
-    $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
-      const $this = $(e.currentTarget);
-      const { groupId } = $this.find("li").first().data();
-      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
-      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
-      $toggler.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
-    });
-  }
-
-  /**
-   * Handle expando/collapso links on sidebar
-   */
-  handleClickExpandControls() {
-    $("main").on("click", "a[data-expand]", e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const { expand } = $this.data();
-
-      $this.tooltip("hide");
-
-      let $collapsibles;
-      if (expand == "assumptions") {
-        $("#pills-assumptions-tab").click();
-        $collapsibles = $(".assumptions-list.collapse");
-      } else if (expand == "advice") {
-        $collapsibles = $(".advice-list").find(".collapse");
-      }
-
-      // open or close?
-      const { collapsed = true } = $this.data();
-      const collapse = collapsed ? "show" : "hide";
-      $collapsibles
-        .collapse(collapse)
-        .on("shown.bs.collapse", e => { this._toggleCollapseLink($this, true) })
-        .on("hidden.bs.collapse", e => { this._toggleCollapseLink($this, false) });
-
-      this._toggleCollapseLink($this, collapse == "show");
+      const display = _.flatMap(this.api.answers).find((a) => { return a.idx == data.idx; });
+      this.api.display = display;
+      this.api.display.idx = display.idx;
+      const $bubbles = $(".answers-chat-bubbles").find(`li[data-id=${this.api.display.id}]`);
+      $bubbles.hide();
+      $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
+      this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
     });
   }
   // #endregion
@@ -262,7 +184,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
     // setup "display" card — either question or "advice".
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
-    // build collection of just answers/assumptions
+    // build collection of just answers
     this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
@@ -324,7 +246,6 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       "AdviceSetDetails": Handlebars.compile($("#tmpl_adviceSetDetails").html()),
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
-      "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
     };
   }
@@ -341,10 +262,10 @@ export default class showcaseVirtualAsst extends ShowcasePage {
   }
 
   /**
-	 * Update assumptions/answers/history list
+	 * Update answers/history list
 	 */
   updateChatHistory(){
-    // do we have ANY assumptions/answers yet?
+    // do we have ANY answers yet?
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
