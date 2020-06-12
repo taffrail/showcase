@@ -84,6 +84,7 @@ export default class ShowcasePage {
       if (api.error) {
         this.api = {
           adviceset: {
+            id: this.api.adviceset.id,
             title: "Error",
             description: api.error.message
           }
