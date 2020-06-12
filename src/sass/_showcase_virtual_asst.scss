@@ -116,6 +116,10 @@ $me-bg-color: $primary_mobile_asst_light;
     .phone {
       section.screenarea {
         main.screen {
+          .title {
+            max-width: 100%;
+          }
+          
           .question {
             header {
               @extend .bubble;
