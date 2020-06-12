@@ -29,6 +29,7 @@ export default class ShowcasePage {
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
     // events
+    this.handleChangeAudience();
     this.handleCopyLink();
   }
 
@@ -61,10 +62,13 @@ export default class ShowcasePage {
    * @param {object} newFormData Form data from input request.
    * @returns Promise<jqXHR>
    */
-  _loadApi(newFormData, $loadingContainer){
+  _loadApi(newFormData, $loadingContainer = this.$loadingContainer){
     // pull querystring from API URL (which has latest passed data)
     const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
-    const formData = _.assign({ include: ["filteredVars"], showcase: true }, currFormData, qs.parse(newFormData));
+    const formData = _.assign({
+      include: ["filteredVars"],
+      showcase: true
+    }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
     const loadingId = Loading.show($loadingContainer);
 
@@ -95,6 +99,7 @@ export default class ShowcasePage {
 
       // update global!
       this.api = api.data;
+      this.setActiveAudience(formData.audienceId);
       Loading.hide(loadingId);
       return api;
     }).catch((jqXHR) => {
@@ -102,8 +107,16 @@ export default class ShowcasePage {
       try {
         err = jqXHR.responseJSON.error.message;
       } catch (e){
-        err = jqXHR;
+        err = jqXHR.statusText;
       }
+      this.api = {
+        adviceset: {
+          id: this.api.adviceset.id,
+          title: "Error",
+          description: err
+        }
+      }
+      Loading.hide(loadingId);
       this.showToast(undefined, {
         title: "Just Good Advice",
         message: `${err}`,
@@ -181,6 +194,33 @@ export default class ShowcasePage {
           message: "Link copying error."
         });
       })
+    });
+  }
+
+  /**
+   * Set the active audience in the switcher
+   */
+  setActiveAudience(audienceId = -1) {
+    const $switcher = $("li.audience-switcher");
+    const $audItem = $(`a[data-audience-id=${audienceId}]`);
+    this.api.audienceType = {
+      id: audienceId,
+      name: $audItem.text() || "Default"
+    }
+    $audItem.addClass("active").siblings().removeClass("active");
+    $switcher.find("span.active-voice").text(`${this.api.audienceType.name} Voice`);
+  }
+
+  /**
+   * Handle changes in audience type
+   */
+  handleChangeAudience() {
+    $("main").on("click", "a[data-action=set-audience]", e => {
+      const $el = $(e.currentTarget);
+      const { audienceId = -1 } = $el.data();
+      this._loadApi(`audienceId=${audienceId}`).then(() => {
+        this.updateFn && this.updateFn();
+      });
     });
   }
 

@@ -55,6 +55,15 @@ export default class showcaseSalesforce extends ShowcasePage {
         });
       });
     });
+
+    // when data is updated after page-load, use this fn
+    this.$loadingContainer = $(".column-card");
+    this.updateFn = (data) => {
+      // update content
+      this.updatePanes();
+      // save state
+      this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+    }
   }
 
   /**

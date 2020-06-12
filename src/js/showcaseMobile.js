@@ -35,6 +35,15 @@ export default class showcaseMobile extends ShowcasePage {
       this.listenForUrlChanges();
       this.handleClickExpandControls();
     });
+
+    // when data is updated after page-load, use this fn
+    this.$loadingContainer = $("main.screen");
+    this.updateFn = (data) => {
+      // update content
+      this.updatePanes();
+      // save state
+      this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+    }
   }
 
   /**
@@ -60,29 +69,6 @@ export default class showcaseMobile extends ShowcasePage {
       $el.tooltip("hide");
       if (sheet == "assumptions") {
         $("#sheet_assumptions").toggleClass("show");
-      }
-    });
-  }
-
-  /**
-   * Handle click on tabbar chat icon to change to Virtual Assistant style
-   */
-  handleClickToggleUx() {
-    $("main").on("click", ".ux-app", e => {
-      e.preventDefault();
-      const $el = $(".ux-app");
-      $el.tooltip("hide");
-      const { uxmode = "app" } = $el.data();
-      if (uxmode == "app") {
-        $el.data("uxmode", "asst");
-        $el.find("i").removeClass("fa-comment-lines").addClass("fa-comments-alt");
-        $("body").addClass("uxmode-asst").removeClass("uxmode-app");
-        this._scrollChatBubbles();
-      } else {
-        $el.data("uxmode", "app");
-        $el.find("i").addClass("fa-comment-lines").removeClass("fa-comments-alt");
-        $("body").addClass("uxmode-app").removeClass("uxmode-asst");
-        this._scrollChatBubbles();
       }
     });
   }

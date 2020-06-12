@@ -31,6 +31,15 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.handleClickBubble();
       this.listenForUrlChanges();
     });
+
+    // when data is updated after page-load, use this fn
+    this.$loadingContainer = $("main.screen");
+    this.updateFn = (data) => {
+      // update content
+      this.updatePanes();
+      // save state
+      this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+    }
   }
 
   /**
@@ -83,7 +92,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       const data = $form.serialize();
 
       this._loadApi(data, $("main.screen")).then(()=> {
-      // update content
+        // update content
         this.updatePanes();
         // save state
         this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);

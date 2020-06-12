@@ -7,6 +7,7 @@ import store from "store";
 import ShowcasePage from "./showcasePage";
 
 export default class showcaseFull extends ShowcasePage {
+
   /**
    * One-time initialization
    */
@@ -48,6 +49,15 @@ export default class showcaseFull extends ShowcasePage {
         });
       });
     });
+
+    // when data is updated after page-load, use this fn
+    this.$loadingContainer = $(".list-all-recommendations");
+    this.updateFn = (data) => {
+      // update content
+      this.updatePanes();
+      // save state
+      this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+    }
   }
 
   /**
@@ -92,10 +102,7 @@ export default class showcaseFull extends ShowcasePage {
       const data = $form.serialize();
 
       this._loadApi(data, $(".row .advice")).then(()=> {
-        // update content
-        this.updatePanes();
-        // save state
-        this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+        this.updateFn();
       });
 
       return false; // don't submit form
