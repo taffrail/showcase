@@ -208,12 +208,12 @@ export default class ShowcasePage {
   /**
 	 * Set the form value from the API data
 	 */
-  _setValue() {
-    const { display: { form: { fieldType, result } } } = this.api;
-    let { value } = result;
+  _setValue($container = this.$advice) {
+    const { display: { form: { fieldType } } } = this.api;
+    let { display: { value } } = this.api;
     if (!value || value == "\"null\"") { return; }
 
-    const $formEls = this.$advice.find("form").find("input,select");
+    const $formEls = $container.find("form").find("input,select");
     $formEls.each((i, el) => {
       const $el = $(el);
       if ($el.is(":radio")) {
@@ -235,8 +235,8 @@ export default class ShowcasePage {
    * https://github.com/RobinHerbots/Inputmask#mask
    */
   // eslint-disable-next-line complexity
-  _handleInputMasks(){
-    const $inputEl = this._findFormInput(this.$advice.find("form"));
+  _handleInputMasks($container = this.$advice){
+    const $inputEl = this._findFormInput($container.find("form"));
     if ($inputEl.length) {
       const maskOpts = {
         showMaskOnHover: false
@@ -296,9 +296,9 @@ export default class ShowcasePage {
   /**
 	 * Focus the 1st visible input on the question form for quicker UX.
 	 */
-  _focusFirstInput() {
+  _focusFirstInput($container = this.$advice) {
     // focus 1st input
-    this._findFormInput(this.$advice.find("form"), "input,textarea,select").first().focus();
+    this._findFormInput($container.find("form"), "input,textarea,select").first().focus();
   }
 
   /**
