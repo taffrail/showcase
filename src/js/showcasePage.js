@@ -39,7 +39,6 @@ export default class ShowcasePage {
 
   set api(data) {
     window.jga.api = data;
-    return data;
   }
 
   get config() {
@@ -50,6 +49,7 @@ export default class ShowcasePage {
     return `/s/${this.api.adviceset.id}`;
   }
 
+  // eslint-disable-next-line accessor-pairs
   set windowTitle(title) {
     document.title = title;
   }
