@@ -18,6 +18,12 @@ export default class ShowcasePage {
     Handlebars.registerHelper("ifNotEquals", function(arg1, arg2, options) {
       return (arg1 != arg2) ? options.fn(this) : options.inverse(this);
     });
+
+    Handlebars.registerHelper("breaklines", (text) => {
+      text = Handlebars.Utils.escapeExpression(text);
+      text = text.replace(/(\r\n|\n|\r)/gm, "<br>");
+      return new Handlebars.SafeString(text);
+    });
   }
 
   /**
