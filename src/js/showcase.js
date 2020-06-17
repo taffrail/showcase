@@ -320,13 +320,7 @@ export default class showcaseFull extends ShowcasePage {
       });
     });
 
-    // if the `display` is the LAST advice node, set a flag
-    const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
-    const lastAdvice = _.last(allAdvice);
-    if (lastAdvice && this.api.display.id == lastAdvice.id) {
-      // allAdvice = allAdvice.slice(0, -1);
-      lastAdvice._isLast = true;
-    }
+    const allAdvice = this.mapAdviceData();
 
     // group all advice into bucketed recommendations
     this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
