@@ -137,18 +137,18 @@ export default class ShowcasePage {
    */
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
-    let allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+    const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
     const lastAdvice = _.last(allAdvice);
     if (lastAdvice && this.api.display.id == lastAdvice.id) {
       lastAdvice._isLast = true;
       // if the last advice node is an Advice Engine Response with this special ID
-      // and `isEnd` property, slice it off the end of the `advice` array
+      // and `isEnd` property, pop it off the end of the `advice` array
       // (so it doesn't appear in the recommendations) and consider the rule "done"...
       if (lastAdvice.id == "-32768" && lastAdvice.properties.isEnd) {
-        // ...but only slice if there are other Advice nodes. the showcase page shouldn't be blank
+        // ...but only pop if there are other Advice nodes. the showcase page shouldn't be blank
         // if there are no other questions or nodes to display.
         if (allAdvice.length > 1) {
-          allAdvice = allAdvice.slice(0, -1);
+          allAdvice.pop();
         } else {
           const { headline: origHeadline } = lastAdvice;
           lastAdvice.headline = "All done!";

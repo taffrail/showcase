@@ -201,7 +201,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
 
     // remove last item, it's always an unanswered question
     if (this.api.display.type == "INPUT_REQUEST") {
-      this.api.answers = this.api.answers.slice(0, -1);
+      this.api.answers.pop();
     }
 
     const allAdvice = this.mapAdviceData();
