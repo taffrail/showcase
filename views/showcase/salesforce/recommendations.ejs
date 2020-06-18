@@ -5,12 +5,12 @@
 				<div>
 					{{#if @first}}
 						<header class="d-flex justify-content-between">
-							<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
+							<h6>{{@key}}</h6>
 							
 							<%- include("_dropdown"); %>
 						</header>
 					{{else}}
-						<h6>{{@key}} <span class="text-muted">({{this.length}})</span></h6>
+						<h6>{{@key}}</h6>
 					{{/if}}
 					<ul class="advice-list recommendations fa-ul">
 						{{#each this}}

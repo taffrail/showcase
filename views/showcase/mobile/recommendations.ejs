@@ -5,12 +5,12 @@
 				<div class="recommendation-title">
 					{{#if @first}}
 						<header class="screen-edge-padding d-flex justify-content-between align-items-baseline">
-							<h6><a href="#collapse_recgroup_{{@index}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse_recgroup_{{@index}}"><i class="fal fa-chevron-right"></i> {{@key}}</a> <span class="text-muted">({{this.length}})</span></h6>
+							<h6><a href="#collapse_recgroup_{{@index}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse_recgroup_{{@index}}"><i class="fal fa-chevron-right"></i> {{@key}}</a></h6>
 							
 							<%- include("_dropdown"); %>
 						</header>
 					{{else}}
-						<h6 class="screen-edge-padding"><a href="#collapse_recgroup_{{@index}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse_recgroup_{{@index}}"><i class="fal fa-chevron-right"></i> {{@key}}</a> <span class="text-muted">({{this.length}})</span></h6>
+						<h6 class="screen-edge-padding"><a href="#collapse_recgroup_{{@index}}" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="collapse_recgroup_{{@index}}"><i class="fal fa-chevron-right"></i> {{@key}}</a></h6>
 					{{/if}}
 				</div>
 				<ul class="screen-edge-padding advice-list recommendations fa-ul collapse {{#ifEquals ../display.type 'ADVICE'}}show{{/ifEquals}}" id="collapse_recgroup_{{@index}}">
