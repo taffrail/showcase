@@ -11,7 +11,7 @@
     "postinstall": "gulp postdeploy"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-pro": "^5.13.0",
+    "@fortawesome/fontawesome-pro": "^5.13.1",
     "bitly": "^7.1.0",
     "bootstrap": "^4.5",
     "clipboard-copy": "^3.1.0",
