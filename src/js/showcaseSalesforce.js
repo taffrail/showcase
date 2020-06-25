@@ -28,7 +28,8 @@ export default class showcaseSalesforce extends ShowcasePage {
     this.listenForUrlChanges();
     this.handleClickExpandControls();
 
-    const [,querystring] = location.search.split("?");
+    // current querystring without "?" prefix
+    const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".column-card")).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);

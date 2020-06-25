@@ -14,7 +14,8 @@ export default class showcaseFull extends ShowcasePage {
   init() {
     super.init();
     this.initCache();
-    const [,querystring] = location.search.split("?");
+    // current querystring without "?" prefix
+    const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".row .advice")).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);

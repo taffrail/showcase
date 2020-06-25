@@ -19,7 +19,8 @@ export default class showcaseMobile extends ShowcasePage {
   init() {
     super.init();
     this.initCache();
-    const [,querystring] = location.search.split("?");
+    // current querystring without "?" prefix
+    const querystring = location.search.substr(1);
     this._loadApi(querystring, $("main.screen")).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
