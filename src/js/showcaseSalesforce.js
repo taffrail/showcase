@@ -275,9 +275,7 @@ export default class showcaseSalesforce extends ShowcasePage {
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
-    this.api.answers = this.api.advice.map(a => {
-      return this._forAdvisor(a);
-    }).filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
     });
@@ -334,7 +332,8 @@ export default class showcaseSalesforce extends ShowcasePage {
           attachment._isInteractiveChart = isChart;
         }
 
-        return a;
+        // manually "fix" any headlines
+        return this._forAdvisor(a);
       });
     });
   }
@@ -484,20 +483,36 @@ export default class showcaseSalesforce extends ShowcasePage {
     $el.data("collapsed", !shown);
   }
 
-  _forAdvisor(obj) {
+  /**
+   * Look in
+   * @param {object} adviceObj Advice item
+   */
+  _forAdvisor(adviceObj) {
     const mapObj = {
       my: "your",
       My: "Your",
-      me: "you"
+      me: "you",
+      I: "You"
     };
 
-    if (obj.tagGroup) {
-      obj.tagGroup.name = obj.tagGroup.name.replace(/my|My|me/gi, (matched) => {
+    if (adviceObj.tagGroup) {
+      // replace my, My, me with their your, Your, you counterparts
+      adviceObj.tagGroup.name = adviceObj.tagGroup.name.replace(new RegExp("(^|\\s)(me|my|My|I)(?=\\s|$)", "g"),(matched) => {
         return mapObj[matched];
       });
     }
 
-    return obj;
+    adviceObj.headline = adviceObj.headline.replace(new RegExp("(^|\\s)(me|my|My|I)(?=\\s|$)", "g"),(matched) => {
+      return mapObj[matched];
+    });
+
+    if (adviceObj.summary){
+      adviceObj.summary = adviceObj.summary.replace(new RegExp("(^|\\s)(me|my|My|I)(?=\\s|$)", "g"),(matched) => {
+        return mapObj[matched];
+      });
+    }
+
+    return adviceObj;
   }
   // #endregion
 }
