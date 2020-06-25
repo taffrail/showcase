@@ -1,4 +1,4 @@
-
+import qs from "querystring";
 import Showcase from "./showcase";
 import ShowcaseMobile from "./showcaseMobile";
 import ShowcaseVirtualAsst from "./showcaseVirtualAsst";
@@ -17,7 +17,13 @@ $("main").on("click", ".demo-nav a[data-target]", e => {
   } else if (target == "salesforce") {
     link += "salesforce/";
   }
-  window.location.href = `${link}${location.search}`;
+  let querystr = qs.parse(location.search.substr(1));
+  if (target == "salesforce") {
+    querystr = Object.assign(querystr, { audienceId: "gRGmgTjX7" });
+  } else {
+    delete querystr.audienceId;
+  }
+  window.location.href = `${link}?${qs.stringify(querystr)}`;
 });
 
 const imports = {
