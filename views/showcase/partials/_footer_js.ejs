@@ -1,4 +1,9 @@
-<script type="text/javascript">window.jga=window.jga||{};window.jga._isMobile=<%= locals.isMobile || false %>;window.jga.api={adviceset:{id: "<%= locals.adviceSetId %>"}};</script>
+<script type="text/javascript">
+	window.jga=window.jga||{};
+	window.jga._isMobile=<%= locals.isMobile || false %>;
+	window.jga.api={adviceset:{id: "<%= locals.adviceSetId %>"}};
+	window.jga.adviceSetId="<%= locals.adviceSetId %>";
+</script>
 <script src="/jquery/dist/jquery.min.js" type="text/javascript"></script>
 <script src="/bootstrap/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 <script src="/dist/js/main.js" type="text/javascript"></script>

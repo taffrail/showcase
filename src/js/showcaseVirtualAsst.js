@@ -39,7 +39,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       // update content
       this.updatePanes();
       // save state
-      this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+      this.history.push(`${this.baseUrl}/?${qs.stringify(this.api.params)}`, this.api);
     }
   }
 
@@ -96,7 +96,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
         // update content
         this.updatePanes();
         // save state
-        this.history.push(`${this.baseUrl}/?${this.api.adviceset._apiUrlQuery}`, this.api);
+        this.history.push(`${this.baseUrl}/?${qs.stringify(this.api.params)}`, this.api);
       });
 
       return false; // don't submit form
@@ -327,7 +327,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
           session: Object.assign({
             ruleSetId: this.api.adviceset._id,
             ruleId: this.api.display.ruleId,
-          }, qs.parse(this.api.adviceset._apiUrlQuery))
+          }, this.api.params)
         }
         const data = {
           advice: window.jga.advice,

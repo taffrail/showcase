@@ -22,7 +22,7 @@ const botMiddleware = (req, res, next) => {
     const qrystr = Object.assign({}, req.query, {
       include: ["filteredVars"], showcase: true
     });
-    const apiUrl = `${process.env.API_HOST}/_/advice/api/${adviceSetId}?${qs.stringify(qrystr)}`;
+    const apiUrl = `${process.env.API_HOST}/api/advice/${adviceSetId}?${qs.stringify(qrystr)}`;
     request.get(apiUrl, {
       headers: {
         "Accept": "application/json; charset=utf-8",

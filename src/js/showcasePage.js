@@ -31,7 +31,7 @@ export default class ShowcasePage {
    */
   init(){
     // set the base URL for loading data
-    window.jga.api.adviceset.apiUrl = `${this.config.api_host}/_/advice/api/${this.api.adviceset.id}`;
+    window.jga.api._links = { self: `${this.config.api_host}/api/advice/${this.api.adviceset.id}` }
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
     // events
@@ -53,6 +53,7 @@ export default class ShowcasePage {
   }
 
   get baseUrl() {
+    console.log("test",this.api)
     return `/s/${this.api.adviceset.id}`;
   }
 
@@ -69,13 +70,12 @@ export default class ShowcasePage {
    * @returns Promise<jqXHR>
    */
   _loadApi(newFormData, $loadingContainer = this.$loadingContainer){
-    // pull querystring from API URL (which has latest passed data)
-    const currFormData = qs.parse(this.api.adviceset._apiUrlQuery);
+    const currFormData = this.api.params;
     const formData = _.assign({
       include: ["filteredVars"],
       showcase: true
     }, currFormData, qs.parse(newFormData));
-    const [apiUrlWithoutQuerystring] = this.api.adviceset.apiUrl.split("?");
+    const [apiUrlWithoutQuerystring] = this.api._links.self.split("?");
     const loadingId = Loading.show($loadingContainer);
 
     return $.ajax({
@@ -92,17 +92,9 @@ export default class ShowcasePage {
       // with an error, so we'll inject that error into the `adviceset`
       // place, so the error shows up on top.
       if (api.error) {
-        this.api = {
-          adviceset: {
-            id: this.api.adviceset.id,
-            title: "Error",
-            description: api.error.message
-          }
-        }
         Loading.hide(loadingId);
         return Promise.reject(new Error(api.error.message));
       }
-
       // update global!
       this.api = api.data;
       this.setActiveAudience(formData.audienceId);
@@ -110,18 +102,20 @@ export default class ShowcasePage {
       return api;
     }).catch((jqXHR) => {
       let err;
-      try {
+      if (jqXHR.responseJSON) {
         err = jqXHR.responseJSON.error.message;
-      } catch (e){
+      } else if (jqXHR.statusText) {
         err = jqXHR.statusText;
+      } else {
+        err = jqXHR.message;
       }
-      this.api = {
+      this.api = _.assign({}, {
         adviceset: {
-          id: this.api.adviceset.id,
+          id: window.jga.adviceSetId, // this is saved to the window on page-load
           title: "Error",
           description: err
         }
-      }
+      });
       Loading.hide(loadingId);
       this.showToast(undefined, {
         title: "Just Good Advice",
