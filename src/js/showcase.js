@@ -57,7 +57,6 @@ export default class showcaseFull extends ShowcasePage {
       // update content
       this.updatePanes();
       // save state
-      console.log("test1111", this.api)
       this.history.push(`${this.baseUrl}/?${qs.stringify(this.api.params)}`, this.api);
     }
   }

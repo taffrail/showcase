@@ -53,7 +53,6 @@ export default class ShowcasePage {
   }
 
   get baseUrl() {
-    console.log("test",this.api)
     return `/s/${this.api.adviceset.id}`;
   }
 
