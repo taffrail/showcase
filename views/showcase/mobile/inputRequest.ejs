@@ -66,6 +66,12 @@
 
 				{{/ifEquals}}
 
+				{{#ifEquals display.form.fieldType "Freetext"}}
+				
+					<input type="text" class="form-control" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
+
+				{{/ifEquals}}
+
 			</div>
 
 			{{#unless display._isLast}}

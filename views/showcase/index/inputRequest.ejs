@@ -58,6 +58,12 @@
 
 				{{/ifEquals}}
 
+				{{#ifEquals display.form.fieldType "Freetext"}}
+				
+					<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
+
+				{{/ifEquals}}
+
 			</div>
 
 			<div class="continue">
