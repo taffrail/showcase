@@ -34,6 +34,11 @@ app.use((req, res, next) => {
   res.locals.API_KEY = process.env.API_KEY;
   res.locals.GTAG_ID = process.env.GTAG_ID;
   res.locals.INTERCOM_APP_ID = process.env.INTERCOM_APP_ID;
+  res.locals.ALGOLIA = {
+    appId: process.env.ALGOLIA_APP_ID,
+    searchKey: process.env.ALGOLIA_SEARCH_KEY,
+    index: process.env.ALGOLIA_INDEX
+  }
   next();
 });
 
