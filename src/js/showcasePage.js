@@ -45,6 +45,10 @@ export default class ShowcasePage {
   }
 
   set api(data) {
+    // save a new property with stringified params
+    // for use in advice builder debug URLs
+    data.paramsAsQueryStr = qs.stringify(data.params);
+
     window.jga.api = data;
   }
 
