@@ -5,6 +5,18 @@
 	window.jga.adviceSetId="<%= locals.adviceSetId %>";
 	window.jga.algolia=<%- JSON.stringify(locals.ALGOLIA); %>;
 </script>
+<% if (locals.SENTRY_DSN) { %>
+<script src="//browser.sentry-cdn.com/5.20.0/bundle.apm.min.js" crossorigin="anonymous"></script>
+<script type="text/javascript">
+	Sentry.init({ 
+		dsn: '<%= locals.SENTRY_DSN %>',
+		integrations: [
+			new Sentry.Integrations.Tracing(),
+		],
+		tracesSampleRate: 0.5
+	});
+</script>
+<% } %>
 <script src="/jquery/dist/jquery.min.js" type="text/javascript"></script>
 <script src="/bootstrap/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 <script src="/dist/js/main.js" type="text/javascript"></script>

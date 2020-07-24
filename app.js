@@ -4,12 +4,30 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const sassMiddleware = require("node-sass-middleware");
+const Sentry = require("@sentry/node");
+const { Integrations: ApmIntegrations } = require("@sentry/apm");
 const sslRedirect = require("heroku-ssl-redirect");
 
 const indexRouter = require("./routes/index");
 const showcaseRouter = require("./routes/showcase");
 
+const pkg = require("./package.json");
 const app = express();
+const isProduction = process.env.NODE_ENV == "production";
+
+if (isProduction) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV,
+    release: `${pkg.name}@${process.env.HEROKU_SLUG_COMMIT.substring(0, 8)}`,
+    integrations: [
+      new ApmIntegrations.Tracing(),
+    ],
+    tracesSampleRate: 0.5
+  });
+
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -39,6 +57,7 @@ app.use((req, res, next) => {
     searchKey: process.env.ALGOLIA_SEARCH_KEY,
     index: process.env.ALGOLIA_INDEX
   }
+  res.locals.SENTRY_DSN = process.env.SENTRY_DSN;
   next();
 });
 
@@ -48,6 +67,10 @@ app.use("/s", showcaseRouter);
 // redirect all requests to HTTPS
 if (!process.env.WEB_HOST.includes("localhost")) {
   app.use(sslRedirect());
+}
+
+if (isProduction) {
+  app.use(Sentry.Handlers.errorHandler());
 }
 
 // catch 404 and forward to error handler
