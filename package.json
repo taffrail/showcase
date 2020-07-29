@@ -1,5 +1,5 @@
 {
-  "name": "justgoodadvice-showcase",
+  "name": "showcase",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "repository": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "postinstall": "gulp postdeploy"
+    "postinstall": "gulp postdeploy",
+    "test": "NODE_ENV=test mocha --exit ./test"
   },
   "dependencies": {
     "@fortawesome/fontawesome-pro": "^5.14.0",
@@ -22,6 +23,7 @@
     "debug": "~4.1.1",
     "ejs": "~3.1.3",
     "express": "~4.17.1",
+    "express-healthcheck": "^0.1.0",
     "handlebars": "^4.7.6",
     "heroku-ssl-redirect": "0.0.4",
     "history": "^4.10.1",
@@ -34,6 +36,7 @@
     "morgan": "~1.10.0",
     "mousetrap": "^1.6.5",
     "mustache": "^4.0.1",
+    "node-fetch": "^2.6.0",
     "node-sass-middleware": "0.11.0",
     "npm": "^6.14.7",
     "numeral": "^2.0.6",
@@ -45,6 +48,7 @@
     "@babel/preset-env": "^7.10.4",
     "babel-loader": "^8.1.0",
     "browser-sync": "^2.26.12",
+    "chai": "^4.2.0",
     "del": "^5.1.0",
     "dotenv": "^8.2.0",
     "eslint": "^7.5.0",
@@ -55,6 +59,7 @@
     "gulp-nodemon": "^2.5.0",
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^2.6.5",
+    "mocha": "^8.0.1",
     "terser-webpack-plugin": "^3.0.8",
     "webpack-stream": "^5.2.1"
   }

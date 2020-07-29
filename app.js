@@ -2,6 +2,7 @@ const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const health = require("./middleware/healthcheck");
 const logger = require("morgan");
 const sassMiddleware = require("node-sass-middleware");
 const Sentry = require("@sentry/node");
@@ -32,6 +33,7 @@ if (isProduction) {
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+app.set("pkg", pkg);
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -45,6 +47,9 @@ app.use(sassMiddleware({
 }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "node_modules/")));
+
+// setup healthcheck
+health.check(app);
 
 app.use((req, res, next) => {
   res.locals.WEB_HOST = process.env.WEB_HOST;
