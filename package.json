@@ -11,7 +11,7 @@
     "postinstall": "gulp postdeploy"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-pro": "^5.13.1",
+    "@fortawesome/fontawesome-pro": "^5.14.0",
     "@sentry/apm": "^5.20.1",
     "@sentry/browser": "^5.20.1",
     "@sentry/node": "^5.20.1",
