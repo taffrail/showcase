@@ -2,6 +2,7 @@ const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const health = require("./middleware/healthcheck");
 const logger = require("morgan");
 const sassMiddleware = require("node-sass-middleware");
 const Sentry = require("@sentry/node");
@@ -45,6 +46,9 @@ app.use(sassMiddleware({
 }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "node_modules/")));
+
+// setup healthcheck
+health.check(app);
 
 app.use((req, res, next) => {
   res.locals.WEB_HOST = process.env.WEB_HOST;
