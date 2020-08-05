@@ -45,24 +45,33 @@
 					</p>
 					<div class="mt-5 typeahead">
 						<hr />
-						<p>Try an Alexa-enabled request to start a new rule.</p>
-						<form class="aiUserRequests">
-							<div class="form-group">
-								<div id="searchbox"></div>
-							</div>
-						</form>
-						<div id="stats"></div>
-						<div id="typeahead_results"><span class="text-muted">Loading...</span></div>
+						<div class="mb-3 position-relative">
+							<img src="//cdn-static.justgoodadvice.com/app/assets/amazon-alexa-logo-h.png" width=215>
+							<div class="mt-3"><a href="#" class="stretched-link" data-action="try-alexa">Try an Alexa-enabled request to start a new rule</a>.</div>
+						</div>
 					</div>
 				</div>
 				<div class="col-md-8 right-pane">
 					<section class="phone">
 						<section class="screenarea">
 							<main class="screen">
-								<header class="title"></header>
-								<div class="answers-chat-bubbles"></div>
-								<div class="advice"></div>
-								<div class="list-all-recommendations"></div>
+								<div class="screen-container">
+									<header class="title"></header>
+									<div class="screen-container__advice">
+										<div class="answers-chat-bubbles"></div>
+										<div class="advice"></div>
+										<div class="list-all-recommendations"></div>
+									</div>
+									<div class="screen-container__alexa" style="display: none;">
+										<form class="aiUserRequests">
+											<div class="form-group">
+												<div id="searchbox"></div>
+											</div>
+										</form>
+										<div id="stats"></div>
+										<div id="typeahead_results"><span class="text-muted">Loading...</span></div>
+									</div>
+								</div>
 							</main>
 							<footer class="tabbar">
 								<a href="./?" data-toggle="tooltip" title="Reset"><i class="fad fa-home"></i></a>

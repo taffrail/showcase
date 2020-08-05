@@ -32,6 +32,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.handleClickBack();
       this.handleClickBubble();
       this.listenForUrlChanges();
+      this.handleClickAlexaRequest();
 
       this.getAdviceSetUserQuestions().then(aiUserRequests => {
         const initialQuery = _.first(aiUserRequests).request;
@@ -143,6 +144,20 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       $bubbles.hide();
       $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
       this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
+    });
+  }
+
+  /**
+   * Click handler for trying an Alexa-enabled request
+   */
+  handleClickAlexaRequest(){
+    $("main").on("click", "a[data-action=try-alexa]", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      $("main").find(".screen-container__advice").fadeOut(()=>{
+        $("main").find(".screen-container__alexa").fadeIn();
+        $(".screen .title").text("Search");
+      });
     });
   }
   // #endregion
