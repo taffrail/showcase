@@ -276,8 +276,8 @@ export default class ShowcasePage {
             params: buildParams(),
             shortUrl: url.includes("localhost") ? null : bitly.link,
             expectedRuleNodeId: isEngineResp ? null : display.id,
-            name: isEngineResp ? "Advice Engine Response" : title,
-            description: isEngineResp ? null : summary,
+            name: isEngineResp ? "Advice Engine Response" : _.truncate(title, { length: 255 }),
+            description: isEngineResp ? null : _.truncate(summary, { length: 255 }),
             position: 1,
             verifiedStatus: isEngineResp ? "error": null,
             verifiedAt: isEngineResp ? new Date() : null
