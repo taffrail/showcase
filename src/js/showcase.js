@@ -236,6 +236,13 @@ export default class showcaseFull extends ShowcasePage {
       if (this.api.display._isLast) {
         $(".center-col").addClass("transition-hide");
         $(".right-col").addClass("centered");
+
+        // if there's < 3 advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list").find("a[data-toggle=collapse]").click();
+          }, 450);
+        }
       }
       // unused center pane
       // this._updateForAdvice();

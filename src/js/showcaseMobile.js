@@ -240,6 +240,13 @@ export default class showcaseMobile extends ShowcasePage {
       if (this.api.display._isLast) {
         // since it's "last", hide the question.
         $(".advice").slideUp(300);
+
+        // if there's < 3 advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list").find("a[data-toggle=collapse]").click();
+          }, 450);
+        }
       }
     }
   }

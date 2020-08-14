@@ -220,6 +220,13 @@ export default class showcaseSalesforce extends ShowcasePage {
       // if this is the LAST advice, hide center column and move advice list into center focus
       if (this.api.display._isLast) {
         this.$advice.find("aside").slideUp(300);
+
+        // if there's < 3 advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list").find("a[data-toggle=collapse]").click();
+          }, 450);
+        }
       }
     }
   }
