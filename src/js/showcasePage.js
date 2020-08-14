@@ -260,7 +260,7 @@ export default class ShowcasePage {
           this.api.variables.forEach(v => {
             params[v.name] = v.value;
           });
-          return params;
+          return _.omit(params, "include", "showcase");
         }
 
         // save scenario to advice builder
