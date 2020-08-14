@@ -8,12 +8,12 @@
 		<a href="#" class="dropdown-item copy-url">
 			<i class="fal fa-link"></i> Copy Link
 		</a>
-		<a href="#" class="dropdown-item copy-url-with-scenario">
-			<i class="fal fa-map-marker-plus"></i> Copy Link & Save Scenario
-		</a>
 		<div class="dropdown-divider"></div>
 		{{#if display}}
 			<div class="dropdown-header">ADVICE BUILDER</div>
+			<a href="#" class="dropdown-item copy-url-with-scenario">
+				<i class="fad fa-plus"></i> Save as Scenario
+			</a>
 			<a href="https://app.justgoodadvice.com/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" class="dropdown-item" target="_blank">
 				<i class="fal fa-pencil"></i> Edit in Advice Builder
 			</a>
@@ -26,6 +26,9 @@
 				<i class="fal fa-code"></i> Open API
 			</a>
 		{{else}}
+			<a href="#" class="dropdown-item copy-url-with-scenario">
+				<i class="fad fa-plus"></i> Save as Scenario
+			</a>
 			<a href="https://app.justgoodadvice.com/advicesets/{{../adviceset._id}}/rules/{{this.0.ruleId}}/debug?{{../paramsAsQueryStr}}" class="dropdown-item" target="_blank">
 				<i class="fal fa-debug"></i> Debug
 			</a>
