@@ -354,12 +354,14 @@ export default class ShowcasePage {
     }
     const toast = Handlebars.compile($("#tmpl_toast").html())(opts);
     // insert into DOM
+    $("#toastWrapper").show();
     $("#toastContainer").append(toast);
     // init Toast component
     $(`#${id}`).toast({
       delay: opts.delay || 2000
     }).on("hidden.bs.toast", function() {
       $(this).remove(); // remove it when it's been hidden
+      $("#toastWrapper").hide();
     }).toast("show"); // finally show it
   }
 
