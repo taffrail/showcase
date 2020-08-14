@@ -162,6 +162,13 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       if (this.api.display._isLast) {
         // since it's "last", hide the question.
         $(".advice").slideUp(300);
+
+        // if there's < 3 advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list").find("a[data-toggle=collapse]").click();
+          }, 450);
+        }
       }
     }
   }
@@ -316,13 +323,13 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       $iframe.on("load", e => {
         // specific data chart is expecting
         // TODO: clean this up in the chart code
-        window.jga.config = {
+        window.jga.config = _.extend(window.jga.config, {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
           colors: ["#605F5E", "#457B9D"],
           width: containerW,
           height: 350
-        }
+        });
         window.jga.advice = {
           session: Object.assign({
             ruleSetId: this.api.adviceset._id,

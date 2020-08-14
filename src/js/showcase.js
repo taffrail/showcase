@@ -236,6 +236,13 @@ export default class showcaseFull extends ShowcasePage {
       if (this.api.display._isLast) {
         $(".center-col").addClass("transition-hide");
         $(".right-col").addClass("centered");
+
+        // if there's < 3 advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list").find("a[data-toggle=collapse]").click();
+          }, 450);
+        }
       }
       // unused center pane
       // this._updateForAdvice();
@@ -460,13 +467,13 @@ export default class showcaseFull extends ShowcasePage {
       $iframe.on("load", e => {
         // specific data chart is expecting
         // TODO: clean this up in the chart code
-        window.jga.config = {
+        window.jga.config = _.extend(window.jga.config, {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
           colors: ["#605F5E", "#6D256C"],
           width: containerW,
           height: 400
-        }
+        });
         window.jga.advice = {
           session: Object.assign({
             ruleSetId: this.api.adviceset._id,

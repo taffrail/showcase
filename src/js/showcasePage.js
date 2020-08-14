@@ -37,6 +37,7 @@ export default class ShowcasePage {
     // events
     this.handleChangeAudience();
     this.handleCopyLink();
+    this.handleCopyLinkAndSaveScenario();
   }
 
   // #region getter/setter
@@ -194,23 +195,20 @@ export default class ShowcasePage {
       const linkGenId = _.uniqueId("link-gen");
       const url = window.location.href;
 
-      // we can't shorten localhost links
-      if (url.includes("localhost")) {
-        return copy(url).then(() => {
-          this.showToast(linkGenId, {
-            title: "Just Good Advice",
-            message: "Link copied!"
-          });
-        });
-      }
-
       // hit the shorten API
       const { display } = this.api;
       const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
 
-      $.post("/s/api/shorten", {
-        long_url: url,
-        title: `${this.api.adviceset.title} - ${title}`
+      new Promise((resolve, reject) => {
+        // we can't shorten localhost links
+        if (url.includes("localhost")) {
+          return resolve({ link: url });
+        } else {
+          return $.post("/s/api/shorten", {
+            long_url: url,
+            title: `${this.api.adviceset.title} - ${title}`
+          });
+        }
       }).then(bitly => {
         // copy to clipboard
         return copy(bitly.link).then(() => {
@@ -219,6 +217,119 @@ export default class ShowcasePage {
             message: "Link copied!"
           });
         });
+      }).catch(e => {
+        console.error(e);
+        this.showToast(linkGenId, {
+          title: "Oops",
+          message: "Link copying error."
+        });
+      })
+    });
+  }
+
+  /**
+   * Handle click to generate and copy a short URL
+   */
+  handleCopyLinkAndSaveScenario() {
+    $("body").on("click", "a.copy-url-with-scenario", e => {
+      e.preventDefault();
+      const linkGenId = _.uniqueId("link-gen");
+      const url = window.location.href;
+
+      // hit the shorten API
+      const { display } = this.api;
+      const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
+      const summary = display.type == "INPUT_REQUEST" ? display.explanation : display.summary;
+      const isEngineResp = display.id == "-32768";
+
+      new Promise((resolve, reject) => {
+        // we can't shorten localhost links
+        if (url.includes("localhost")) {
+          return resolve({ link: url });
+        } else {
+          return $.post("/s/api/shorten", {
+            long_url: url,
+            title: `${this.api.adviceset.title} - ${title}`
+          }).then(resolve);
+        }
+      }).then(bitly => {
+        // get input params
+        const buildParams = () => {
+          // return _.omit(this.api.params, "include", "showcase");
+          const params = { ...this.api.params };
+          this.api.variables.forEach(v => {
+            params[v.name] = v.value;
+          });
+          return _.omit(params, "include", "showcase");
+        }
+
+        // save scenario to advice builder
+        return $.ajax({
+          url: `${this.config.api_host}/api/advicescenario`,
+          type: "POST",
+          headers: {
+            "Accept": "application/json; chartset=utf-8",
+            "Authorization": `Bearer ${this.config.api_key}`
+          },
+          data: {
+            ruleSetId: this.api.adviceset._id,
+            params: buildParams(),
+            shortUrl: url.includes("localhost") ? null : bitly.link,
+            expectedRuleNodeId: isEngineResp ? null : display.id,
+            name: isEngineResp ? "Advice Engine Response" : _.truncate(title, { length: 255 }),
+            description: isEngineResp ? null : _.truncate(summary, { length: 255 }),
+            position: 1,
+            verifiedStatus: isEngineResp ? "error": null,
+            verifiedAt: isEngineResp ? new Date() : null
+          }
+        }).then((api) => {
+          const { data: scenario } = api;
+          const adviceBuilderScenarioUrl = `${this.config.api_host}/advicesets/${this.api.adviceset._id}/advicescenarios/${scenario.id}/show`;
+
+          const $modalHtml = $(`
+            <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" id="link_modal_${linkGenId}">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">All Set!</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <p>A <span class="underline-highlight">short link was copied to your clipboard</span> and an Advice Builder scenario was saved.</p>
+                    <ul class="fa-ul">
+                      <li>
+                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <a href="${adviceBuilderScenarioUrl}" target="_blank">Advice Builder Scenario</a>
+                      </li>
+                      <li>
+                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <a href="${bitly.link}" target="_blank">${bitly.link}</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `);
+
+          $("body").append($modalHtml);
+          $(`#link_modal_${linkGenId}`).modal().on("hidden.bs.modal", e=> {
+            $(`#link_modal_${linkGenId}`).remove();
+          });
+
+          // copy to clipboard
+          return copy(bitly.link).then(() => {
+            this.showToast(linkGenId, {
+              title: "Just Good Advice",
+              message: "Link copied!"
+            });
+          });
+        })
       }).catch(e => {
         console.error(e);
         this.showToast(linkGenId, {
@@ -267,12 +378,14 @@ export default class ShowcasePage {
     }
     const toast = Handlebars.compile($("#tmpl_toast").html())(opts);
     // insert into DOM
+    $("#toastWrapper").show();
     $("#toastContainer").append(toast);
     // init Toast component
     $(`#${id}`).toast({
       delay: opts.delay || 2000
     }).on("hidden.bs.toast", function() {
       $(this).remove(); // remove it when it's been hidden
+      $("#toastWrapper").hide();
     }).toast("show"); // finally show it
   }
 
