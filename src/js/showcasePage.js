@@ -253,12 +253,14 @@ export default class ShowcasePage {
           }).then(resolve);
         }
       }).then(bitly => {
+        const paramsEntitiesUsed = [];
         // get input params
         const buildParams = () => {
           // return _.omit(this.api.params, "include", "showcase");
           const params = { ...this.api.params };
           this.api.variables.forEach(v => {
             params[v.name] = v.value;
+            paramsEntitiesUsed.push(v.id);
           });
           return _.omit(params, "include", "showcase");
         }
@@ -274,6 +276,7 @@ export default class ShowcasePage {
           data: {
             ruleSetId: this.api.adviceset._id,
             params: buildParams(),
+            paramsEntitiesUsed: paramsEntitiesUsed,
             shortUrl: url.includes("localhost") ? null : bitly.link,
             expectedRuleNodeId: isEngineResp ? null : display.id,
             name: isEngineResp ? "Advice Engine Response" : _.truncate(title, { length: 255 }),
