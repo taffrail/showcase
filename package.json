@@ -59,7 +59,7 @@
     "gulp-nodemon": "^2.5.0",
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^2.6.5",
-    "mocha": "^8.1.0",
+    "mocha": "^8.1.1",
     "terser-webpack-plugin": "^4.0.0",
     "webpack-stream": "^5.2.1"
   }
