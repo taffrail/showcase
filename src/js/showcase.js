@@ -448,6 +448,7 @@ export default class showcaseFull extends ShowcasePage {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
+    this.api._referenceDocumentsExist = this.api.adviceset.referenceDocuments.length > 0;
 
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
