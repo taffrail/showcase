@@ -258,15 +258,14 @@ export default class ShowcasePage {
           }).then(resolve);
         }
       }).then(bitly => {
-        // get input params
-        const buildParams = () => {
-          // return _.omit(this.api.params, "include", "showcase");
-          const params = { ...this.api.params };
-          this.api.variables.forEach(v => {
-            params[v.name] = v.value;
-          });
-          return _.omit(params, "include", "showcase");
-        }
+        const paramsEntitiesUsed = [];
+        let inputParams = { ...this.api.params };
+        // Build inputParams with values
+        this.api.variables.forEach(v => {
+          inputParams[v.name] = v.value;
+          paramsEntitiesUsed.push(v.id);
+        });
+        inputParams = _.omit(inputParams, "include", "showcase");
 
         // save scenario to advice builder
         return $.ajax({
@@ -278,7 +277,8 @@ export default class ShowcasePage {
           },
           data: {
             ruleSetId: this.api.adviceset._id,
-            params: buildParams(),
+            params: inputParams,
+            paramsEntitiesUsed: paramsEntitiesUsed,
             shortUrl: url.includes("localhost") ? null : bitly.link,
             expectedRuleNodeId: isEngineResp ? null : display.id,
             name: isEngineResp ? "Advice Engine Response" : _.truncate(title, { length: 255 }),
