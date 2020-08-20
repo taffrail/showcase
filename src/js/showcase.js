@@ -254,9 +254,11 @@ export default class showcaseFull extends ShowcasePage {
       // if this is the LAST advice, hide center column and move advice list into center focus
       if (this.api.display._isLast) {
         $(".center-col").hide();// .addClass("transition-hide");
-        // $(".right-col").addClass("centered");
-
-        $(".right-col").hide().removeClass("col-lg-6").addClass("centered col-lg-10");
+        if (this.isTaffrail) {
+          $(".right-col").hide().removeClass("col-lg-6").addClass("centered col-lg-10");
+        } else {
+          $(".right-col").addClass("centered");
+        }
 
         // if there's < 3 expandable advice recommendations displayed, expand them automatically
         if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
@@ -265,7 +267,9 @@ export default class showcaseFull extends ShowcasePage {
           }, 450);
         }
 
-        $(".right-col").show()
+        if (this.isTaffrail) {
+          $(".right-col").show();
+        }
       }
       // unused center pane
       // this._updateForAdvice();
