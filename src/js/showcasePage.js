@@ -212,7 +212,7 @@ export default class ShowcasePage {
           return $.post("/s/api/shorten", {
             long_url: url,
             title: `${this.api.adviceset.title} - ${title}`
-          });
+          }).then(resolve);
         }
       }).then(bitly => {
         // copy to clipboard
