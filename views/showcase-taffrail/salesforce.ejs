@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<%- include("partials/_head"); %>
+  </head>
+  <body class="showcase showcase--advice showcase--advice_salesforce">
+
+		<header class="banner bg-stripes fixed-top">
+			<div class="container">
+				<img src="/img/logo_white.svg" height="28">
+			</div>
+		</header>
+		
+		<main class="container">
+			<header class="row">
+				<div class="col-md-6">&nbsp;</div>
+				<div class="col-md-6 demo-nav">
+					<ul class="nav nav-pills">
+						<%- include("_voices_dropdown"); %>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="full">Main</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="mobile">Mobile</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="asst">Virtual Assistant</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link active" href="#" data-target="salesforce">Salesforce</a>
+						</li>
+					</ul>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-12 sf-header"></div>
+			</div>
+			<div class="row no-gutters mx-n3">
+				<div class="col-8 sf-left"></div>
+				<div class="col-4 sf-right">
+					<div class="advice-card">
+						<div class="column-card">
+							<div class="advice">
+								<header class="column-card-header"><span>Just Good Advice</span></header>
+								<section class="raised-card">
+									<aside>
+
+									</aside>
+									<div class="list-all-recommendations"></div>
+								</section>
+							</div>
+						</div>
+					</div>
+					<div class="sf-related"></div>
+				</div>
+			</div>
+			<div class="push"></div>
+		</main>
+
+		<%- include("partials/_footer"); %>
+		<%- include("partials/_toast"); %>
+
+		<!--templates-->
+<%- include("salesforce/adviceSetDetails"); %>
+<%- include("salesforce/inputRequest"); %>
+<%- include("salesforce/advice"); %>
+<%- include("salesforce/recommendations"); %>
+
+<%- include("salesforce/answers"); %>
+<%- include("salesforce/assumptions"); %>
+
+<div id="__init" data-page-init="showcaseSalesforce"></div>
+
+		<%- include("partials/_footer_js"); %>
+  </body>
+</html>

@@ -1,7 +1,6 @@
 import _ from "lodash";
 
 class AjaxLoading {
-
   /**
    * Show a mask + loader over a container to indicate loading
    * @param {jQuery} $container jQuery container element
@@ -9,7 +8,10 @@ class AjaxLoading {
    */
   static show($container, ajaxId = _.uniqueId("loading")) {
     const imgWH = 44;
-    const imgPath = "/img/Rainbow-1s-200px.svg";
+    let imgPath = "/img/Rainbow-1s-200px.svg";
+    if (location.pathname.includes("deck")){
+      imgPath = "/img/Wave-1s-200px.svg";
+    }
 
     if ($(`#loader_${ajaxId}`).length) {
       this.hideAjaxLoader(ajaxId);

@@ -26,6 +26,7 @@ export default class showcaseFull extends ShowcasePage {
       this.handleClickContinue();
       this.handleClickBack();
       this.handleClickAssumption();
+      this.handleCollapseAdviceSummaries();
       this.handleCollapseAssumptionGroup();
       this.listenForUrlChanges();
       this.handleClickExpandControls();
@@ -45,7 +46,7 @@ export default class showcaseFull extends ShowcasePage {
       Mousetrap.bind("?", () => {
         this.showToast(undefined,{
           title: "Keyboard Shortcuts",
-          message: "Press <code>a</code> for advice.<br>Press <code>s</code> for assumptions.",
+          message: "Press <code>a</code> to expand advice.<br>Press <code>s</code> to expand assumptions.",
           delay: 5000
         });
       });
@@ -130,7 +131,7 @@ export default class showcaseFull extends ShowcasePage {
    * Click handler for assumptions or Q&A
    */
   handleClickAssumption() {
-    $(".answers, .assumptions").on("click", ".a > a", e => {
+    $(".answers, .assumptions").on("click", ".a > a, a.statement", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
@@ -145,7 +146,26 @@ export default class showcaseFull extends ShowcasePage {
   }
 
   /**
-   * Listener for pening/closing assumption groups
+   * Listener for opening/closing advice summaries
+   */
+  handleCollapseAdviceSummaries() {
+    $(".advice-list").on("show.bs.collapse", "li .collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
+      const $faLi = $toggler.prev("span.fa-li");
+      $faLi.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
+    });
+
+    $(".advice-list").on("hidden.bs.collapse", "li .collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
+      const $faLi = $toggler.prev("span.fa-li");
+      $faLi.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
+    });
+  }
+
+  /**
+   * Listener for opening/closing assumption groups
    */
   handleCollapseAssumptionGroup() {
     $(".assumptions").on("show.bs.collapse", "ol.assumptions-list.collapse", (e) => {
@@ -156,7 +176,7 @@ export default class showcaseFull extends ShowcasePage {
       $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
     });
 
-    $(".assumptions").on("hide.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+    $(".assumptions").on("hidden.bs.collapse", "ol.assumptions-list.collapse", (e) => {
       const $this = $(e.currentTarget);
       const { groupId } = $this.find("li").first().data();
       store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
@@ -178,7 +198,6 @@ export default class showcaseFull extends ShowcasePage {
 
       let $collapsibles;
       if (expand == "assumptions") {
-        $("#pills-assumptions-tab").click();
         $collapsibles = $(".assumptions-list.collapse");
       } else if (expand == "advice") {
         $collapsibles = $(".advice-list").find(".collapse");
@@ -226,23 +245,27 @@ export default class showcaseFull extends ShowcasePage {
     this._setCurrentIdx();
 
     // render
-    $(".center-col").removeClass("transition-hide");
-    $(".right-col").removeClass("centered");
+    $(".center-col").removeClass("transition-hide").show();
+    $(".right-col").removeClass("centered col-lg-10").addClass("col-lg-6");
 
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
     } else {
       // if this is the LAST advice, hide center column and move advice list into center focus
       if (this.api.display._isLast) {
-        $(".center-col").addClass("transition-hide");
-        $(".right-col").addClass("centered");
+        $(".center-col").hide();// .addClass("transition-hide");
+        // $(".right-col").addClass("centered");
 
-        // if there's < 3 advice recommendations displayed, expand them automatically
-        if (_.flatMap(this.api.recommendations).length < 3) {
+        $(".right-col").hide().removeClass("col-lg-6").addClass("centered col-lg-10");
+
+        // if there's < 3 expandable advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
           setTimeout(()=>{
             $(".advice-list").find("a[data-toggle=collapse]").click();
           }, 450);
         }
+
+        $(".right-col").show()
       }
       // unused center pane
       // this._updateForAdvice();
@@ -335,19 +358,8 @@ export default class showcaseFull extends ShowcasePage {
     // add icon
     Object.keys(this.api.recommendations).forEach((key, idx) => {
       // add icons
+      // eslint-disable-next-line complexity
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
-        // use thumbs up icon by default
-        // let icon = "fad fa-thumbs-up";
-        let icon = "fad fa-arrow-circle-right";
-        // support To Do/Completed checklist icons
-        if (key.includes("To Do")) {
-          icon = "fad fa-circle";
-        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fad fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-
         // determine if this is an interactive chart attachment
         const { attachment } = a;
         let isChart = false;
@@ -356,6 +368,23 @@ export default class showcaseFull extends ShowcasePage {
           // handlebars helper
           attachment._isInteractiveChart = isChart;
         }
+
+        let icon = "fad fa-arrow-circle-right";
+        if (this.isTaffrail && a.summary && isChart) {
+          icon = "fal fa-chevron-down";
+        } else if (this.isTaffrail && a.summary) {
+          icon = "fal fa-chevron-right";
+        } else if (this.isTaffrail){
+          icon = "fal fa-circle invisible-bullet";
+        }
+        // support To Do/Completed checklist icons
+        if (key.includes("To Do")) {
+          icon = "fad fa-circle";
+        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
+          icon = "fad fa-check-circle";
+        }
+        // save the helper for handlebars
+        a._icon = icon;
 
         return a;
       });
@@ -456,7 +485,7 @@ export default class showcaseFull extends ShowcasePage {
       const $chart = $(`[data-id=${chartId}]`);
       const { src } = $chart.data();
       // parent container
-      const containerW = $chart.parents(".rounded.bg-white").outerWidth();
+      const containerW = $chart.parents(".advice-group").outerWidth();
       const $iframe = $chart.find("iframe");
       // set chart container size
       $chart.css({
@@ -470,7 +499,7 @@ export default class showcaseFull extends ShowcasePage {
         window.jga.config = _.extend(window.jga.config, {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: ["#605F5E", "#6D256C"],
+          colors: this.isTaffrail ? ["#023E7D", "#0466C8"] : ["#605F5E", "#6D256C"],
           width: containerW,
           height: 400
         });

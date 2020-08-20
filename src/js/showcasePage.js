@@ -57,8 +57,13 @@ export default class ShowcasePage {
     return window.jga.config;
   }
 
+  get isTaffrail() {
+    return location.pathname.includes("deck");
+  }
+
   get baseUrl() {
-    return `/s/${this.api.adviceset.id}`;
+    const prefix = (this.isTaffrail) ? "deck" : "s";
+    return `/${prefix}/${this.api.adviceset.id}`;
   }
 
   // eslint-disable-next-line accessor-pairs
@@ -344,7 +349,7 @@ export default class ShowcasePage {
    * Set the active audience in the switcher
    */
   setActiveAudience(audienceId = -1) {
-    const $switcher = $("li.audience-switcher");
+    const $switcher = $(".audience-switcher");
     const $audItem = $(`a[data-audience-id=${audienceId}]`);
     this.api.audienceType = {
       id: audienceId,

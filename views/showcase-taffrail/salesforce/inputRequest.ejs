@@ -1,0 +1,77 @@
+<script id="tmpl_adviceInputRequest" type="text/x-handlebars-template">
+	<div class="question">
+		<header class="d-flex justify-content-between icon-row">
+			{{#if display.explanation}}
+				<div>
+					<p class="lead">{{display.explanation}}</p>
+					<h4>{{display.question}}</h4>
+				</div>
+			{{else}}
+				<h4>{{display.question}}</h4>
+			{{/if}}
+			
+			<%- include("_dropdown"); %>
+		</header>
+		
+		<hr>
+		<form data-id="{{display.id}}">
+
+			<div class="form-group">
+
+				{{#ifEquals display.form.fieldType "Radio"}}
+				
+					{{#each display.form.values}}
+						<div class="custom-control custom-radio">
+							<input type="radio" name="{{../display.form.name}}" value="{{value}}" id="{{id}}" class="custom-control-input" required>
+							<label class="custom-control-label" for="{{id}}">{{label}}
+							{{#if helpText}}
+							<small class="form-text text-muted">{{helpText}}</small>
+							{{/if}}
+							</label>
+						</div>
+					{{/each}}
+
+				{{/ifEquals}}
+
+				{{#ifEquals display.form.fieldType "Boolean"}}
+
+					<div class="custom-control custom-radio">
+						<input type="radio" name="{{display.form.name}}" value="true" id="yes_{{display.id}}" class="custom-control-input required">
+						<label class="custom-control-label" for="yes_{{display.id}}">Yes</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" name="{{display.form.name}}" value="false" id="no_{{display.id}}" class="custom-control-input" required>
+						<label class="custom-control-label" for="no_{{display.id}}">No</label>
+					</div>
+
+				{{/ifEquals}}
+
+				{{#ifEquals display.form.fieldType "Number"}}
+				
+					<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
+
+				{{/ifEquals}}
+
+				{{#ifEquals display.form.fieldType "Percent"}}
+				
+					<input type="text" class="form-control w-50" id="{{display.id}}" name="{{display.form.name}}" data-type="{{display.form.fieldType}}" autocomplete="off" required>
+
+				{{/ifEquals}}
+
+				{{#ifEquals display.form.fieldType "Freetext"}}
+				
+					<input type="text" class="form-control" id="{{display.id}}" name="{{display.form.name}}" autocomplete="off" required>
+
+				{{/ifEquals}}
+
+			</div>
+
+			<div class="continue">
+				{{#unless display._isFirst}}
+					<a href="#" class="btn btn-outline-primary" data-action="back">Back</a>
+				{{/unless}}
+				<button type="submit" data-id="{{display.id}}" class="btn btn-primary">Next</button>
+			</div>
+		</form>
+	</div>
+</script>

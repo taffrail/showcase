@@ -1,0 +1,285 @@
+@import 'variables';
+@import '../../../node_modules/bootstrap/scss/bootstrap';
+
+@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
+@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
+@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/light';
+@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
+@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/brands';
+
+@import '../loading';
+@import 'halyard';
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#toastWrapper {
+  display: none;
+  min-height: 200px;
+  min-width: 320px;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 9999999;
+
+  #toastContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
+
+// all HR
+hr {
+	border-top-color: $gray-light;
+}
+
+.push {
+	height: $footer-height;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.dropdown-menu {
+	.dropdown-item {
+		align-items: center;
+		display: flex;
+
+		i {
+			padding-right: .25rem;
+			width: 1.25rem;
+		}
+	}
+	.dropdown-header {
+		font-weight: 400;
+	}
+}
+
+.showcase.showcase--advice {
+	background: $gray-light;
+
+	// logo+navbar
+	header.top {
+		.text-dark {
+			font-weight: 400; //regular
+		}
+	}
+
+	main.container {
+		background-color: $white;
+		margin-bottom: $footer-height / 2;
+		min-height: 100%;
+	}
+
+	.advice-set-details {
+		h1 {
+			a {
+				color: $body-color;
+			}
+		}
+
+		p.lead {
+			margin-bottom: 0;
+		}
+
+		hr {
+			margin: 2rem 0;
+		}
+	}
+
+	.jumbotron {
+		margin-bottom: 0;
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.center-col {
+		transition:.3s;
+
+		&.transition-hide {
+			flex: 0 0 0%;
+			max-width: 0%;
+			padding: 0 !important;
+			transition: .2s;
+
+			> div {
+				display: none;
+			}
+		}
+	}
+
+	// expand/switch view in left side
+	.assumption-controls {
+		// color: $gray;
+		font-size: $font-size-sm;
+		// margin-bottom: 1rem;
+
+		a {
+			// color: $gray;
+
+			&:hover {
+				// color: $primary;
+			}
+		}
+	}
+
+	.assumption-intro {
+		margin-bottom: 0;
+	}
+
+	// expandable header
+	.assumption-group {
+		// margin-bottom: .25rem;
+
+		a {
+			// color: $gray-dark;
+			text-decoration: none;
+
+			&:hover {
+				// color: $primary;
+			}
+
+			i {
+				min-width: $grid-gutter-width / 2; // width of chevron-down
+			}
+		}
+	}
+
+	.answers,
+	.assumptions {
+		font-size: $font-size-sm;
+		font-weight: 300;
+
+		ol {
+			list-style-type: none;
+			padding-left: $grid-gutter-width / 2;
+		}
+
+		li {
+			border-radius: $border-radius;
+			// margin-bottom: 1rem;
+			padding-left: $grid-gutter-width / 9;
+			position: relative; // for .stretched-link
+
+			&.active,
+			&:hover {
+				color: $primary;
+
+				a {
+					color: $primary;
+				}
+			}
+
+			a {
+				@extend .stretched-link;
+				color: $body-color;
+				text-decoration: none;
+			}
+		}
+	}
+
+	.list-all-recommendations {
+		header {
+			// border-bottom: 1px solid lighten($secondary, 60%);
+			// box-shadow: 0 -3px 0 lighten($secondary, 60%) inset;
+			margin-bottom: $headings-margin-bottom;
+		}
+
+		h5 {
+			margin-bottom: 0;
+			width: 100%;
+		}
+	
+		.advice-list {
+			&.fa-ul {
+				margin-left: 1.5rem;
+			}
+
+			li {
+				font-size: 110%;
+				// line-height: $line-height-lg;
+				margin-bottom: $headings-margin-bottom;
+				position: relative;
+	
+				.invisible-bullet {
+					color: $white;
+				}
+	
+				&:hover {
+					.invisible-bullet {
+						color: $gray-500;
+					}
+				}
+			}
+	
+			a[data-toggle=collapse] {
+				@extend .stretched-link;
+				// color: $body-color;
+	
+				&:hover {
+					// color: $primary;
+					text-decoration: none;
+				}
+			}
+	
+			.summary {
+				color: $gray;
+				line-height: $line-height-sm;
+			}
+		}
+	}
+
+	// inside a modal
+	.variables-container {
+
+		.variables {
+			font-family: $font-family-monospace;
+			font-size: 12px;
+			td:nth-child(1) {
+				max-width: 1px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			td:nth-child(2) {
+				max-width: 1px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+		}
+	}
+
+  footer {
+    &.footer {
+			height: $footer-height;
+    }
+
+    hr {
+      margin-top: 0;
+    }
+
+    section {
+      color: $gray;
+      font-size: 12px;
+      text-align: right;
+
+      p {
+        margin-bottom: 0;
+      }
+
+      a {
+        color: $gray;
+        text-decoration: none;
+
+        &:hover {
+          color: $primary;
+        }
+      }
+    }
+  }
+}

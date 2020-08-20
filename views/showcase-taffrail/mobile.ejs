@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<%- include("partials/_head"); %>
+  </head>
+  <body class="showcase showcase--advice showcase--advice_mobile">
+
+		<header class="banner bg-stripes fixed-top">
+			<div class="container">
+				<img src="/img/logo_white.svg" height="28">
+			</div>
+		</header>
+		
+		<main class="container">
+			<header class="row">
+				<div class="col-md-6">
+					<div class="advice-set-details"><h2>&nbsp;</h2><p class="lead text-muted">Loading...</p></div>
+				</div>
+				<div class="col-md-6 demo-nav">
+					<ul class="nav nav-pills">
+						<%- include("_voices_dropdown"); %>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="full">Main</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link active" href="#" data-target="mobile">Mobile</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="asst">Virtual Assistant</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="#" data-target="salesforce">Salesforce</a>
+						</li>
+					</ul>
+				</div>
+			</header>
+			<div class="row">
+				<div class="col-md-4 left-intro">
+					<p class="mt-3">
+						Our Advice API is omnichannel and can be integrated into existing mobile apps for customized and personalized experiences.
+					</p>
+				</div>
+				<div class="col-md-8 right-pane">
+					<section class="phone">
+						<section class="screenarea">
+							<main class="screen">
+								<header class="title"></header>
+								<a class="action-assumptions" href="#" data-sheet="assumptions" data-toggle="tooltip" title="View assumptions"><i class="fal fa-clipboard-list-check"></i></a>
+								<div class="advice"></div>
+								<div class="list-all-recommendations"></div>
+								<div id="sheet_assumptions" class="sheet screen-edge-padding">
+									<header>
+										<h6>Assumptions</h6>
+										<a href="#" data-sheet="assumptions"><i class="fal fa-times"></i></a>
+									</header>
+									<div class="assumptions"></div>
+								</div>
+							</main>
+							<footer class="tabbar">
+								<a href="./?" data-toggle="tooltip" title="Reset"><i class="fal fa-home"></i></a>
+								<a href="#"><i class="fal fa-dollar-sign"></i></a>
+								<a href="#" class="center"><i class="fal fa-bullseye-pointer"></i></a>
+								<a href="#"><i class="fal fa-user"></i></a>
+								<a href="#"><i class="fal fa-cog"></i></a>
+							</footer>
+						
+						</section>
+					</section>
+				</div>
+			</div>
+			<div class="push"></div>
+		</main>
+
+		<!--templates-->
+<%- include("mobile/adviceSetDetails"); %>
+<%- include("mobile/inputRequest"); %>
+<%- include("mobile/recommendations"); %>
+<%- include("mobile/assumptions"); %>
+<%- include("mobile/answers-chatbubbles"); %>
+
+		<%- include("partials/_footer"); %>
+		<%- include("partials/_toast"); %>
+
+<div id="__init" data-page-init="showcaseMobile"></div>
+
+		<%- include("partials/_footer_js"); %>
+  </body>
+</html>
