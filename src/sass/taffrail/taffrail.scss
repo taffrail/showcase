@@ -112,10 +112,21 @@ hr {
 		}
 	}
 
+	.assumptions-outer-container {
+		// border-right: 1px inset $gray-200;
+	}
+
+	.assumptions-container-header {
+		padding-bottom: $headings-margin-bottom;
+
+		h5 {
+			margin-bottom: 0;
+		}
+	}
+
 	// expand/switch view in left side
 	.assumption-controls {
 		// color: $gray;
-		font-size: $font-size-sm;
 		// margin-bottom: 1rem;
 
 		a {
@@ -152,7 +163,6 @@ hr {
 	.answers,
 	.assumptions {
 		font-size: $font-size-sm;
-		font-weight: 300;
 
 		ol {
 			list-style-type: none;
@@ -160,7 +170,6 @@ hr {
 		}
 
 		li {
-			border-radius: $border-radius;
 			// margin-bottom: 1rem;
 			padding-left: $grid-gutter-width / 9;
 			position: relative; // for .stretched-link
@@ -178,6 +187,56 @@ hr {
 				@extend .stretched-link;
 				color: $body-color;
 				text-decoration: none;
+			}
+		}
+	}
+
+	.advice-outer-container {
+		.center-col {
+			.advice {
+				@extend .rounded;
+				@extend .shadow-sm;
+				padding: 1rem;
+				margin-top: -1rem;
+
+				.question .lead {
+					// color: $gray;
+				}
+
+				form {
+					padding: .5rem;
+
+					.custom-control {
+						margin-bottom: .5rem;
+
+						label {
+							cursor: pointer;
+							width: 100%;
+						}
+					}
+				}
+			}
+		}
+
+		// when recommendations are on the right side building up
+		// fade them out a bit
+		.right-col:not(.centered) {
+			font-size: $font-size-sm;
+			opacity: .7;
+		}
+
+		// only when centered...
+		.right-col.centered {
+			@extend .offset-1;
+
+			.advice-attachment.advice-chart--interactive {
+				@extend .rounded;
+				@extend .shadow-sm;
+				margin: 1rem 0 1rem 0;
+				margin-left: -5%;
+				padding: 1rem;
+				max-width: 105%;
+				width: 105%;
 			}
 		}
 	}
@@ -200,7 +259,6 @@ hr {
 			}
 
 			li {
-				font-size: 110%;
 				// line-height: $line-height-lg;
 				margin-bottom: $headings-margin-bottom;
 				position: relative;

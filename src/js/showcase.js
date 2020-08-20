@@ -379,7 +379,7 @@ export default class showcaseFull extends ShowcasePage {
         } else if (this.isTaffrail && a.summary) {
           icon = "fal fa-chevron-right";
         } else if (this.isTaffrail){
-          icon = "fal fa-circle invisible-bullet";
+          icon = "fal fa-chevron-circle-right invisible-bullet";
         }
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
@@ -448,7 +448,7 @@ export default class showcaseFull extends ShowcasePage {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
-    this.api._referenceDocumentsExist = this.api.adviceset.referenceDocuments.length > 0;
+    this.api._referenceDocumentsExist = this.api._recommendationsExist && this.api.adviceset.referenceDocuments.length > 0;
 
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
