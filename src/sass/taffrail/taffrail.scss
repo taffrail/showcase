@@ -2,18 +2,14 @@
 @import '../../../node_modules/bootstrap/scss/bootstrap';
 
 @import '../../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
-@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
+// @import '../../../node_modules/@fortawesome/fontawesome-pro/scss/regular';
 @import '../../../node_modules/@fortawesome/fontawesome-pro/scss/light';
-@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
-@import '../../../node_modules/@fortawesome/fontawesome-pro/scss/brands';
+// @import '../../../node_modules/@fortawesome/fontawesome-pro/scss/duotone';
+// @import '../../../node_modules/@fortawesome/fontawesome-pro/scss/brands';
+@import "../../../node_modules/placeholder-loading/src/scss/placeholder-loading";
 
 @import '../loading';
-@import 'halyard';
-
-html, body {
-  height: 100%;
-  margin: 0;
-}
+// @import 'halyard';
 
 #toastWrapper {
   display: none;
@@ -31,262 +27,278 @@ html, body {
   }
 }
 
-// all HR
-hr {
-	border-top-color: $gray-light;
+.ph-item {
+	border: 0 none;
+	padding: 0;
+
+	> * {
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
-.push {
-	height: $footer-height;
-}
+// mixin
+@mixin text-link($color: $body-color, $hoverUnderline: true) {
+	color: $color;
+	text-decoration: none;
 
-.text-sm {
-  font-size: $font-size-sm;
-}
-
-.dropdown-menu {
-	.dropdown-item {
-		align-items: center;
-		display: flex;
-
-		i {
-			padding-right: .25rem;
-			width: 1.25rem;
+	@if $hoverUnderline == true {
+		&:hover {
+			text-decoration: underline;
 		}
 	}
-	.dropdown-header {
-		font-weight: 400;
-	}
 }
 
-.showcase.showcase--advice {
-	background: $gray-light;
-
-	// logo+navbar
-	header.top {
-		.text-dark {
-			font-weight: 400; //regular
-		}
-	}
+.showcase.showcase--redux {
+	background: $gray-200;
 
 	main.container {
 		background-color: $white;
-		margin-bottom: $footer-height / 2;
-		min-height: 100%;
 	}
 
-	.advice-set-details {
-		h1 {
-			a {
-				color: $body-color;
-			}
-		}
+	header.row {
+		border-bottom: 1px solid $gray-light;
+	}
 
-		p.lead {
-			margin-bottom: 0;
-		}
-
-		hr {
-			margin: 2rem 0;
+	nav.menubar {
+		a.text-dark {
+			@include text-link($body-color, false);
+			font-size: $font-size-sm;
 		}
 	}
 
 	.jumbotron {
 		margin-bottom: 0;
-		padding-left: 0;
-		padding-right: 0;
+		padding-bottom: 1rem;
 	}
 
-	.center-col {
-		transition:.3s;
+	.advice-set-details {
+		h1 {
+			font-weight: bold;
+			margin-bottom: 0;
 
-		&.transition-hide {
-			flex: 0 0 0%;
-			max-width: 0%;
-			padding: 0 !important;
-			transition: .2s;
-
-			> div {
-				display: none;
+			a {
+				@include text-link();
 			}
 		}
+	}
+
+	.main-content {
+		padding-top: 0;
 	}
 
 	.assumptions-outer-container {
-		// border-right: 1px inset $gray-200;
+		border-right: 1px solid $gray-light;
+		padding-top: 1rem;
+
+		footer {
+			margin: 2rem 0 2.5rem 0;
+		}
 	}
 
 	.assumptions-container-header {
-		padding-bottom: $headings-margin-bottom;
-
-		h5 {
-			margin-bottom: 0;
-		}
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
 	}
 
-	// expand/switch view in left side
-	.assumption-controls {
-		// color: $gray;
-		// margin-bottom: 1rem;
-
-		a {
-			// color: $gray;
-
-			&:hover {
-				// color: $primary;
-			}
-		}
+	.assumptions-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		justify-content: space-between;
 	}
 
-	.assumption-intro {
-		margin-bottom: 0;
-	}
-
-	// expandable header
-	.assumption-group {
-		// margin-bottom: .25rem;
-
-		a {
-			// color: $gray-dark;
-			text-decoration: none;
-
-			&:hover {
-				// color: $primary;
-			}
-
-			i {
-				min-width: $grid-gutter-width / 2; // width of chevron-down
-			}
-		}
-	}
-
-	.answers,
 	.assumptions {
+		color: $gray-light;
 		font-size: $font-size-sm;
 
-		ol {
-			list-style-type: none;
-			padding-left: $grid-gutter-width / 2;
-		}
+		// expandable header
+		.assumption-group {
+			margin-bottom: .25rem;
 
-		li {
-			// margin-bottom: 1rem;
-			padding-left: $grid-gutter-width / 9;
-			position: relative; // for .stretched-link
+			> a {
+				@include text-link($gray-dark, false);
+				font-weight: bold;
 
-			&.active,
-			&:hover {
-				color: $primary;
-
-				a {
-					color: $primary;
+				i {
+					max-width: 1rem;
+					width: 1rem;
 				}
 			}
+		}
 
-			a {
-				@extend .stretched-link;
-				color: $body-color;
-				text-decoration: none;
+		// list
+		ol.assumptions-list {
+			@extend .list-unstyled;
+			padding-left: .75rem;
+
+			&.ungrouped {
+				padding-left: 0;
+			}
+
+			li {
+				border-radius: $border-radius;
+				padding: .25rem;
+				position: relative;
+
+				&.active,
+				&:hover {
+					background-color: $gray-200;
+				}
+
+				a {
+					@include text-link($gray-dark, false);
+					@extend .stretched-link;
+				}
 			}
 		}
 	}
 
 	.advice-outer-container {
-		.center-col {
-			.advice {
-				@extend .rounded;
-				@extend .shadow-sm;
-				padding: 1rem;
-				margin-top: -1rem;
+		min-height: 600px;
+		padding-top: 1rem;
+		width: 100%;
 
-				.question .lead {
-					// color: $gray;
-				}
+		.question {
+			// @extend .shadow-sm;
+			margin-bottom: 2rem;
+			// margin-top: -.5rem;
+			// padding: 1rem;
 
-				form {
-					padding: .5rem;
+			.explanation {
+				color: $gray-dark;
+			}
 
-					.custom-control {
-						margin-bottom: .5rem;
+			form {
+				padding: .5rem;
 
-						label {
-							cursor: pointer;
-							width: 100%;
-						}
+				.custom-control {
+					margin-bottom: .5rem;
+
+					label {
+						cursor: pointer;
+						width: 100%;
 					}
 				}
 			}
 		}
 
-		// when recommendations are on the right side building up
-		// fade them out a bit
-		.right-col:not(.centered) {
-			font-size: $font-size-sm;
-			opacity: .7;
-		}
+		.list-all-recommendations {
+			margin-bottom: 2rem;
 
-		// only when centered...
-		.right-col.centered {
-			@extend .offset-1;
+			&.unfocused {
+				border-top: 1px solid $gray-light;
+				// opacity: .4;
+				padding-top: 2rem;
+			}
+		}	
 
-			.advice-attachment.advice-chart--interactive {
-				@extend .rounded;
-				@extend .shadow-sm;
-				margin: 1rem 0 1rem 0;
-				margin-left: -5%;
-				padding: 1rem;
-				max-width: 105%;
-				width: 105%;
+		.advice-group {
+			header {
+				margin-bottom: $headings-margin-bottom;
 			}
 		}
-	}
 
-	.list-all-recommendations {
-		header {
-			// border-bottom: 1px solid lighten($secondary, 60%);
-			// box-shadow: 0 -3px 0 lighten($secondary, 60%) inset;
-			margin-bottom: $headings-margin-bottom;
+		.advice-group + .advice-group {
+			margin-top: 2rem;
 		}
 
-		h5 {
-			margin-bottom: 0;
-			width: 100%;
-		}
-	
 		.advice-list {
 			&.fa-ul {
 				margin-left: 1.5rem;
 			}
 
 			li {
-				// line-height: $line-height-lg;
-				margin-bottom: $headings-margin-bottom;
-				position: relative;
-	
-				.invisible-bullet {
-					color: $white;
-				}
-	
-				&:hover {
-					.invisible-bullet {
-						color: $gray-500;
-					}
+				margin-bottom: 1rem;
+
+				a {
+					@include text-link();
 				}
 			}
-	
-			a[data-toggle=collapse] {
-				@extend .stretched-link;
-				// color: $body-color;
-	
-				&:hover {
-					// color: $primary;
-					text-decoration: none;
-				}
-			}
-	
+
 			.summary {
 				color: $gray;
+				font-size: $font-size-sm;
 				line-height: $line-height-sm;
+				margin-bottom: 0;
+				margin-top: .25rem;
+			}
+		}
+
+		// only when centered...
+		.advice-attachment.advice-chart--interactive {
+			margin: -.5rem 0 1rem -2.5rem;
+			padding: 0;
+		}
+	}
+
+	.recommendations-on-this-page {
+		position: relative;
+	}
+
+	.advice-on-this-page {
+		position: absolute;
+		top: 0;
+
+		h5 {
+			@include text-link($gray-dark, false);
+			font-size: $font-size-sm;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		li {
+			color: $gray-light;
+			border-radius: $border-radius;
+			font-size: $font-size-sm;
+			padding: .25rem;
+			position: relative;
+
+			&.active,
+			&:hover {
+				background-color: $gray-200;
+			}
+
+			a {
+				@include text-link($gray-dark, false);
+				@extend .stretched-link;
+			}
+		}
+	}
+
+	.references {
+		margin: 3rem 0;
+
+		.card {
+			@extend .shadow-sm;
+		}
+	}
+
+	footer {
+		&.footer {
+			margin: 2rem;
+
+			hr {
+				margin-top: 0;
+			}
+
+			section {
+				color: $gray;
+				font-size: $font-size-sm;
+				text-align: right;
+
+				p {
+					margin-bottom: 0;
+				}
+
+				a {
+					@include text-link($gray-dark, false);
+
+					&:hover {
+						color: $primary;
+					}
+				}
 			}
 		}
 	}
@@ -311,33 +323,4 @@ hr {
 			}
 		}
 	}
-
-  footer {
-    &.footer {
-			height: $footer-height;
-    }
-
-    hr {
-      margin-top: 0;
-    }
-
-    section {
-      color: $gray;
-      font-size: 12px;
-      text-align: right;
-
-      p {
-        margin-bottom: 0;
-      }
-
-      a {
-        color: $gray;
-        text-decoration: none;
-
-        &:hover {
-          color: $primary;
-        }
-      }
-    }
-  }
 }

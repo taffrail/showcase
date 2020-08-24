@@ -1,12 +1,12 @@
 <script id="tmpl_adviceInputRequest" type="text/x-handlebars-template">
 	<div class="question">
-		<header class="d-flex justify-content-between align-items-center icon-row">
-			<h4>{{display.question}}</h4>
+		<header class="mb-1 d-flex align-items-center justify-content-between">
+			<h4 class="mb-0 mr-2">{{display.question}}</h4>
 			<%- include("_dropdown"); %>
 		</header>
 		{{#if display.explanation}}
-			<div>
-				<p class="">{{display.explanation}}</p>
+			<div class="explanation">
+				<p>{{display.explanation}}</p>
 			</div>
 		{{/if}}
 		<hr>

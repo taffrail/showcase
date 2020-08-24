@@ -2,10 +2,10 @@
 	{{#if _recommendationsExist}}
 		
 		{{#each recommendations}}
-			<div class="advice-group">
+			<div class="advice-group" id="group_{{@key}}">
 				{{#if @first}}
-					<header class="d-flex justify-content-between">
-						<h5>{{@key}}</h5>
+					<header class="d-flex align-items-center justify-content-between">
+						<h5 class="mr-2 mb-0">{{@key}}</h5>
 						<%- include("_dropdown"); %>
 					</header>
 				{{else}}
@@ -14,13 +14,13 @@
 				<ul class="advice-list recommendations fa-ul">
 					{{#each this}}
 						<li data-id="{{id}}" data-idx="{{idx}}">
-							<span class="fa-li {{#if attachment}}show{{/if}}">
-								<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}" target="_blank">
-									<i class="{{_icon}}"></i>
+							<span class="{{#if summary}}fa-li{{/if}} {{#if attachment}}show{{/if}}">
+								<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">
+									{{#if summary}}<i class="{{_icon}}"></i>{{/if}}
 								</a>
 							</span>
+							<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}" target="_blank">{{headline}}</a>
 							{{#if summary}}
-								<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">{{headline}} {{#if attachment}}<i class="fal fa-image"></i>{{/if}}</a>
 								<div class="collapse {{#if attachment}}show{{/if}}" id="collapse_{{id}}">
 									{{#if attachment}}
 										{{#if attachment._isInteractiveChart}}
@@ -44,15 +44,13 @@
 											</section>
 										{{/if}}
 									{{/if}}
-									<p class="summary"><small>{{breaklines summary}}</small></p>
+									<p class="summary">{{breaklines summary}}</p>
 									{{#if actions.length}}
 										{{#each actions}}
 											<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
 										{{/each}}
 									{{/if}}
 								</div>
-							{{else}}
-								{{headline}}
 							{{/if}}
 						</li>
 					{{/each}}
@@ -63,14 +61,29 @@
 	{{/if}}
 
 	{{#if _referenceDocumentsExist}}
-		<hr />
-		<div class="advice-group">
+		<div class="advice-group references" id="group_references">
+			<hr />
 			<header><h5>References & Sources</h5></header>
-			<ul class="advice-list">
+			<div class="card-deck">
 				{{#each adviceset.referenceDocuments}}
-					<li><a href="{{url}}" target="_blank">{{name}}</a></li>
+					<div class="card" style="max-width: 18rem;">
+						<div id="img_container_{{id}}">
+							<div class="ph-item mb-0">
+								<div class="ph-col-12">
+									<div class="ph-row">
+										<div class="ph-picture" style="width:290px;height:180px;"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="card-body">
+							<h6 class="card-title">{{name}}</h6>
+							<p class="card-text">{{body}}</p>
+							<a class="card-link" href="{{url}}" target="_blank">Read more <i class="fal fa-external-link"></i></a>
+						</div>
+					</div>
 				{{/each}}
-			</ul>
+			</div>
 		</div>
 	{{/if}}
 </script>

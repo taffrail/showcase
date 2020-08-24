@@ -78,14 +78,14 @@ export default class ShowcasePage {
    * @param {object} newFormData Form data from input request.
    * @returns Promise<jqXHR>
    */
-  _loadApi(newFormData, $loadingContainer = this.$loadingContainer){
+  _loadApi(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = this.isTaffrail){
     const currFormData = this.api.params;
     const formData = _.assign({
       include: ["filteredVars"],
       showcase: true
     }, currFormData, qs.parse(newFormData));
     const [apiUrlWithoutQuerystring] = this.api._links.self.split("?");
-    const loadingId = Loading.show($loadingContainer);
+    const loadingId = Loading.show($loadingContainer, undefined, usePlaceholder);
 
     return $.ajax({
       url: apiUrlWithoutQuerystring,

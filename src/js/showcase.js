@@ -53,7 +53,9 @@ export default class showcaseFull extends ShowcasePage {
     });
 
     // when data is updated after page-load, use this fn
-    this.$loadingContainer = $(".list-all-recommendations");
+    this.$loadingContainer = this.isTaffrail ? $(".advice-outer-container") : $(".list-all-recommendations");
+    this.scrollTo = 0;
+
     this.updateFn = (data) => {
       // update content
       this.updatePanes();
@@ -70,6 +72,9 @@ export default class showcaseFull extends ShowcasePage {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
+    if (this.isTaffrail) {
+      this.updateOnThisPageRecommendationsList();
+    }
     this.updateVariablesList();
   }
 
@@ -81,7 +86,7 @@ export default class showcaseFull extends ShowcasePage {
     this.$advice.on("submit", "form", e => {
       const $form = $(e.currentTarget);
 
-      $("html, body").animate({ scrollTop: 0 });
+      $("html, body").animate({ scrollTop: this.scrollTo });
 
       // convert values from masked to unmasked for form submission
       const $inputs = this._findFormInput($form);
@@ -103,7 +108,7 @@ export default class showcaseFull extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $(".row .advice")).then(()=> {
+      this._loadApi(data, $(".row .advice"), false).then(()=> {
         this.updateFn();
       });
 
@@ -120,7 +125,7 @@ export default class showcaseFull extends ShowcasePage {
       const { _currIdx } = this.api.display;
       const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
       if (!display) { return; }
-      $("html, body").animate({ scrollTop: 0 });
+      $("html, body").animate({ scrollTop: this.scrollTo });
       // temp override `display` global prop to insert question into HTML
       this.api.display = display;
       this.updateMainPane();
@@ -135,7 +140,7 @@ export default class showcaseFull extends ShowcasePage {
       e.preventDefault();
       const $this = $(e.currentTarget);
       const data = $this.closest("li").data();
-      $("html, body").animate({ scrollTop: 0 });
+      $("html, body").animate({ scrollTop: this.scrollTo });
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
       const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == data.idx; });
@@ -149,14 +154,14 @@ export default class showcaseFull extends ShowcasePage {
    * Listener for opening/closing advice summaries
    */
   handleCollapseAdviceSummaries() {
-    $(".advice-list").on("show.bs.collapse", "li .collapse", (e) => {
+    $(".list-all-recommendations").on("show.bs.collapse", ".collapse", (e) => {
       const $this = $(e.currentTarget);
       const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
       const $faLi = $toggler.prev("span.fa-li");
       $faLi.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
     });
 
-    $(".advice-list").on("hidden.bs.collapse", "li .collapse", (e) => {
+    $(".list-all-recommendations").on("hidden.bs.collapse", ".collapse", (e) => {
       const $this = $(e.currentTarget);
       const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
       const $faLi = $toggler.prev("span.fa-li");
@@ -238,41 +243,57 @@ export default class showcaseFull extends ShowcasePage {
   /**
 	 * Update center Advice/Question pane
 	 */
+  // eslint-disable-next-line complexity
   updateMainPane(){
     // update the window title
     this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
 
     this._setCurrentIdx();
 
-    // render
-    $(".center-col").removeClass("transition-hide").show();
-    $(".right-col").removeClass("centered col-lg-10").addClass("col-lg-6");
+    if (this.isTaffrail){
+      $(".question").show();
+      if (this.api.display.type == "INPUT_REQUEST") {
+        this._updateForInputRequest();
+        $(".list-all-recommendations").addClass("unfocused");
+        this.moveTableOfContents();
+      } else {
+        // if this is the LAST advice, hide center column and move advice list into center focus
+        if (this.api.display._isLast) {
+          $(".question").hide();
+          $(".list-all-recommendations").removeClass("unfocused");
 
-    if (this.api.display.type == "INPUT_REQUEST") {
-      this._updateForInputRequest();
-    } else {
-      // if this is the LAST advice, hide center column and move advice list into center focus
-      if (this.api.display._isLast) {
-        $(".center-col").hide();// .addClass("transition-hide");
-        if (this.isTaffrail) {
-          $(".right-col").hide().removeClass("col-lg-6").addClass("centered col-lg-10");
-        } else {
-          $(".right-col").addClass("centered");
+          // if there's < 3 expandable advice recommendations displayed, expand them automatically
+          if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
+            setTimeout(()=>{
+              $(".advice-list .collapse").collapse("show");
+            }, 50);
+          }
         }
-
-        // if there's < 3 expandable advice recommendations displayed, expand them automatically
-        if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
-          setTimeout(()=>{
-            $(".advice-list").find("a[data-toggle=collapse]").click();
-          }, 450);
-        }
-
-        if (this.isTaffrail) {
-          $(".right-col").show();
-        }
+        this.moveTableOfContents();
       }
-      // unused center pane
-      // this._updateForAdvice();
+    } else {
+      // render
+      $(".center-col").removeClass("transition-hide").show();
+      $(".right-col").removeClass("centered col-lg-10").addClass("col-lg-6");
+
+      if (this.api.display.type == "INPUT_REQUEST") {
+        this._updateForInputRequest();
+      } else {
+        // if this is the LAST advice, hide center column and move advice list into center focus
+        if (this.api.display._isLast) {
+          $(".center-col").hide();// .addClass("transition-hide");
+          $(".right-col").addClass("centered");
+
+          // if there's < 3 expandable advice recommendations displayed, expand them automatically
+          if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
+            setTimeout(()=>{
+              $(".advice-list .collapse").collapse("show");
+            }, 450);
+          }
+        }
+        // unused center pane
+        // this._updateForAdvice();
+      }
     }
   }
 
@@ -350,7 +371,7 @@ export default class showcaseFull extends ShowcasePage {
       // add `_isOpen` flag to each item
       const arr = this.api.assumptions[key];
       this.api.assumptions[key] = arr.map(a => {
-        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
+        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, true);
         return a;
       });
     });
@@ -373,19 +394,19 @@ export default class showcaseFull extends ShowcasePage {
           attachment._isInteractiveChart = isChart;
         }
 
-        let icon = "fad fa-arrow-circle-right";
+        const iconFam = this.isTaffrail ? "fal" : "fad";
+        let icon = "";
         if (this.isTaffrail && a.summary && isChart) {
-          icon = "fal fa-chevron-down";
+          icon = `${iconFam} fa-chevron-down`;
         } else if (this.isTaffrail && a.summary) {
-          icon = "fal fa-chevron-right";
-        } else if (this.isTaffrail){
-          icon = "fal fa-chevron-circle-right invisible-bullet";
-        }
-        // support To Do/Completed checklist icons
-        if (key.includes("To Do")) {
-          icon = "fad fa-circle";
-        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fad fa-check-circle";
+          icon = `${iconFam} fa-chevron-right`;
+        } else {
+          // support To Do/Completed checklist icons
+          if (key.includes("To Do")) {
+            icon = `${iconFam} fa-circle`;
+          } else if (key.includes("Completed") || key.includes("Accomplishments")) {
+            icon = `${iconFam} fa-check-circle`;
+          }
         }
         // save the helper for handlebars
         a._icon = icon;
@@ -407,6 +428,7 @@ export default class showcaseFull extends ShowcasePage {
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
+      "RecommendationsOnThisPage": this.isTaffrail ? Handlebars.compile($("#tmpl_groupedRecommendationsAdviceListTOC").html()) : "",
       "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
@@ -431,7 +453,11 @@ export default class showcaseFull extends ShowcasePage {
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
-    $(".assumptions-container").toggle(this.api._answersExist);
+    if (this.isTaffrail) {
+      $(".assumptions-container > div").css("visibility", this.api._answersExist ? "visible" : "hidden");
+    } else {
+      $(".assumptions-container").toggle(this.api._answersExist);
+    }
     // only show expand button if there's grouped assumptions besides "ungrouped"
     $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
@@ -455,6 +481,19 @@ export default class showcaseFull extends ShowcasePage {
     $(".list-all-recommendations").html(str);
 
     this._setupChartsAll();
+    this.fetchReferencesOpenGraph();
+  }
+
+  /**
+	 * Update advice list headings by group
+	 */
+  updateOnThisPageRecommendationsList() {
+    // render
+    const numGroups = _.flatMap(this.api.recommendations).length;
+    if (numGroups && numGroups >= 2) {
+      const str = this.TEMPLATES["RecommendationsOnThisPage"](this.api);
+      $(".recommendations-on-this-page").html(str);
+    }
   }
 
   /**
@@ -479,6 +518,50 @@ export default class showcaseFull extends ShowcasePage {
     $(".variables").html(str);
   }
   // #endregion
+
+  /**
+   * Fetch OG meta for each reference
+   */
+  fetchReferencesOpenGraph() {
+    const { referenceDocuments } = this.api.adviceset;
+    if (referenceDocuments.length) {
+      const fns = [];
+      referenceDocuments.forEach((rd, i) => {
+        const { id, url, name } = rd;
+
+        fns.push(new Promise((resolve, reject) => {
+          const cache = store.get(`ogImage_${id}`);
+          if (cache && new Date().getTime() < cache.expires) {
+            const $img = $(`<img src="${cache.url}" class="card-img-top" alt="${name}" width=290>`);
+            $(`#img_container_${id}`).html($img);
+            return resolve();
+          } else {
+            return $.post("/deck/api/ogs", { url: url }, (meta) => {
+              if (!meta.success) {
+                console.error(meta);
+                return resolve();
+              }
+
+              const { ogImage = [] } = meta;
+              // pull the card image, default to a grayscale picsum
+              const [img = {}] = ogImage;
+              const { url = "https://picsum.photos/290/180?grayscale&random="+i } = img;
+
+              // update DOM
+              const $img = $(`<img src="${url}" class="card-img-top" alt="${name}" width=290>`);
+              $(`#img_container_${id}`).html($img);
+              store.set(`ogImage_${id}`, {
+                url: url,
+                expires: new Date().getTime() + 3600000 // 1 hour TTL
+              })
+              return resolve();
+            });
+          }
+        }));
+      });
+      return Promise.all(fns);
+    }
+  }
 
   /**
    * Sets up chart
@@ -538,6 +621,22 @@ export default class showcaseFull extends ShowcasePage {
         this.setupChart(true, chart.id);
       }, 500);
     });
+  }
+
+  /**
+   * Helper to move position of TOC
+   */
+  moveTableOfContents() {
+    const $toc = $(".advice-on-this-page");
+    if ($toc.length) {
+      const currPos = $toc.position().top;
+      const newPos = $(".list-all-recommendations").position().top;
+      if (currPos != newPos) {
+        $(".advice-on-this-page").animate({
+          top: newPos
+        });
+      }
+    }
   }
 
   /**
