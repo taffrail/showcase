@@ -11,7 +11,6 @@ const sslRedirect = require("heroku-ssl-redirect");
 
 const indexRouter = require("./routes/index");
 const showcaseRouter = require("./routes/showcase");
-const showcaseTaffrailRouter = require("./routes/showcase-taffrail");
 
 const pkg = require("./package.json");
 const app = express();
@@ -63,7 +62,6 @@ app.use((req, res, next) => {
 
 app.use("/", indexRouter);
 app.use("/s", showcaseRouter);
-app.use("/deck", showcaseTaffrailRouter);
 
 // redirect all requests to HTTPS
 if (!process.env.WEB_HOST.includes("localhost")) {

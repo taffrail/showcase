@@ -1,18 +1,14 @@
 <script id="tmpl_adviceInputRequest" type="text/x-handlebars-template">
 	<div class="question">
-		<header class="d-flex justify-content-between icon-row">
-			{{#if display.explanation}}
-				<div>
-					<p class="lead">{{display.explanation}}</p>
-					<h4>{{display.question}}</h4>
-				</div>
-			{{else}}
-				<h4>{{display.question}}</h4>
-			{{/if}}
-			
+		<header class="mb-1 d-flex align-items-center justify-content-between">
+			<h4 class="mb-0 mr-2">{{display.question}}</h4>
 			<%- include("_dropdown"); %>
 		</header>
-		
+		{{#if display.explanation}}
+			<div class="explanation">
+				<p>{{display.explanation}}</p>
+			</div>
+		{{/if}}
 		<hr>
 		<form data-id="{{display.id}}">
 

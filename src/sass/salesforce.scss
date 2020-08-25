@@ -1,0 +1,151 @@
+// use blueishgreen as primary color to show alternate appearance
+// https://coolors.co/283d3b-197278-edddd4-c44536-772e25
+
+$primary_sf: #197278;
+$primary_sf_dark: #283D3B;
+$primary_sf_light: #EDDDD4;
+$them-bg-color: #E5E5EA;
+// $me-bg-color: #0B93F6;
+$me-bg-color: $primary_sf_light;
+
+$sf_bg: #b0c4df;
+$sf_brand_primary: rgb(21, 137, 238);
+$sf_brand_link: #006dcc;
+$sf_bg_img: "/img/salesforce7@2x.png";
+
+main {
+	a {
+		color: $primary_sf;
+	}
+}
+
+.demo-nav {
+	.active {
+		background-color: $primary_sf;
+		color: $white;
+	}
+}
+
+.sf-header {
+	background: $sf_bg url($sf_bg_img) 0 0 no-repeat;
+	background-size: (2730px / 2);
+	height: 315px;
+	margin-top: 2rem;
+}
+
+.sf-left,
+.sf-related {
+	background: $sf_bg url($sf_bg_img) 0 0 no-repeat;
+	background-size: (2730px / 2);
+	min-height: 675px;
+}
+
+.sf-left {
+	background-position: 0 -315px;
+}
+
+.sf-right {
+	background-color: $sf_bg;
+}
+
+.sf-related {
+	background-position: -912px -315px;
+}
+
+.advice-card {
+	padding: 6px 13px 7px 8px;  
+}
+
+.column-card {
+	background-color: $white;
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.10);
+	border-radius: 3px;
+	padding: 1rem;
+
+	.column-card-header {
+		border-bottom: 1px solid $gray-400;
+		color: $black;
+		font-weight: bold;
+		margin-bottom: 1rem;
+		padding-bottom: .75rem;
+
+		span {
+			border-bottom: 3px solid $sf_brand_primary;
+			padding: 0 .75rem .75rem .75rem;
+		}
+	}
+
+	.raised-card {
+		border-radius: 3px;
+		box-shadow: 0 2px 4px 4px rgba(0,0,0,.16);
+		font-size: 90%;
+		min-height: 300px;
+		overflow: auto;
+
+		a {
+			color: $sf_brand_link;
+
+			&:not(.dropdown-item):not(.btn) {
+				border-bottom: 1px dotted $sf_brand_link;
+			}
+
+			&:hover {
+				text-decoration: none;
+			}
+		}
+
+		.fa-li a {
+			border-bottom: 0 !important;
+		}
+
+		.btn.btn-primary {
+			background-color: $sf_brand_link;
+			border-color: $sf_brand_link;
+			&:focus {
+				box-shadow: 0 0 0 0.2rem rgba($sf_brand_link,0.5)
+			}
+		}
+
+		.btn.btn-outline-primary {
+			border-color: $sf_brand_link;
+
+			&:hover {
+				background-color: $sf_brand_link;
+				color: $white;
+			}
+		}
+
+		.question,
+		.list-all-recommendations {
+			padding: 1rem ;
+		}
+
+		.custom-control-input:checked ~ .custom-control-label::before {
+			background-color: $sf_brand_link;
+			border-color: $sf_brand_link;
+		}
+
+		.custom-control-input:focus ~ .custom-control-label::before {
+			box-shadow: 0 0 0 0.2rem rgba($sf_brand_link,0.25);
+			border-color: $sf_brand_link;
+		}
+
+		.custom-control-input:not(:disabled):active ~ .custom-control-label::before {
+			background-color: lighten($sf_brand_link, 20%);
+			border-color: lighten($sf_brand_link, 20%);
+		}
+
+		.form-control {
+			&:focus {
+				border-color: $sf_brand_link;
+				box-shadow: 0 0 0 0.2rem rgba($sf_brand_link, .25);
+			}
+		}
+
+		.list-all-recommendations {
+			.advice-list {
+				margin-left: 1.8rem;
+			}
+		}
+	}
+}

@@ -57,12 +57,8 @@ export default class ShowcasePage {
     return window.jga.config;
   }
 
-  get isTaffrail() {
-    return location.pathname.includes("deck");
-  }
-
   get baseUrl() {
-    const prefix = (this.isTaffrail) ? "deck" : "s";
+    const prefix = "s";
     return `/${prefix}/${this.api.adviceset.id}`;
   }
 
@@ -76,9 +72,11 @@ export default class ShowcasePage {
   /**
    * Capture new form data, merge with current state and make new Advice API request.
    * @param {object} newFormData Form data from input request.
+   * @param {jQuery} $loadingContainer
+   * @param {boolean} usePlaceholder
    * @returns Promise<jqXHR>
    */
-  _loadApi(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = this.isTaffrail){
+  _loadApi(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = true){
     const currFormData = this.api.params;
     const formData = _.assign({
       include: ["filteredVars"],
@@ -366,7 +364,7 @@ export default class ShowcasePage {
     $("main").on("click", "a[data-action=set-audience]", e => {
       const $el = $(e.currentTarget);
       const { audienceId = -1 } = $el.data();
-      this._loadApi(`audienceId=${audienceId}`).then(() => {
+      this._loadApi(`audienceId=${audienceId}`, undefined, false).then(() => {
         this.updateFn && this.updateFn();
       });
     });

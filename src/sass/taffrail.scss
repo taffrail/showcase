@@ -344,3 +344,15 @@
 		}
 	}
 }
+
+.showcase {
+	@import "mobile";
+}
+
+.showcase--redux_mobile.showcase--redux_mobile-asst {
+	@import "virtual-asst";
+}
+
+.showcase--redux_salesforce {
+	@import "salesforce";
+}

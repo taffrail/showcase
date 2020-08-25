@@ -30,11 +30,11 @@ export default class showcaseSalesforce extends ShowcasePage {
 
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
-    this._loadApi(querystring, $(".column-card")).then(api => {
+    this._loadApi(querystring, $(".column-card"), false).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
-      // this.updateAdviceSetDetails();
+      this.updateAdviceSetDetails();
       this.updatePanes();
 
       // keyboard shortcuts
@@ -105,7 +105,7 @@ export default class showcaseSalesforce extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $(".column-card")).then(()=> {
+      this._loadApi(data, $(".column-card"), false).then(()=> {
         // update content
         this.updatePanes();
         // save state
@@ -320,12 +320,12 @@ export default class showcaseSalesforce extends ShowcasePage {
       this.api.recommendations[key] = this.api.recommendations[key].map(a => {
         // use thumbs up icon by default
         // let icon = "fad fa-thumbs-up";
-        let icon = "far fa-arrow-right";
+        let icon = "fal fa-arrow-right";
         // support To Do/Completed checklist icons
         if (key.includes("To Do")) {
-          icon = "far fa-circle";
+          icon = "fal fa-circle";
         } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
+          icon = "fal fa-check-circle";
         }
         // save the helper for handlebars
         a._icon = icon;

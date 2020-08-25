@@ -20,10 +20,7 @@ class AjaxLoading {
       ;
     } else {
       const imgWH = 44;
-      let imgPath = "/img/Rainbow-1s-200px.svg";
-      if (location.pathname.includes("deck")){
-        imgPath = "/img/Wave-1s-200px.svg";
-      }
+      const imgPath = "/img/Wave-1s-200px.svg";
       const height = $container.outerHeight();
       const width = $container.outerWidth();
       const containerPosition = $container.offset();

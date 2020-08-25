@@ -125,8 +125,7 @@ function sass() {
     includePaths: [node_modules] // find node_modules above the cwd
   }
   return src([
-    "src/sass/main.scss",
-    "src/sass/taffrail/taffrail.scss"
+    "src/sass/taffrail.scss"
   ])
     .pipe(sourcemaps.init())
     .pipe(gSass(options).on("error", gSass.logError))

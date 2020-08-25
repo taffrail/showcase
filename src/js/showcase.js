@@ -53,7 +53,7 @@ export default class showcaseFull extends ShowcasePage {
     });
 
     // when data is updated after page-load, use this fn
-    this.$loadingContainer = this.isTaffrail ? $(".advice-outer-container") : $(".list-all-recommendations");
+    this.$loadingContainer = $(".advice-outer-container");
     this.scrollTo = 0;
 
     this.updateFn = (data) => {
@@ -72,9 +72,7 @@ export default class showcaseFull extends ShowcasePage {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
-    if (this.isTaffrail) {
-      this.updateOnThisPageRecommendationsList();
-    }
+    this.updateOnThisPageRecommendationsList();
     this.updateVariablesList();
   }
 
@@ -250,50 +248,25 @@ export default class showcaseFull extends ShowcasePage {
 
     this._setCurrentIdx();
 
-    if (this.isTaffrail){
-      $(".question").show();
-      if (this.api.display.type == "INPUT_REQUEST") {
-        this._updateForInputRequest();
-        $(".list-all-recommendations").addClass("unfocused");
-        this.moveTableOfContents();
-      } else {
-        // if this is the LAST advice, hide center column and move advice list into center focus
-        if (this.api.display._isLast) {
-          $(".question").hide();
-          $(".list-all-recommendations").removeClass("unfocused");
-
-          // if there's < 3 expandable advice recommendations displayed, expand them automatically
-          if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
-            setTimeout(()=>{
-              $(".advice-list .collapse").collapse("show");
-            }, 50);
-          }
-        }
-        this.moveTableOfContents();
-      }
+    $(".question").show();
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this._updateForInputRequest();
+      $(".list-all-recommendations").addClass("unfocused");
+      this.moveTableOfContents();
     } else {
-      // render
-      $(".center-col").removeClass("transition-hide").show();
-      $(".right-col").removeClass("centered col-lg-10").addClass("col-lg-6");
+      // if this is the LAST advice, hide center column and move advice list into center focus
+      if (this.api.display._isLast) {
+        $(".question").hide();
+        $(".list-all-recommendations").removeClass("unfocused");
 
-      if (this.api.display.type == "INPUT_REQUEST") {
-        this._updateForInputRequest();
-      } else {
-        // if this is the LAST advice, hide center column and move advice list into center focus
-        if (this.api.display._isLast) {
-          $(".center-col").hide();// .addClass("transition-hide");
-          $(".right-col").addClass("centered");
-
-          // if there's < 3 expandable advice recommendations displayed, expand them automatically
-          if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
-            setTimeout(()=>{
-              $(".advice-list .collapse").collapse("show");
-            }, 450);
-          }
+        // if there's < 3 expandable advice recommendations displayed, expand them automatically
+        if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
+          setTimeout(()=>{
+            $(".advice-list .collapse").collapse("show");
+          }, 50);
         }
-        // unused center pane
-        // this._updateForAdvice();
       }
+      this.moveTableOfContents();
     }
   }
 
@@ -394,11 +367,11 @@ export default class showcaseFull extends ShowcasePage {
           attachment._isInteractiveChart = isChart;
         }
 
-        const iconFam = this.isTaffrail ? "fal" : "fad";
+        const iconFam = "fal";
         let icon = "";
-        if (this.isTaffrail && a.summary && isChart) {
+        if (a.summary && isChart) {
           icon = `${iconFam} fa-chevron-down`;
-        } else if (this.isTaffrail && a.summary) {
+        } else if (a.summary) {
           icon = `${iconFam} fa-chevron-right`;
         } else {
           // support To Do/Completed checklist icons
@@ -428,7 +401,7 @@ export default class showcaseFull extends ShowcasePage {
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
-      "RecommendationsOnThisPage": this.isTaffrail ? Handlebars.compile($("#tmpl_groupedRecommendationsAdviceListTOC").html()) : "",
+      "RecommendationsOnThisPage": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceListTOC").html()),
       "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
@@ -453,11 +426,7 @@ export default class showcaseFull extends ShowcasePage {
     // show or hide depending
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
-    if (this.isTaffrail) {
-      $(".assumptions-container > div").css("visibility", this.api._answersExist ? "visible" : "hidden");
-    } else {
-      $(".assumptions-container").toggle(this.api._answersExist);
-    }
+    $(".assumptions-container > div").css("visibility", this.api._answersExist ? "visible" : "hidden");
     // only show expand button if there's grouped assumptions besides "ungrouped"
     $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
@@ -536,7 +505,7 @@ export default class showcaseFull extends ShowcasePage {
             $(`#img_container_${id}`).html($img);
             return resolve();
           } else {
-            return $.post("/deck/api/ogs", { url: url }, (meta) => {
+            return $.post("/s/api/ogs", { url: url }, (meta) => {
               if (!meta.success) {
                 console.error(meta);
                 return resolve();
@@ -587,7 +556,7 @@ export default class showcaseFull extends ShowcasePage {
         window.jga.config = _.extend(window.jga.config, {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: this.isTaffrail ? ["#023E7D", "#0466C8"] : ["#605F5E", "#6D256C"],
+          colors: ["#023E7D", "#0466C8"],
           width: containerW,
           height: 400
         });

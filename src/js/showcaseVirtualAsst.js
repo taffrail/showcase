@@ -20,7 +20,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
     this.initCache();
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
-    this._loadApi(querystring, $("main.screen")).then(api => {
+    this._loadApi(querystring, $("main.screen"), false).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
@@ -92,7 +92,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $("main.screen")).then(()=> {
+      this._loadApi(data, $("main.screen"), false).then(()=> {
         // update content
         this.updatePanes();
         // save state
