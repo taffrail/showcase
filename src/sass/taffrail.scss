@@ -44,7 +44,7 @@
 }
 
 .showcase.showcase--redux {
-	background: $gray-200;
+	background-color: $gray-200;
 
 	main.container {
 		background-color: $white;
@@ -83,6 +83,11 @@
 
 	.assumptions-outer-container {
 		border-right: 1px solid $gray-light;
+
+		&.assumptions-outer-container--empty {
+			border-right: 1px solid $white;	
+		}
+
 		padding-top: 1rem;
 
 		footer {
@@ -94,6 +99,15 @@
 		align-items: center;
 		display: flex;
 		justify-content: space-between;
+
+		// match "on this page" on right column
+		h5 {
+			@include text-link($gray-dark, false);
+			font-size: $font-size-sm;
+			font-weight: bold;
+			text-transform: uppercase;
+			width: 100%;
+		} 
 	}
 
 	.assumptions-container {
@@ -112,7 +126,7 @@
 			margin-bottom: .25rem;
 
 			> a {
-				@include text-link($gray-dark, false);
+				@include text-link($primary, false);
 				font-weight: bold;
 
 				i {
@@ -169,7 +183,7 @@
 			}
 
 			a {
-				@include text-link($gray-dark, false);
+				@include text-link($primary, false);
 				@extend .stretched-link;
 			}
 		}
@@ -181,10 +195,11 @@
 		width: 100%;
 
 		.question {
-			// @extend .shadow-sm;
-			margin-bottom: 2rem;
-			// margin-top: -.5rem;
-			// padding: 1rem;
+			background-color: $gray-200;
+			border-radius: $border-radius;
+			margin-bottom: 3rem;
+			margin-top: -.5rem;
+			padding: 1rem;
 
 			.explanation {
 				color: $gray-dark;
@@ -207,11 +222,9 @@
 		.list-all-recommendations {
 			margin-bottom: 2rem;
 
-			&.unfocused {
-				border-top: 1px solid $gray-light;
-				// opacity: .4;
-				padding-top: 2rem;
-			}
+			// &.unfocused {
+				
+			// }
 		}	
 
 		.advice-group {
@@ -234,6 +247,10 @@
 
 				a {
 					@include text-link();
+				}
+
+				.fa-li a {
+					color: $primary;
 				}
 			}
 
@@ -261,6 +278,7 @@
 		position: absolute;
 		top: 0;
 
+		// match assumptions spacing on left column
 		h5 {
 			@include text-link($gray-dark, false);
 			font-size: $font-size-sm;
@@ -298,10 +316,6 @@
 	footer {
 		&.footer {
 			margin: 2rem;
-
-			hr {
-				margin-top: 0;
-			}
 
 			section {
 				color: $gray;

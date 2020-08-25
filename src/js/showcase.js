@@ -332,18 +332,24 @@ export default class showcaseFull extends ShowcasePage {
     }
 
     // assumptions are grouped, answers are not
-    const ASSUMPTIONS_UNGROUPED = "ungrouped";
+    const ASSUMPTIONS_UNGROUPED = "Assumptions";
+    const ASSUMPTIONS_UNGROUPED_ID = `assumptions_${this.api.adviceset.id}`;
     this.api.assumptions = _.groupBy(this.api.answers, (a) => {
       return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
     });
 
     // go through each assumption group and set open/close state
     Object.keys(this.api.assumptions).forEach((key, idx) => {
-      if (key == ASSUMPTIONS_UNGROUPED) { return; }
-
-      // add `_isOpen` flag to each item
       const arr = this.api.assumptions[key];
       this.api.assumptions[key] = arr.map(a => {
+        // add tagGroup because these items don't have one assigned
+        if (key == ASSUMPTIONS_UNGROUPED) {
+          a.tagGroup = {
+            name: ASSUMPTIONS_UNGROUPED,
+            id: ASSUMPTIONS_UNGROUPED_ID
+          }
+        }
+        // add `_isOpen` flag to each item
         a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, true);
         return a;
       });
@@ -427,6 +433,7 @@ export default class showcaseFull extends ShowcasePage {
     // simple helper for UX
     this.api._answersExist = this.api.answers.length > 0;
     $(".assumptions-container > div").css("visibility", this.api._answersExist ? "visible" : "hidden");
+    $(".assumptions-outer-container").toggleClass("assumptions-outer-container--empty", !this.api._answersExist);
     // only show expand button if there's grouped assumptions besides "ungrouped"
     $(".assumption-expander").toggle(_.without(Object.keys(this.api.assumptions), "ungrouped").length > 0);
 
