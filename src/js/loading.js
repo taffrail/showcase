@@ -20,7 +20,7 @@ class AjaxLoading {
       ;
     } else {
       const imgWH = 44;
-      const imgPath = "/img/Wave-1s-200px.svg";
+      const imgPath = "/img/Spinner-1s-200px.svg";
       const height = $container.outerHeight();
       const width = $container.outerWidth();
       const containerPosition = $container.offset();
