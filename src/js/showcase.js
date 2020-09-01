@@ -355,44 +355,7 @@ export default class showcaseFull extends ShowcasePage {
       });
     });
 
-    const allAdvice = this.mapAdviceData();
-
-    // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
-    // add icon
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      // add icons
-      // eslint-disable-next-line complexity
-      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
-        // determine if this is an interactive chart attachment
-        const { attachment } = a;
-        let isChart = false;
-        if (attachment) {
-          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-          // handlebars helper
-          attachment._isInteractiveChart = isChart;
-        }
-
-        const iconFam = "fal";
-        let icon = "";
-        if (a.summary && isChart) {
-          icon = `${iconFam} fa-chevron-down`;
-        } else if (a.summary) {
-          icon = `${iconFam} fa-chevron-right`;
-        } else {
-          // support To Do/Completed checklist icons
-          if (key.includes("To Do")) {
-            icon = `${iconFam} fa-circle`;
-          } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-            icon = `${iconFam} fa-check-circle`;
-          }
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-
-        return a;
-      });
-    });
+    this.mapAdviceData();
   }
 
   /**
@@ -563,7 +526,7 @@ export default class showcaseFull extends ShowcasePage {
         window.jga.config = _.extend(window.jga.config, {
           adviceSetId: this.api.adviceset.id,
           bgColor: "#fff",
-          colors: ["#023E7D", "#0466C8"],
+          colors: ["#1C2145", "#3956EF"],
           width: containerW,
           height: 400
         });

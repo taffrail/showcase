@@ -212,38 +212,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.api.answers.pop();
     }
 
-    const allAdvice = this.mapAdviceData();
-
-    // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
-    // add icon
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      // add icons
-      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
-        // use thumbs up icon by default
-        // let icon = "fal fa-thumbs-up";
-        let icon = "fal fa-arrow-circle-right";
-        // support To Do/Completed checklist icons
-        if (key.includes("To Do")) {
-          icon = "fal fa-circle";
-        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fal fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-
-        // determine if this is an interactive chart attachment
-        const { attachment } = a;
-        let isChart = false;
-        if (attachment) {
-          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-          // handlebars helper
-          attachment._isInteractiveChart = isChart;
-        }
-
-        return a;
-      });
-    });
+    this.mapAdviceData();
   }
 
   /**

@@ -139,6 +139,7 @@ export default class ShowcasePage {
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
+
     const lastAdvice = _.last(allAdvice);
     if (lastAdvice && this.api.display.id == lastAdvice.id) {
       lastAdvice._isLast = true;
@@ -158,7 +159,56 @@ export default class ShowcasePage {
       }
     }
 
-    return allAdvice;
+    // group all advice into bucketed recommendations
+    let groupedAdvice = _.groupBy(allAdvice, (a) => {
+      return (a.tagGroup) ? a.tagGroup.name : "Recommendations";
+    });
+
+    // This is hard to read but straightforward chained lodash logic. Steps:
+    // 1.convert groupedAdvice object `toPairs` (new array of arrays [[tagGroup, itemsArr]])
+    // 2.sort by weight of tagGroup (pull from 1st item)
+    // 3.reverse the sort, order DESC
+    // 4.convert `fromPairs` back to object
+    // 5.retrieve chained value
+    //
+    // Cribbed from:
+    // https://github.com/lodash/lodash/issues/1459#issuecomment-253969771
+    groupedAdvice = _(groupedAdvice).toPairs().sortBy([(group) => {
+      const [/* key*/, items] = group;
+      // get the weight (defaults to 0) from first item in group
+      const { tagGroup: { weight = 0 } = {} } = _.first(items);
+      return weight;
+    }]).reverse().fromPairs().value();
+
+    // add handlebars helpers
+    Object.keys(groupedAdvice).forEach((key, idx) => {
+      // map each array of advice with some props
+      groupedAdvice[key] = groupedAdvice[key].map(a => {
+        // determine if this is an interactive chart attachment
+        const { attachment } = a;
+        let isChart = false;
+        if (attachment) {
+          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+          // handlebars helper
+          attachment._isInteractiveChart = isChart;
+        }
+
+        // only show icon for advice with summary or attachment
+        let icon = "";
+        if (a.summary && isChart) {
+          icon = "fal fa-chevron-down";
+        } else if (a.summary) {
+          icon = "fal fa-chevron-right";
+        }
+        // handlebars helper
+        a._icon = icon;
+
+        return a;
+      });
+    });
+
+    // all advice to render is saved to `recommendations`
+    this.api.recommendations = groupedAdvice;
   }
 
   /**
@@ -303,11 +353,11 @@ export default class ShowcasePage {
                     <p>A <span class="underline-highlight">short link was copied to your clipboard</span> and an Advice Builder scenario was saved.</p>
                     <ul class="fa-ul">
                       <li>
-                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
                         <a href="${adviceBuilderScenarioUrl}" target="_blank">Advice Builder Scenario</a>
                       </li>
                       <li>
-                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
                         <a href="${bitly.link}" target="_blank">${bitly.link}</a>
                       </li>
                     </ul>
