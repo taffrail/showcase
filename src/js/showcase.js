@@ -422,7 +422,6 @@ export default class showcaseFull extends ShowcasePage {
       "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "RecommendationsOnThisPage": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceListTOC").html()),
-      "Variables": Handlebars.compile($("#tmpl_variablesList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
     };
@@ -501,15 +500,6 @@ export default class showcaseFull extends ShowcasePage {
     } else {
       $(".assumptions, .answers").find("li").removeClass("active").end().find(`li[data-id=${id}]`).addClass("active");
     }
-  }
-
-  /**
-	 * Update variables list
-	 */
-  updateVariablesList(){
-    // render
-    const str = this.TEMPLATES["Variables"](this.api);
-    $(".variables").html(str);
   }
   // #endregion
 

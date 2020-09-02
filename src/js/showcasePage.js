@@ -40,6 +40,7 @@ export default class ShowcasePage {
     this.handleCopyLink();
     this.handleCopyLinkAndSaveScenario();
     this.handleShowAllRecommendationsFromPrimaryAdvice();
+    this.handleClickOpenRawDataModal();
   }
 
   // #region getter/setter
@@ -237,6 +238,15 @@ export default class ShowcasePage {
   }
 
   /**
+	 * Update variables list
+	 */
+  updateVariablesList(){
+    // render
+    const template = Handlebars.compile($("#tmpl_variablesList").html());
+    $("#dataModal .variables").html(template(this.api));
+  }
+
+  /**
    * Set an index on the `display` to allow navigating assumptions list
    */
   _setCurrentIdx() {
@@ -419,6 +429,16 @@ export default class ShowcasePage {
   }
 
   /**
+   * Handle clicks to open variable modal
+   */
+  handleClickOpenRawDataModal() {
+    $("main").on("click", "a[data-action='modal-raw-data']", e => {
+      e.preventDefault();
+      $("#dataModal").modal();
+    });
+  }
+
+  /**
    * Handle click to show/hide all recommendations
    */
   handleShowAllRecommendationsFromPrimaryAdvice(){
@@ -427,7 +447,7 @@ export default class ShowcasePage {
       const $btn = $(e.currentTarget);
       $("html, body").animate({ scrollTop: $(".expand-history hr").offset().top + 1 });
       $(".list-all-recommendations").slideToggle(function() {
-        const isVisible = $(this).is(":visible")
+        const isVisible = $(this).is(":visible");
         $(this).toggleClass("show", isVisible);
         $btn.find("span").text( isVisible ? "Hide" : "Show" );
       });
