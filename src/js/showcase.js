@@ -28,6 +28,7 @@ export default class showcaseFull extends ShowcasePage {
       this.handleClickAssumption();
       this.handleCollapseAdviceSummaries();
       this.handleCollapseAssumptionGroup();
+      this.handleClickOnThisPageItem();
       this.listenForUrlChanges();
       this.handleClickExpandControls();
       this.handleScrollStickySidebar();
@@ -146,6 +147,19 @@ export default class showcaseFull extends ShowcasePage {
       this.api.display = answer;
       this.api.display.idx = answer.idx;
       this.updateMainPane();
+    });
+  }
+
+  /**
+   * Handle clicks on "on this page" table of contents
+   */
+  handleClickOnThisPageItem() {
+    $(".advice-on-this-page").on("click", "li a", e => {
+      const isContentVisible = $(".list-all-recommendations").is(":visible");
+      // if content isn't visible yet, expand it when user clicks on TOC
+      if (!isContentVisible) {
+        $("a[data-action=toggleRecommendations]").click();
+      }
     });
   }
 
@@ -299,6 +313,12 @@ export default class showcaseFull extends ShowcasePage {
 
       const str = this.TEMPLATES["Advice"](this.api);
       this.$advice.html(str);
+
+      // if the rule has primary advice ... but no grouped recommendations and sources
+      // show the sources container.
+      if (this.api._referenceDocumentsExist && !this.api._recommendationsExist){
+        $(".list-all-recommendations").addClass("show");
+      }
     }
   }
 
@@ -444,7 +464,8 @@ export default class showcaseFull extends ShowcasePage {
   updateRecommendationsList() {
     // simple helper for UX
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
-    this.api._referenceDocumentsExist = this.api._recommendationsExist && this.api.adviceset.referenceDocuments.length > 0;
+    this.api._referenceDocumentsExist = this.api.adviceset.referenceDocuments.length > 0;
+    this.api._showsidebar = this.api._recommendationsExist || this.api._referenceDocumentsExist;
 
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
@@ -463,7 +484,7 @@ export default class showcaseFull extends ShowcasePage {
   updateOnThisPageRecommendationsList() {
     // render
     const numGroups = _.flatMap(this.api.recommendations).length;
-    if (numGroups && numGroups >= 2) {
+    if ((numGroups && numGroups >= 2) || this.api._referenceDocumentsExist) {
       const str = this.TEMPLATES["RecommendationsOnThisPage"](this.api);
       $(".recommendations-on-this-page").html(str);
     }

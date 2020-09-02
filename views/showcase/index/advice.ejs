@@ -42,12 +42,14 @@
       {{/each}}
     {{/if}}
 
-    {{#if _recommendationsExist}}
+    {{#if _showsidebar}}
       <section class="expand-history">
         <hr />
         <h4><i class="fal fa-flag"></i> <span class="highlighted">Your personalized advice</span></h4>
-        <p class="intro">In providing this personalized advice, we factored in {{{display._evaluated}}}. Wow! There's so much more to show you&mdash;explore all of your personalized recommendations.</p>
+        <p class="intro">In providing this personalized advice, we factored in {{{display._evaluated}}}. Wow! {{#if _recommendationsExist}}There's so much more to show you&mdash;explore all of your personalized recommendations.{{/if}}</p>
+        {{#if _recommendationsExist}}
         <p><a href="#" data-action="toggleRecommendations" class="btn btn-outline-secondary"><span>Show</span> {{display._recommended}}</a></p>
+        {{/if}}
       </section>
     {{/if}}
   </div>
