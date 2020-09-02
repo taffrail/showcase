@@ -233,7 +233,8 @@
 
 			// don't negative offset chart
 			.advice-attachment.advice-chart--interactive {
-				margin: 0;
+				margin: 0 0 0 -1rem;
+				padding: 0;
 			}
 
 			.expand-history {
