@@ -423,6 +423,7 @@ export default class ShowcasePage {
     $("main").on("click", "a[data-action=toggleRecommendations]", e => {
       e.preventDefault();
       const $btn = $(e.currentTarget);
+      $("html, body").animate({ scrollTop: $(".expand-history hr").offset().top + 1 });
       $(".list-all-recommendations").slideToggle(function() {
         const isVisible = $(this).is(":visible")
         $(this).toggleClass("show", isVisible);
