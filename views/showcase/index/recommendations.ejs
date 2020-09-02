@@ -79,7 +79,17 @@
 						<div class="card-body">
 							<h6 class="card-title">{{name}}</h6>
 							<p class="card-text">{{body}}</p>
-							<a class="card-link" href="{{url}}" target="_blank">Read more <i class="fal fa-external-link"></i></a>
+							<div class="d-flex align-items-center">
+								<a class="btn btn-outline-secondary" href="{{url}}" target="_blank">Read more <i class="fal fa-external-link"></i></a>
+								<div class="dropdown ml-2">
+									<a href="#" class="dropdown-toggle text-dark" id="dropdownMenuButtonCard_{{id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i class="fal fa-ellipsis-h"></i>
+									</a>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButtonCard_{{id}}">
+										<a class="dropdown-item" href="https://app.justgoodadvice.com/media/{{id}}/show" target="_blank"><i class="fal fa-pencil"></i>&nbsp;Edit in Advice Builder</a>
+									</div>
+								</div>	
+							</div>
 						</div>
 					</div>
 				{{/each}}
