@@ -4,6 +4,7 @@ import { createBrowserHistory } from "history";
 import Handlebars from "handlebars";
 import Inputmask from "inputmask";
 import Loading from "./loading";
+import pluralize from "pluralize";
 import qs from "querystring";
 
 export default class ShowcasePage {
@@ -38,6 +39,7 @@ export default class ShowcasePage {
     this.handleChangeAudience();
     this.handleCopyLink();
     this.handleCopyLinkAndSaveScenario();
+    this.handleShowAllRecommendationsFromPrimaryAdvice();
   }
 
   // #region getter/setter
@@ -139,7 +141,6 @@ export default class ShowcasePage {
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
-
     const lastAdvice = _.last(allAdvice);
     if (lastAdvice && this.api.display.id == lastAdvice.id) {
       lastAdvice._isLast = true;
@@ -206,6 +207,28 @@ export default class ShowcasePage {
         return a;
       });
     });
+
+    // find "primary advice" -- last advice in highest weighted group
+    const [highestWeightedGroup] = Object.keys(groupedAdvice);
+    // assign it to temp prop
+    this.api.display_primary_advice = _.last(groupedAdvice[highestWeightedGroup]);
+    // remove it from list that will become `recommendations`
+    groupedAdvice[highestWeightedGroup].pop();
+    // are there any recommendations left in this group?
+    if (!groupedAdvice[highestWeightedGroup].length) {
+      delete groupedAdvice[highestWeightedGroup];
+    }
+
+    // build a string for use below primary advice
+    const varStr = ` ${pluralize("inputs", this.api.variables.length, true)}`;
+    let factoredStr = "";
+    const assumptionLen = _.flatMap(this.api.assumptions).length;
+    const recommendationLen = _.flatMap(groupedAdvice).length;
+    if (assumptionLen > 0) {
+      factoredStr = `${pluralize("assumption", assumptionLen, true)}`;
+    }
+    this.api.display_primary_advice._evaluated = `<strong>${factoredStr}</strong> and <strong>${varStr}</strong>`;
+    this.api.display_primary_advice._recommended = `${pluralize("recommendation", recommendationLen, true)}`;
 
     // all advice to render is saved to `recommendations`
     this.api.recommendations = groupedAdvice;
@@ -390,6 +413,21 @@ export default class ShowcasePage {
           message: "Link copying error."
         });
       })
+    });
+  }
+
+  /**
+   * Handle click to show/hide all recommendations
+   */
+  handleShowAllRecommendationsFromPrimaryAdvice(){
+    $("main").on("click", "a[data-action=toggleRecommendations]", e => {
+      e.preventDefault();
+      const $btn = $(e.currentTarget);
+      $(".list-all-recommendations").slideToggle(function() {
+        const isVisible = $(this).is(":visible")
+        $(this).toggleClass("show", isVisible);
+        $btn.find("span").text( isVisible ? "Hide" : "Show" );
+      });
     });
   }
 

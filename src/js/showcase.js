@@ -30,6 +30,7 @@ export default class showcaseFull extends ShowcasePage {
       this.handleCollapseAssumptionGroup();
       this.listenForUrlChanges();
       this.handleClickExpandControls();
+      this.handleScrollStickySidebar();
       // this.handleResizeChart();
 
       // keyboard shortcuts
@@ -235,6 +236,25 @@ export default class showcaseFull extends ShowcasePage {
       }
     });
   }
+
+  /**
+   *
+   */
+  handleScrollStickySidebar() {
+    const $sidebar = $(".advice-on-this-page");
+    let timer;
+    $(window).scroll(() => {
+      window.clearTimeout(timer);
+      timer = setTimeout(() => {
+        const scrollTop = $(window).scrollTop();
+        const mainOffsetTop = $(".main-content").offset().top;
+        const moveTo = scrollTop > mainOffsetTop ? (scrollTop - mainOffsetTop) : scrollTop;
+        $sidebar.animate({
+          "top": moveTo
+        });
+      }, 50);
+    });
+  }
   // #endregion
 
   // #region templating
@@ -251,42 +271,54 @@ export default class showcaseFull extends ShowcasePage {
     $(".question").show();
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
-      $(".list-all-recommendations").addClass("unfocused");
+      $(".list-all-recommendations").addClass("unfocused").removeClass("has-primary-advice");
       this.moveTableOfContents();
     } else {
-      // if this is the LAST advice, hide center column and move advice list into center focus
-      if (this.api.display._isLast) {
-        $(".question").hide();
-        $(".list-all-recommendations").removeClass("unfocused");
-
-        // if there's < 3 expandable advice recommendations displayed, expand them automatically
-        if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
-          setTimeout(()=>{
-            $(".advice-list .collapse").collapse("show");
-          }, 50);
-        }
-      }
-      this.moveTableOfContents();
+      // see `updateRecommendationsList`
     }
   }
 
   // #region templating utils
   /**
+   * Template update for "primary advice" (last advice in highest weighted group)
+   *
+   */
+  _updateForPrimaryAdvice() {
+    // if this is the LAST advice, hide center column and move advice list into center focus
+    if (this.api.display._isLast) {
+      this.api.display = this.api.display_primary_advice;
+
+      $(".question").hide();
+      $(".list-all-recommendations").removeClass("unfocused").addClass("has-primary-advice");
+
+      // if there's < 3 expandable advice recommendations displayed, expand them automatically
+      if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
+        setTimeout(()=>{
+          $(".advice-list .collapse").collapse("show");
+        }, 50);
+      }
+
+      const str = this.TEMPLATES["Advice"](this.api);
+      this.$advice.html(str);
+    }
+  }
+
+  /**
    * Template update for INPUT_REQUEST
    */
   _updateForInputRequest() {
-    const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != "\"null\"";
+    // const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != null;
     // console.log(isLastAndAnswered)
-    if (isLastAndAnswered) {
-      // this.api.display = Object.assign(this.api.display, {
-      //   question: "Advice Engine Response",
-      //   explanation: "This rule has been evaluated, see variable data for export.",
-      //   form: {
-      //     fieldType: "NONE",
-      //     result: this.api.display.value
-      //   }
-      // });
-    }
+    // if (isLastAndAnswered) {
+    // this.api.display = Object.assign(this.api.display, {
+    //   question: "Advice Engine Response",
+    //   explanation: "This rule has been evaluated, see variable data for export.",
+    //   form: {
+    //     fieldType: "NONE",
+    //     result: this.api.display.value
+    //   }
+    // });
+    // }
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
     this.$advice.html(str);
@@ -421,6 +453,9 @@ export default class showcaseFull extends ShowcasePage {
 
     this._setupChartsAll();
     this.fetchReferencesOpenGraph();
+
+    // One more step....
+    this._updateForPrimaryAdvice();
   }
 
   /**
@@ -512,7 +547,7 @@ export default class showcaseFull extends ShowcasePage {
       const $chart = $(`[data-id=${chartId}]`);
       const { src } = $chart.data();
       // parent container
-      const containerW = $chart.parents(".advice-group").outerWidth();
+      const containerW = $chart.parents(".advice").outerWidth();
       const $iframe = $chart.find("iframe");
       // set chart container size
       $chart.css({
@@ -551,7 +586,7 @@ export default class showcaseFull extends ShowcasePage {
    */
   _setupChartsAll() {
     // quickly find all charts and set them up
-    _.flatMap(this.api.recommendations).filter(a => {
+    _.flatMap(this.api.recommendations).concat([this.api.display]).filter(a => {
       return a.attachment && a.attachment._isInteractiveChart;
     }).map(a => {
       return a.attachment;
