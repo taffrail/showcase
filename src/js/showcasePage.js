@@ -112,12 +112,19 @@ export default class ShowcasePage {
       return api;
     }).catch((jqXHR) => {
       let err;
+      let reason = "";
       if (jqXHR.responseJSON) {
         err = jqXHR.responseJSON.error.message;
+        if (jqXHR.responseJSON.error.reason) {
+          ({ reason } = jqXHR.responseJSON.error);
+        }
       } else if (jqXHR.statusText) {
         err = jqXHR.statusText;
       } else {
         err = jqXHR.message;
+      }
+      if (reason) {
+        err += ` (${reason})`;
       }
       this.api = _.assign({}, {
         adviceset: {
