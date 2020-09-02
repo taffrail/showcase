@@ -272,7 +272,6 @@ export default class showcaseFull extends ShowcasePage {
     if (this.api.display.type == "INPUT_REQUEST") {
       this._updateForInputRequest();
       $(".list-all-recommendations").addClass("unfocused").removeClass("has-primary-advice");
-      this.moveTableOfContents();
     } else {
       // see `updateRecommendationsList`
     }
