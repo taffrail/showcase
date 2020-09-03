@@ -216,7 +216,7 @@ export default class ShowcasePage {
         } else if (a.summary) {
           icon = "fal fa-chevron-right";
         } else {
-          icon = "fas fa-circle bullet-sm";
+          icon = "fal fa-circle bullet-sm";
         }
         // handlebars helper
         a._icon = icon;
