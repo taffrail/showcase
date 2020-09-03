@@ -478,9 +478,11 @@ export default class showcaseFull extends ShowcasePage {
 	 */
   updateRecommendationsList() {
     // simple helper for UX
+    const recommendationGroupCount = Object.keys(this.api.recommendations).length;
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
     this.api._referenceDocumentsExist = this.api.adviceset.referenceDocuments.length > 0;
-    this.api._showsidebar = this.api._recommendationsExist || this.api._referenceDocumentsExist;
+    this.api._showPrimaryPersonalized = (this.api._recommendationsExist && recommendationGroupCount >= 2) || this.api._referenceDocumentsExist;
+    this.api._showsidebar = (this.api._recommendationsExist && recommendationGroupCount >= 2);
 
     // render
     const str = this.TEMPLATES["Recommendations"](this.api);
