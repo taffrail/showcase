@@ -263,6 +263,13 @@
 		.advice-group {
 			header {
 				margin-bottom: $headings-margin-bottom;
+				
+				a {
+					@include text-link($body-color, false);
+				}
+				i {
+					min-width: 1.25rem;
+				}
 			}
 		}
 
@@ -276,10 +283,32 @@
 			}
 
 			li {
-				margin-bottom: 1rem;
+				margin-bottom: 1.5rem;
 
-				a {
+				&.is-primary {
+					background-color: $gray-200;
+					border-radius: $border-radius;
+					margin-left: -2rem;
+					padding-left: 2rem;
+
+					.fa-li {
+						left: 0;
+						padding-top: .25rem;
+					}
+
+					a.headline {
+						padding: .25rem .25rem .25rem 0;
+					}
+
+					.collapse {
+						padding: 0 .25rem 1rem .25rem;
+					}
+				}
+
+				a.headline {
 					@include text-link();
+					display: block;
+					font-weight: $font-weight-medium;
 				}
 
 				.fa-li a {
@@ -288,9 +317,10 @@
 			}
 
 			.summary {
-				color: $gray;
-				font-size: $font-size-sm;
-				line-height: $line-height-sm;
+				// color: $gray;
+				// font-size: $font-size-sm;
+				font-weight: $font-weight-normal;
+				// line-height: $line-height-sm;
 				margin-bottom: 0;
 				margin-top: .25rem;
 			}
@@ -298,7 +328,7 @@
 
 		// only when centered...
 		.advice-attachment.advice-chart--interactive {
-			margin: -.5rem 0 1rem -2.5rem;
+			margin: -.5rem 0 1rem -.5rem;
 			padding: 0;
 		}
 	}

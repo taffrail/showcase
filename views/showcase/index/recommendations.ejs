@@ -5,21 +5,35 @@
 			<div class="advice-group" id="group_{{@key}}">
 				{{#if @first}}
 					<header class="d-flex align-items-center justify-content-between">
-						<h5 class="mr-2 mb-0">{{@key}}</h5>
+						<h5 class="mr-2 mb-0">
+							<a data-toggle="collapse" href="#collapse_group_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_group_{{@index}}" class="group-toggler">
+								<i class="fal fa-chevron-down"></i> {{@key}}
+							</a>
+						</h5>
 						<%- include("_dropdown"); %>
 					</header>
 				{{else}}
-					<header><h5>{{@key}}</h5></header>
+					<header>
+						<h5>
+							<a data-toggle="collapse" href="#collapse_group_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_group_{{@index}}" class="group-toggler">
+								<i class="fal fa-chevron-down"></i> {{@key}}
+							</a>
+						</h5>
+					</header>
 				{{/if}}
-				<ul class="advice-list recommendations fa-ul">
+				<ul class="advice-list recommendations fa-ul collapse show" id="collapse_group_{{@index}}">
 					{{#each this}}
-						<li data-id="{{id}}" data-idx="{{idx}}">
-							<span class="{{#if summary}}fa-li{{/if}} {{#if attachment}}show{{/if}}">
+						<li data-id="{{id}}" data-idx="{{idx}}" class="{{#if _isPrimary}}is-primary{{/if}}">
+							<span class="{{#if _icon}}fa-li{{/if}} {{#if attachment}}show{{/if}}">
+							{{#if summary}}
 								<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">
-									{{#if summary}}<i class="{{_icon}}"></i>{{/if}}
+									{{#if _icon}}<i class="{{_icon}}"></i>{{/if}}
 								</a>
+							{{else}}
+								{{#if _icon}}<i class="{{_icon}}"></i>{{/if}}
+							{{/if}}
 							</span>
-							<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}" target="_blank">{{headline}}</a>
+							<a href="https://app.justgoodadvice.com/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}" target="_blank" class="headline">{{headline}}</a>
 							{{#if summary}}
 								<div class="collapse {{#if attachment}}show{{/if}}" id="collapse_{{id}}">
 									{{#if attachment}}
@@ -46,9 +60,11 @@
 									{{/if}}
 									<p class="summary">{{breaklines summary}}</p>
 									{{#if actions.length}}
-										{{#each actions}}
-											<div><a href="{{url}}" target="_blank" class="btn btn-sm btn-primary">{{name}}</a></div>
-										{{/each}}
+										<div class="mt-3">
+											{{#each actions}}
+												<div><a href="{{url}}" target="_blank" class="btn btn-outline-secondary">{{name}}</a></div>
+											{{/each}}
+										</div>
 									{{/if}}
 								</div>
 							{{/if}}

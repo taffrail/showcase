@@ -169,16 +169,24 @@ export default class showcaseFull extends ShowcasePage {
   handleCollapseAdviceSummaries() {
     $(".list-all-recommendations").on("show.bs.collapse", ".collapse", (e) => {
       const $this = $(e.currentTarget);
-      const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
-      const $faLi = $toggler.prev("span.fa-li");
-      $faLi.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      const isGroupHeader = $toggler.hasClass("group-toggler");
+      if (isGroupHeader) {
+        $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
+      } else {
+        $toggler.find("i").addClass("fa-chevron-circle-down").removeClass("fa-chevron-circle-right");
+      }
     });
 
     $(".list-all-recommendations").on("hidden.bs.collapse", ".collapse", (e) => {
       const $this = $(e.currentTarget);
-      const $toggler = $this.prev();// $(`a[aria-controls=${$this.prop("id")}]`);
-      const $faLi = $toggler.prev("span.fa-li");
-      $faLi.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      const isGroupHeader = $toggler.hasClass("group-toggler");
+      if (isGroupHeader) {
+        $toggler.find("i").addClass("fa-chevron-right").removeClass("fa-chevron-down");
+      } else {
+        $toggler.find("i").addClass("fa-chevron-circle-right").removeClass("fa-chevron-circle-down");
+      }
     });
   }
 
@@ -299,10 +307,16 @@ export default class showcaseFull extends ShowcasePage {
   _updateForPrimaryAdvice() {
     // if this is the LAST advice, hide center column and move advice list into center focus
     if (this.api.display._isLast) {
-      this.api.display = this.api.display_primary_advice;
+      if (this.primaryAdviceModeEnabled) {
+        this.api.display = this.api.display_primary_advice;
+      }
 
       $(".question").hide();
-      $(".list-all-recommendations").removeClass("unfocused").addClass("has-primary-advice");
+      $(".list-all-recommendations").removeClass("unfocused");
+
+      if (this.primaryAdviceModeEnabled) {
+        $(".list-all-recommendations").addClass("has-primary-advice");
+      }
 
       // if there's < 3 expandable advice recommendations displayed, expand them automatically
       if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
@@ -311,8 +325,10 @@ export default class showcaseFull extends ShowcasePage {
         }, 50);
       }
 
-      const str = this.TEMPLATES["Advice"](this.api);
-      this.$advice.html(str);
+      if (this.primaryAdviceModeEnabled) {
+        const str = this.TEMPLATES["Advice"](this.api);
+        this.$advice.html(str);
+      }
 
       // if the rule has primary advice ... but no grouped recommendations and sources
       // show the sources container.
@@ -470,11 +486,10 @@ export default class showcaseFull extends ShowcasePage {
     const str = this.TEMPLATES["Recommendations"](this.api);
     $(".list-all-recommendations").html(str);
 
-    this._setupChartsAll();
-    this.fetchReferencesOpenGraph();
-
     // One more step....
     this._updateForPrimaryAdvice();
+    this._setupChartsAll();
+    this.fetchReferencesOpenGraph();
   }
 
   /**
@@ -605,22 +620,6 @@ export default class showcaseFull extends ShowcasePage {
         this.setupChart(true, chart.id);
       }, 500);
     });
-  }
-
-  /**
-   * Helper to move position of TOC
-   */
-  moveTableOfContents() {
-    const $toc = $(".advice-on-this-page");
-    if ($toc.length) {
-      const currPos = $toc.position().top;
-      const newPos = $(".list-all-recommendations").position().top;
-      if (currPos != newPos) {
-        $(".advice-on-this-page").animate({
-          top: newPos
-        });
-      }
-    }
   }
 
   /**

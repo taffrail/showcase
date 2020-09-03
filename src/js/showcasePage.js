@@ -6,6 +6,7 @@ import Inputmask from "inputmask";
 import Loading from "./loading";
 import pluralize from "pluralize";
 import qs from "querystring";
+import store from "store";
 
 export default class ShowcasePage {
   constructor(){
@@ -35,12 +36,15 @@ export default class ShowcasePage {
     window.jga.api._links = { self: `${this.config.api_host}/api/advice/${this.api.adviceset.id}` }
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    // mode
+    this.primaryAdviceModeEnabled = store.get("primaryAdviceModeEnabled", true);
     // events
     this.handleChangeAudience();
     this.handleCopyLink();
     this.handleCopyLinkAndSaveScenario();
     this.handleShowAllRecommendationsFromPrimaryAdvice();
     this.handleClickOpenRawDataModal();
+    this.handleClickTogglePrimaryAdviceMode();
   }
 
   // #region getter/setter
@@ -146,6 +150,7 @@ export default class ShowcasePage {
    * Helper to find the "last" Advice node, including a check for the
    * System Advice Node with special ID -32768
    */
+  // eslint-disable-next-line complexity
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
@@ -189,8 +194,10 @@ export default class ShowcasePage {
       return weight;
     }]).reverse().fromPairs().value();
 
+    const groupKeys = Object.keys(groupedAdvice);
+
     // add handlebars helpers
-    Object.keys(groupedAdvice).forEach((key, idx) => {
+    groupKeys.forEach((key, idx) => {
       // map each array of advice with some props
       groupedAdvice[key] = groupedAdvice[key].map(a => {
         // determine if this is an interactive chart attachment
@@ -205,8 +212,10 @@ export default class ShowcasePage {
         // only show icon for advice with summary or attachment
         let icon = "";
         if (a.summary && isChart) {
-          icon = "fal fa-chevron-down";
+          icon = "fal fa-chevron-circle-down";
         } else if (a.summary) {
+          icon = "fal fa-chevron-circle-right";
+        } else {
           icon = "fal fa-chevron-right";
         }
         // handlebars helper
@@ -217,31 +226,36 @@ export default class ShowcasePage {
     });
 
     // find "primary advice" -- last advice in highest weighted group
-    const [highestWeightedGroup] = Object.keys(groupedAdvice);
+    const [highestWeightedGroup] = groupKeys;
     if (groupedAdvice[highestWeightedGroup] && groupedAdvice[highestWeightedGroup].length){
-      // assign it to temp prop
-      this.api.display_primary_advice = _.last(groupedAdvice[highestWeightedGroup]);
-      // remove it from list that will become `recommendations`
-      groupedAdvice[highestWeightedGroup].pop();
-      // are there any recommendations left in this group?
-      if (!groupedAdvice[highestWeightedGroup].length) {
-        delete groupedAdvice[highestWeightedGroup];
-      }
+      const primaryAdvice = _.last(groupedAdvice[highestWeightedGroup]);
+      primaryAdvice._isPrimary = true;
 
-      // build a string for use below primary advice
-      const varStr = ` ${pluralize("inputs", this.api.variables.length, true)}`;
-      let factoredStr = "";
-      const assumptionLen = _.flatMap(this.api.assumptions).length;
-      const recommendationLen = _.flatMap(groupedAdvice).length;
-      if (assumptionLen > 0) {
-        factoredStr = `${pluralize("assumption", assumptionLen, true)}`;
-      }
-      this.api.display_primary_advice._evaluated = `<strong>${factoredStr}</strong> and <strong>${varStr}</strong>`;
-      this.api.display_primary_advice._recommended = `${pluralize("recommendation", recommendationLen, true)}`;
+      if (this.primaryAdviceModeEnabled) {
+        // assign it to temp prop
+        this.api.display_primary_advice = primaryAdvice;
+        // remove it from list that will become `recommendations`
+        groupedAdvice[highestWeightedGroup].pop();
+        // are there any recommendations left in this group?
+        if (!groupedAdvice[highestWeightedGroup].length) {
+          delete groupedAdvice[highestWeightedGroup];
+        }
 
-      // all advice to render is saved to `recommendations`
-      this.api.recommendations = groupedAdvice;
+        // build a string for use below primary advice
+        const varStr = ` ${pluralize("inputs", this.api.variables.length, true)}`;
+        let factoredStr = "";
+        const assumptionLen = _.flatMap(this.api.assumptions).length;
+        const recommendationLen = _.flatMap(groupedAdvice).length;
+        if (assumptionLen > 0) {
+          factoredStr = `${pluralize("assumption", assumptionLen, true)}`;
+        }
+        this.api.display_primary_advice._evaluated = `<strong>${factoredStr}</strong> and <strong>${varStr}</strong>`;
+        this.api.display_primary_advice._recommended = `${pluralize("recommendation", recommendationLen, true)}`;
+      }
     }
+
+    // all advice to render is saved to `recommendations`
+    this.api.recommendations = groupedAdvice;
   }
 
   /**
@@ -442,6 +456,26 @@ export default class ShowcasePage {
     $("main").on("click", "a[data-action='modal-raw-data']", e => {
       e.preventDefault();
       $("#dataModal").modal();
+    });
+  }
+
+  /**
+   * Handle clicks to toggle primnary advice mode
+   */
+  handleClickTogglePrimaryAdviceMode() {
+    $("main").on("click", "a[data-action='toggle-primary-advice-mode']", e => {
+      e.preventDefault();
+      const currentlyEnabled = this.primaryAdviceModeEnabled;
+      const modeEnabled = !currentlyEnabled ? true : false;
+      store.set("primaryAdviceModeEnabled", modeEnabled);
+      this.primaryAdviceModeEnabled = modeEnabled;
+      this.showToast(undefined, {
+        title: "Challenge accepted!",
+        message: `Primary mode ${modeEnabled ? "enabled" : "disabled"}. Refreshing in 3 seconds...`
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     });
   }
 
