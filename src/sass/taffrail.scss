@@ -385,6 +385,16 @@
 
 		.card {
 			@extend .shadow-sm;
+			margin-left: .75;
+			margin-right: .75;
+
+			.card-title {
+				font-weight: $font-weight-medium;
+			}
+
+			.card-body {
+				padding: .75rem;
+			}
 		}
 	}
 

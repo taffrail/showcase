@@ -23,7 +23,7 @@
 				{{/if}}
 				<ul class="advice-list recommendations fa-ul collapse show" id="collapse_group_{{@index}}">
 					{{#each this}}
-						<li data-id="{{id}}" data-idx="{{idx}}" class="{{#if _isPrimary}}is-primary{{/if}}">
+						<li data-id="{{id}}" data-idx="{{idx}}" class="{{#if _isPrimary}}is-primary{{/if}} {{#unless summary}}no-summary{{/unless}}">
 							<span class="{{#if _icon}}fa-li{{/if}} {{#unless summary}}no-summary{{/unless}} {{#if attachment}}show{{/if}}">
 							{{#if summary}}
 								<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">
