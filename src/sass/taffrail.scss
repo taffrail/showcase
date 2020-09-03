@@ -1,6 +1,7 @@
 @import 'variables';
 @import '../../node_modules/bootstrap/scss/bootstrap';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
+@import '../../node_modules/@fortawesome/fontawesome-pro/scss/solid';
 @import '../../node_modules/@fortawesome/fontawesome-pro/scss/light';
 @import "../../node_modules/placeholder-loading/src/scss/placeholder-loading";
 @import 'loading';
@@ -285,6 +286,17 @@
 			li {
 				margin-bottom: 1.5rem;
 
+				.fa-li {
+					&.no-summary {
+						line-height: $line-height-sm;
+					}
+				}
+
+				i.bullet-sm {
+					// color: $secondary;
+					font-size: 7px;
+				}
+
 				&.is-primary {
 					background-color: $gray-200;
 					border-radius: $border-radius;
@@ -301,7 +313,7 @@
 					}
 
 					.collapse {
-						padding: 0 .25rem 1rem .25rem;
+						padding: 0 0 1rem 0;
 					}
 				}
 

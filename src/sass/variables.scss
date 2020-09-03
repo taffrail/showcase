@@ -19,6 +19,7 @@ $theme-colors: (
 $primary: map-get($theme-colors, 'primary');
 $secondary: map-get($theme-colors, 'secondary');
 $tertiary: map-get($theme-colors, 'tertiary');
+$rust: #EC9E38;
 $gray: map-get($colors, 'gray');
 $gray-light: map-get($colors, 'gray-light');
 $gray-dark: map-get($colors, 'gray-dark');

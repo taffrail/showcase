@@ -170,11 +170,11 @@ export default class showcaseFull extends ShowcasePage {
     $(".list-all-recommendations").on("show.bs.collapse", ".collapse", (e) => {
       const $this = $(e.currentTarget);
       const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
-      const isGroupHeader = $toggler.hasClass("group-toggler");
+      const isGroupHeader = $toggler.hasClass("group-toggler") && $toggler.find("i").length;
       if (isGroupHeader) {
         $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
       } else {
-        $toggler.find("i").addClass("fa-chevron-circle-down").removeClass("fa-chevron-circle-right");
+        $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
       }
     });
 
@@ -185,7 +185,7 @@ export default class showcaseFull extends ShowcasePage {
       if (isGroupHeader) {
         $toggler.find("i").addClass("fa-chevron-right").removeClass("fa-chevron-down");
       } else {
-        $toggler.find("i").addClass("fa-chevron-circle-right").removeClass("fa-chevron-circle-down");
+        $toggler.find("i").addClass("fa-chevron-right").removeClass("fa-chevron-down");
       }
     });
   }
@@ -531,7 +531,7 @@ export default class showcaseFull extends ShowcasePage {
         fns.push(new Promise((resolve, reject) => {
           const cache = store.get(`ogImage_${id}`);
           if (cache && new Date().getTime() < cache.expires) {
-            const $img = $(`<img src="${cache.url}" class="card-img-top" alt="${name}" width=290>`);
+            const $img = $(`<img src="${cache.url}" class="card-img-top" alt="${name}" width=200>`);
             $(`#img_container_${id}`).html($img);
             return resolve();
           } else {
@@ -544,10 +544,10 @@ export default class showcaseFull extends ShowcasePage {
               const { ogImage = [] } = meta;
               // pull the card image, default to a grayscale picsum
               const [img = {}] = ogImage;
-              const { url = "https://picsum.photos/290/180?grayscale&random="+i } = img;
+              const { url = "https://picsum.photos/240/180?grayscale&random="+i } = img;
 
               // update DOM
-              const $img = $(`<img src="${url}" class="card-img-top" alt="${name}" width=290>`);
+              const $img = $(`<img src="${url}" class="card-img-top" alt="${name}" width=200>`);
               $(`#img_container_${id}`).html($img);
               store.set(`ogImage_${id}`, {
                 url: url,

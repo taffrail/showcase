@@ -7,7 +7,7 @@
 					<header class="d-flex align-items-center justify-content-between">
 						<h5 class="mr-2 mb-0">
 							<a data-toggle="collapse" href="#collapse_group_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_group_{{@index}}" class="group-toggler">
-								<i class="fal fa-chevron-down"></i> {{@key}}
+								{{@key}}
 							</a>
 						</h5>
 						<%- include("_dropdown"); %>
@@ -16,7 +16,7 @@
 					<header>
 						<h5>
 							<a data-toggle="collapse" href="#collapse_group_{{@index}}" role="button" aria-expanded="false" aria-controls="collapse_group_{{@index}}" class="group-toggler">
-								<i class="fal fa-chevron-down"></i> {{@key}}
+								{{@key}}
 							</a>
 						</h5>
 					</header>
@@ -24,7 +24,7 @@
 				<ul class="advice-list recommendations fa-ul collapse show" id="collapse_group_{{@index}}">
 					{{#each this}}
 						<li data-id="{{id}}" data-idx="{{idx}}" class="{{#if _isPrimary}}is-primary{{/if}}">
-							<span class="{{#if _icon}}fa-li{{/if}} {{#if attachment}}show{{/if}}">
+							<span class="{{#if _icon}}fa-li{{/if}} {{#unless summary}}no-summary{{/unless}} {{#if attachment}}show{{/if}}">
 							{{#if summary}}
 								<a data-toggle="collapse" href="#collapse_{{id}}" role="button" aria-expanded="false" aria-controls="collapse_{{id}}">
 									{{#if _icon}}<i class="{{_icon}}"></i>{{/if}}
@@ -82,12 +82,12 @@
 			<header><h5>References & Sources</h5></header>
 			<div class="card-deck">
 				{{#each adviceset.referenceDocuments}}
-					<div class="card" style="max-width: 18rem;">
+					<div class="card" style="max-width: 14rem;">
 						<div id="img_container_{{id}}">
 							<div class="ph-item mb-0">
 								<div class="ph-col-12">
 									<div class="ph-row">
-										<div class="ph-picture" style="width:290px;height:180px;"></div>
+										<div class="ph-picture" style="width:240px;height:240px;"></div>
 									</div>
 								</div>
 							</div>
@@ -95,8 +95,8 @@
 						<div class="card-body">
 							<h6 class="card-title">{{name}}</h6>
 							<p class="card-text">{{body}}</p>
-							<div class="d-flex align-items-center">
-								<a class="btn btn-outline-secondary" href="{{url}}" target="_blank">Read more <i class="fal fa-external-link"></i></a>
+							<div class="d-flex align-items-center justify-content-between">
+								<a class="btn btn-sm btn-outline-secondary" href="{{url}}" target="_blank">Open <i class="fal fa-external-link"></i></a>
 								<div class="dropdown ml-2">
 									<a href="#" class="dropdown-toggle text-dark" id="dropdownMenuButtonCard_{{id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 										<i class="fal fa-ellipsis-h"></i>

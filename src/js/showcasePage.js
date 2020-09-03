@@ -212,11 +212,11 @@ export default class ShowcasePage {
         // only show icon for advice with summary or attachment
         let icon = "";
         if (a.summary && isChart) {
-          icon = "fal fa-chevron-circle-down";
+          icon = "fal fa-chevron-down";
         } else if (a.summary) {
-          icon = "fal fa-chevron-circle-right";
-        } else {
           icon = "fal fa-chevron-right";
+        } else {
+          icon = "fas fa-circle bullet-sm";
         }
         // handlebars helper
         a._icon = icon;
