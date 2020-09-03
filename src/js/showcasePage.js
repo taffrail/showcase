@@ -37,7 +37,7 @@ export default class ShowcasePage {
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
     // mode
-    this.primaryAdviceModeEnabled = store.get("primaryAdviceModeEnabled", true);
+    this.primaryAdviceModeEnabled = store.get("primaryAdviceModeEnabled", false);
     // events
     this.handleChangeAudience();
     this.handleCopyLink();
