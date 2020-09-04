@@ -320,6 +320,10 @@
 					.fa-li {
 						left: 0;
 						padding-top: 0;
+
+						&.no-summary {
+							top: 4px;
+						}
 					}
 
 					a.headline {
