@@ -389,9 +389,32 @@
 		margin: 3rem 0;
 
 		.card {
+			$height: 160px;
+			$width: 235px;
+			$border-width: 2px;
+
 			@extend .shadow-sm;
-			margin-left: .75;
-			margin-right: .75;
+			margin-bottom: .5rem;
+			margin-left: .5rem;
+			margin-right: .5rem;
+			max-width: $width;
+			min-width: $width;
+
+			.img-ph,
+			.img-ph .ph-picture {			
+				height: $height;
+				width: $width - $border-width;
+			}
+
+			.img-ph {
+				background-repeat: no-repeat;
+				background-size: cover;
+			}
+
+			.card-img-top {
+				height: $height;
+				width: $width - $border-width;
+			}
 
 			.card-title {
 				font-weight: $font-weight-medium;
@@ -399,6 +422,20 @@
 
 			.card-body {
 				padding: .75rem;
+			}
+
+			.card-text {
+				&.text-sm {
+					font-size: .8rem;
+				}
+			}
+
+			.source-url {
+				display: block;
+				font-size: .7rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 			}
 		}
 	}

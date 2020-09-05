@@ -259,6 +259,20 @@ export default class ShowcasePage {
   }
 
   /**
+   * Map reference doc data
+   */
+  mapReferenceDocuments() {
+    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.map(rd => {
+      const { _links: { original = "" } } = rd;
+      if (original) {
+        const u = new URL(original);
+        rd._links.original_without_prefix = `${u.host.replace("www.","")}${u.pathname}`;
+      }
+      return rd;
+    });
+  }
+
+  /**
 	 * Update variables list
 	 */
   updateVariablesList(){

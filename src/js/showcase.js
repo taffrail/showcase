@@ -388,7 +388,7 @@ export default class showcaseFull extends ShowcasePage {
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
-    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+    this.api.answers = [].concat(this.api.advice).filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
     });
@@ -423,6 +423,7 @@ export default class showcaseFull extends ShowcasePage {
     });
 
     this.mapAdviceData();
+    this.mapReferenceDocuments();
   }
 
   /**
@@ -528,39 +529,37 @@ export default class showcaseFull extends ShowcasePage {
     if (referenceDocuments.length) {
       const fns = [];
       referenceDocuments.forEach((rd, i) => {
-        const { id, url, name } = rd;
+        const { id, url, _links: { original: originalUrl = "" } } = rd;
+        const size = { width: 235, height: 165 }
+        const defaultImg = `https://picsum.photos/${size.width}/${size.height}?grayscale&random=${i}`;
 
         fns.push(new Promise((resolve, reject) => {
-          const cache = store.get(`ogImage_${id}`);
-          if (cache && new Date().getTime() < cache.expires) {
-            const $img = $(`<img src="${cache.url}" class="card-img-top" alt="${name}" width=200>`);
-            $(`#img_container_${id}`).html($img);
-            return resolve();
-          } else {
-            return $.post("/s/api/ogs", { url: url }, (meta) => {
-              if (!meta.success) {
-                console.error(meta);
-                return resolve();
-              }
-
-              const { ogImage = [] } = meta;
-              // pull the card image, default to a grayscale picsum
-              const [img = {}] = ogImage;
-              const { url = "https://picsum.photos/240/180?grayscale&random="+i } = img;
-
-              // update DOM
-              const $img = $(`<img src="${url}" class="card-img-top" alt="${name}" width=200>`);
-              $(`#img_container_${id}`).html($img);
-              store.set(`ogImage_${id}`, {
-                url: url,
-                expires: new Date().getTime() + 3600000 // 1 hour TTL
-              })
+          return $.post("/s/api/ogs", { url: url }, (meta) => {
+            if (!meta.success) {
+              console.error("og failure", meta);
+              $(`#img_container_${id}`).empty().css("background-image", `url("${defaultImg}")`);
               return resolve();
-            });
-          }
+            }
+
+            // pull the card image, default to a grayscale picsum
+            const { ogImage = [] } = meta;
+            const [img = {}] = ogImage;
+            let { url = defaultImg } = img;
+
+            // custom image for IRS website, their blue logo is too blue.
+            if (originalUrl && originalUrl.includes("irs.gov")) {
+              url = "https://justgoodadvice-web.s3.amazonaws.com/demos/irs-logo-white.png";
+            }
+
+            // update DOM
+            $(`#img_container_${id}`).empty().css("background-image", `url("${url}")`);
+            return resolve();
+          });
         }));
       });
-      return Promise.all(fns);
+      return Promise.all(fns).then(() => {
+        $("#group_references").find(".card[data-toggle=popover]").popover();
+      });
     }
   }
 
