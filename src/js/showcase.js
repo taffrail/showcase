@@ -388,7 +388,7 @@ export default class showcaseFull extends ShowcasePage {
     // `api.advice` is an array of every input + advice node
     this.api.display = _.last(this.api.advice) || {};
     // build collection of just answers & assumptions
-    this.api.answers = [].concat(this.api.advice).filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+    this.api.answers = [].concat(this.api.advice||[]).filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
       a.idx = i;
       return a;
     });
