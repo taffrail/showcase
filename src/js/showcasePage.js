@@ -45,6 +45,7 @@ export default class ShowcasePage {
     this.handleShowAllRecommendationsFromPrimaryAdvice();
     this.handleClickOpenRawDataModal();
     this.handleClickTogglePrimaryAdviceMode();
+    this.handleClickShowAllSources();
   }
 
   // #region getter/setter
@@ -262,14 +263,22 @@ export default class ShowcasePage {
    * Map reference doc data
    */
   mapReferenceDocuments() {
-    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.map(rd => {
+    let hasMoreThanLimit = false;
+    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.map((rd, i) => {
       const { _links: { original = "" } } = rd;
       if (original) {
         const u = new URL(original);
         rd._links.original_without_prefix = `${u.host.replace("www.","")}${u.pathname}`;
       }
+      // show only first 6 docs
+      rd._hidden = (i >= 6);
+      hasMoreThanLimit = (i >= 6);
       return rd;
-    }).reverse();
+    });
+
+    this.api.adviceset.referenceDocuments_hasMoreThanLimit = hasMoreThanLimit;
+
+    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.reverse();
   }
 
   /**
@@ -490,6 +499,18 @@ export default class ShowcasePage {
       setTimeout(() => {
         window.location.reload();
       }, 3000);
+    });
+  }
+
+  /**
+   * Handle clicks to toggle primnary advice mode
+   */
+  handleClickShowAllSources() {
+    $("main").on("click", "a[data-action='showAllSources']", e => {
+      e.preventDefault();
+      const $btn = $(e.currentTarget);
+      $btn.hide()
+      $("#group_references").find(".card.d-none").removeClass("d-none");
     });
   }
 

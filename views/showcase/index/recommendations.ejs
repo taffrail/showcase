@@ -81,7 +81,7 @@
 			<header><h5>References & Sources</h5></header>
 			<div class="card-deck">
 				{{#each adviceset.referenceDocuments}}
-					<div class="card" {{#if body}}data-toggle="popover" title="{{name}}" data-content="{{body}}" data-trigger="hover" data-placement="right"{{/if}}>
+					<div class="card {{#if _hidden}}d-none{{/if}}" {{#if body}}data-toggle="popover" title="{{name}}" data-content="{{body}}" data-trigger="hover" data-placement="right"{{/if}}>
 						<div id="img_container_{{id}}" class="img-ph">
 							<div class="ph-item mb-0">
 								<div class="ph-col-12">
@@ -111,6 +111,9 @@
 					</div>
 				{{/each}}
 			</div>
+			{{#if adviceset.referenceDocuments_hasMoreThanLimit}}
+				<div><a href="#" class="btn btn-sm btn-outline-secondary" data-action="showAllSources">Show all</a></div>
+			{{/if}}
 		</div>
 	{{/if}}
 </script>
