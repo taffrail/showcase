@@ -269,7 +269,7 @@ export default class ShowcasePage {
         rd._links.original_without_prefix = `${u.host.replace("www.","")}${u.pathname}`;
       }
       return rd;
-    });
+    }).reverse();
   }
 
   /**
