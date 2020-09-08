@@ -90,6 +90,9 @@ export default class ShowcasePage {
       include: ["filteredVars"],
       showcase: true
     }, currFormData, qs.parse(newFormData));
+    // internal JGA: don't include this legacy field
+    delete formData.returnFields;
+
     const [apiUrlWithoutQuerystring] = this.api._links.self.split("?");
     const loadingId = Loading.show($loadingContainer, undefined, usePlaceholder);
 
