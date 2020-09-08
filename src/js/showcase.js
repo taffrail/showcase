@@ -558,7 +558,7 @@ export default class showcaseFull extends ShowcasePage {
         }));
       });
       return Promise.all(fns).then(() => {
-        $("#group_references").find(".card[data-toggle=popover]").popover();
+        $("#group_references").find("[data-toggle=popover]").popover();
       });
     }
   }

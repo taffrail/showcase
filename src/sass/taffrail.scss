@@ -389,7 +389,7 @@
 		margin: 3rem 0;
 
 		.card {
-			$height: 160px;
+			$height: 125px;
 			$width: 235px;
 			$border-width: 2px;
 
@@ -409,6 +409,7 @@
 			.img-ph {
 				background-repeat: no-repeat;
 				background-size: cover;
+				background-position-y: -1rem;
 			}
 
 			.card-img-top {
@@ -416,12 +417,24 @@
 				width: $width - $border-width;
 			}
 
+			.img-header {
+				position: relative;
+
+				.dropdown {
+					position: absolute;
+					right: .75rem;
+					top: .25rem;
+				}
+			}
+
 			.card-title {
-				font-weight: $font-weight-medium;
+				font-size: $font-size-sm;
+				font-weight: $font-weight-normal;
 			}
 
 			.card-body {
 				padding: .75rem;
+				position: relative;
 			}
 
 			.card-text {

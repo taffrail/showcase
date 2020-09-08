@@ -81,38 +81,38 @@
 			<header><h5>References & Sources</h5></header>
 			<div class="card-deck">
 				{{#each adviceset.referenceDocuments}}
-					<div class="card {{#if _hidden}}d-none{{/if}}" {{#if body}}data-toggle="popover" title="{{name}}" data-content="{{body}}" data-trigger="hover" data-placement="right"{{/if}}>
-						<div id="img_container_{{id}}" class="img-ph">
-							<div class="ph-item mb-0">
-								<div class="ph-col-12">
-									<div class="ph-row">
-										<div class="ph-picture"></div>
+					<div class="card {{#if _hidden}}d-none{{/if}}">
+						<div class="img-header">
+							<div id="img_container_{{id}}" class="img-ph">
+								<div class="ph-item mb-0">
+									<div class="ph-col-12">
+										<div class="ph-row">
+											<div class="ph-picture"></div>
+										</div>
 									</div>
 								</div>
 							</div>
+							<div class="dropdown">
+								<a href="#" class="dropdown-toggle text-dark" id="dropdownMenuButtonCard_{{id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									<i class="fal fa-ellipsis-h"></i>
+								</a>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuButtonCard_{{id}}">
+									<a class="dropdown-item" href="https://app.justgoodadvice.com/media/{{id}}/show" target="_blank"><i class="fal fa-pencil"></i>&nbsp;Edit in Advice Builder</a>
+								</div>
+							</div>	
 						</div>
-						<div class="card-body">
+						<div class="card-body" {{#if body}}data-toggle="popover" title="{{name}}" data-content="{{body}}" data-trigger="hover" data-placement="right"{{/if}}>
 							<h6 class="card-title">{{name}}</h6>
 							<!--<p class="card-text text-sm">{{body}}</p>-->
 							<div class="d-flex align-items-center justify-content-between">
 								<a class="text-sm text-muted stretched-link source-url" href="{{url}}" target="_blank">{{#if _links.original_without_prefix}}{{_links.original_without_prefix}}{{else}}{{_links.original}}{{/if}}</a>
-								<!--
-								<div class="dropdown ml-2">
-									<a href="#" class="dropdown-toggle text-dark" id="dropdownMenuButtonCard_{{id}}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="fal fa-ellipsis-h"></i>
-									</a>
-									<div class="dropdown-menu" aria-labelledby="dropdownMenuButtonCard_{{id}}">
-										<a class="dropdown-item" href="https://app.justgoodadvice.com/media/{{id}}/show" target="_blank"><i class="fal fa-pencil"></i>&nbsp;Edit in Advice Builder</a>
-									</div>
-								</div>	
-								-->
 							</div>
 						</div>
 					</div>
 				{{/each}}
 			</div>
 			{{#if adviceset.referenceDocuments_hasMoreThanLimit}}
-				<div><a href="#" class="btn btn-sm btn-outline-secondary" data-action="showAllSources">Show all</a></div>
+				<div><a href="#" class="btn btn-sm btn-light" data-action="showAllSources">Show all</a></div>
 			{{/if}}
 		</div>
 	{{/if}}
