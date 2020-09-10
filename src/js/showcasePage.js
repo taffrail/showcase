@@ -385,7 +385,7 @@ export default class ShowcasePage {
           return $.post("/s/api/shorten", {
             long_url: url,
             title: `${this.api.adviceset.title} - ${title}`
-          }).then(resolve);
+          }).then(resolve).catch(reject);
         }
       }).then(bitly => {
         const paramsEntitiesUsed = [];
@@ -395,7 +395,8 @@ export default class ShowcasePage {
           inputParams[v.name] = v.value;
           paramsEntitiesUsed.push(v.id);
         });
-        inputParams = _.omit(inputParams, "include", "showcase");
+        // internal JGA: don't include these fields for scenarios
+        inputParams = _.omit(inputParams, "include", "showcase", "returnFields");
 
         // save scenario to advice builder
         return $.ajax({
