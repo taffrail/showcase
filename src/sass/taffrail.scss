@@ -264,7 +264,7 @@
 			header {
 				margin-bottom: $headings-margin-bottom * 2;
 				
-				a {
+				a:not(.dropdown-item) {
 					@include text-link($body-color, false);
 				}
 
