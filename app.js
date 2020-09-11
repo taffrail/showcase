@@ -7,7 +7,7 @@ const logger = require("morgan");
 const sassMiddleware = require("node-sass-middleware");
 const Sentry = require("@sentry/node");
 const { Integrations: ApmIntegrations } = require("@sentry/apm");
-const sslRedirect = require("heroku-ssl-redirect");
+const { default: sslRedirect } = require("heroku-ssl-redirect");
 
 const indexRouter = require("./routes/index");
 const showcaseRouter = require("./routes/showcase");
