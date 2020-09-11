@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-pro": "^5.14.0",
-    "@sentry/apm": "^5.21.1",
-    "@sentry/browser": "^5.21.1",
-    "@sentry/node": "^5.21.1",
+    "@sentry/apm": "^5.21.4",
+    "@sentry/browser": "^5.23.0",
+    "@sentry/node": "^5.21.4",
     "bitly": "^7.1.0",
     "bootstrap": "^4.5",
     "clipboard-copy": "^3.1.0",
@@ -25,11 +25,11 @@
     "express": "~4.17.1",
     "express-healthcheck": "^0.1.0",
     "handlebars": "^4.7.6",
-    "heroku-ssl-redirect": "0.0.4",
+    "heroku-ssl-redirect": "0.1.1",
     "history": "^4.10.1",
     "http-errors": "~1.8.0",
     "i": "^0.3.6",
-    "inputmask": "^5.0.3",
+    "inputmask": "^5.0.5",
     "isbot": "^3.0.7",
     "jquery": "^3.5.1",
     "lodash": "^4.17.20",
@@ -47,7 +47,7 @@
     "store": "^2.0.12"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.0",
+    "@babel/core": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
     "babel-loader": "^8.1.0",
     "browser-sync": "^2.26.12",
@@ -63,7 +63,7 @@
     "gulp-sass": "^4.1.0",
     "gulp-sourcemaps": "^2.6.5",
     "mocha": "^8.1.1",
-    "terser-webpack-plugin": "^4.0.0",
+    "terser-webpack-plugin": "^4.1.0",
     "webpack-stream": "^5.2.1"
   }
 }
