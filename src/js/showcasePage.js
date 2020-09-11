@@ -70,6 +70,12 @@ export default class ShowcasePage {
     return `/${prefix}/${this.api.adviceset.id}`;
   }
 
+  // these are API params set by default
+  // do not save them as visible parts of the URL or in Advice Builder scenarios
+  get paramsToOmit() {
+    return ["include", "showcase", "returnFields"];
+  }
+
   // eslint-disable-next-line accessor-pairs
   set windowTitle(title) {
     document.title = title;
@@ -391,7 +397,7 @@ export default class ShowcasePage {
         const paramsEntitiesUsed = [];
         let inputParams = { ...this.api.params };
         // internal JGA: don't include these fields for scenarios
-        inputParams = _.omit(inputParams, "include", "showcase", "returnFields");
+        inputParams = _.omit(inputParams, this.paramsToOmit);
         // lookup input param IDs to save with scenario
         Object.keys(inputParams).forEach(key => {
           const variable = this.api.variables.find(v => { return v.name == key; });
@@ -567,6 +573,9 @@ export default class ShowcasePage {
    *
    * @param {string=} id Optional ID
    * @param {object} opts Toast options
+   * @param {string} opts.title Toast title
+   * @param {string=} opts.message Toast message
+   * @param {number=} opts.delay Toast delay, default to 2 seconds
    */
   showToast(id = _.uniqueId("toast"), opts = {}) {
     if (!opts.id) {
