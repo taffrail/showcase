@@ -390,13 +390,15 @@ export default class ShowcasePage {
       }).then(bitly => {
         const paramsEntitiesUsed = [];
         let inputParams = { ...this.api.params };
-        // Build inputParams with values
-        this.api.variables.forEach(v => {
-          inputParams[v.name] = v.value;
-          paramsEntitiesUsed.push(v.id);
-        });
         // internal JGA: don't include these fields for scenarios
         inputParams = _.omit(inputParams, "include", "showcase", "returnFields");
+        // lookup input param IDs to save with scenario
+        Object.keys(inputParams).forEach(key => {
+          const variable = this.api.variables.find(v => { return v.name == key; });
+          if (variable) {
+            paramsEntitiesUsed.push(variable.id);
+          }
+        });
 
         // save scenario to advice builder
         return $.ajax({
