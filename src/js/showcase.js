@@ -17,8 +17,9 @@ export default class showcaseFull extends ShowcasePage {
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".row .advice")).then(api => {
-      // on page load, save current state
-      this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
+      // on page load, save current state without API params
+      const currQs = qs.stringify(_.omit(qs.parse(querystring), this.paramsToOmit));
+      this.history.replace(`${this.baseUrl}/?${currQs}`, this.api);
       // DOM updates
       this.updateAdviceSetDetails();
       this.updatePanes();
@@ -62,7 +63,7 @@ export default class showcaseFull extends ShowcasePage {
       // update content
       this.updatePanes();
       // save state
-      this.history.push(`${this.baseUrl}/?${qs.stringify(this.api.params)}`, this.api);
+      this.history.push(`${this.baseUrl}/?${qs.stringify(_.omit(this.api.params, this.paramsToOmit))}`, this.api);
     }
   }
 
@@ -342,18 +343,6 @@ export default class showcaseFull extends ShowcasePage {
    * Template update for INPUT_REQUEST
    */
   _updateForInputRequest() {
-    // const isLastAndAnswered = this.api.display.id == _.last(this.api.advice).id && this.api.display.value != null;
-    // console.log(isLastAndAnswered)
-    // if (isLastAndAnswered) {
-    // this.api.display = Object.assign(this.api.display, {
-    //   question: "Advice Engine Response",
-    //   explanation: "This rule has been evaluated, see variable data for export.",
-    //   form: {
-    //     fieldType: "NONE",
-    //     result: this.api.display.value
-    //   }
-    // });
-    // }
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
     this.$advice.html(str);
