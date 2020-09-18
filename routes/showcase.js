@@ -59,9 +59,15 @@ router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
   const allowedViews = ["index", "mobile", "virtual-assistant", "salesforce"];
   const template = (allowedViews.includes(view)) ? view : allowedViews[0];
   const isMobile = view == "mobile" || view == "virtual-assistant";
+  const qrystr = Object.assign({}, req.query, {
+    include: ["filteredVars"], showcase: true
+  });
+  const apiUrl = `${process.env.API_HOST}/api/advice/${adviceSetId}?${qs.stringify(qrystr)}`;
 
   return res.render(`showcase/${template}`, {
     adviceSetId: adviceSetId,
+    linkApi: apiUrl,
+    linkAdviceBuilder: `${process.env.API_HOST}/advicesets/${adviceSetId}/show`,
     isMobile: isMobile
   });
 });

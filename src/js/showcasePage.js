@@ -140,17 +140,20 @@ export default class ShowcasePage {
       if (reason) {
         err += ` (${reason})`;
       }
-      this.api = _.assign({}, {
-        adviceset: {
+      this.api = _.assign({}, window.jga.api, {
+        adviceset: _.assign({}, window.jga.api.adviceset,{
           id: window.jga.adviceSetId, // this is saved to the window on page-load
           title: "Error",
-          description: err
-        }
+          description: err != "error" ? err : "API unavailable",
+          referenceDocuments: [],
+          owner: {}
+        }),
+        advice: []
       });
       Loading.hide(loadingId);
       this.showToast(undefined, {
         title: "Just Good Advice",
-        message: `${err}`,
+        message: `${this.api.adviceset.description}`,
         delay: 10000
       });
     });
