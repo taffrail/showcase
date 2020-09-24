@@ -1,12 +1,12 @@
 # Best-interest financial advice, automated.
 
-Just Good Advice is the first service to enable online brokers to provide automated, personalized, contextual advice to their clients that is convenient and compliant with all regulations.
+Taffrail is the first service to enable online brokers to provide automated, personalized, contextual advice to their clients that is convenient and compliant with all regulations.
 
 **We are redefining digital advice in financial services.**
 
 Learn more at [taffrail.com](https://taffrail.com) and contact us at hello@taffrail.com.
 
-## Just Good Advice Showcase
+## Taffrail Showcase
 
 This is our Advice showcase app. Integrating our Advice API into your app is demonstrated in this fully-functional javascript app. We created this project and open sourced the code to make it easier for you to explore using our Advice API.
 
