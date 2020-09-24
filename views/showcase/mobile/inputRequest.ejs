@@ -72,6 +72,21 @@
 
 				{{/ifEquals}}
 
+				{{#ifEquals display.form.fieldType "MultipleChoice"}}
+				
+					{{#each display.form.values}}
+						<div class="custom-control custom-radio">
+							<input type="radio" name="{{../display.form.name}}" value="{{@this}}" id="{{../display.id}}_{{@index}}" class="custom-control-input" required>
+							<label class="custom-control-label" for="{{../display.id}}_{{@index}}">{{@this}}
+							{{#if helpText}}
+							<small class="form-text text-muted">{{helpText}}</small>
+							{{/if}}
+							</label>
+						</div>
+					{{/each}}
+
+				{{/ifEquals}}
+
 			</div>
 
 			{{#unless display._isLast}}
