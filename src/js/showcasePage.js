@@ -122,7 +122,7 @@ export default class ShowcasePage {
       });
       Loading.hide(loadingId);
       this.showToast(undefined, {
-        title: "Just Good Advice",
+        title: "Taffrail",
         message: `${err}`,
         delay: 10000
       });
@@ -213,7 +213,7 @@ export default class ShowcasePage {
         // copy to clipboard
         return copy(bitly.link).then(() => {
           this.showToast(linkGenId, {
-            title: "Just Good Advice",
+            title: "Taffrail",
             message: "Link copied!"
           });
         });
@@ -325,7 +325,7 @@ export default class ShowcasePage {
           // copy to clipboard
           return copy(bitly.link).then(() => {
             this.showToast(linkGenId, {
-              title: "Just Good Advice",
+              title: "Taffrail",
               message: "Link copied!"
             });
           });

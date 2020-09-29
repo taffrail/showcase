@@ -1,4 +1,4 @@
-// const logger = require("@justgoodadvice/justgoodadvice-web-core/logger");
+// const logger = require("@taffrail/core/logger");
 const pkg = require("../package.json");
 const fetch = require("node-fetch");
 
