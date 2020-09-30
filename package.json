@@ -64,6 +64,6 @@
     "gulp-sourcemaps": "^2.6.5",
     "mocha": "^8.1.1",
     "terser-webpack-plugin": "^4.2.2",
-    "webpack-stream": "^5.2.1"
+    "webpack-stream": "^6.1.0"
   }
 }
