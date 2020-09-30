@@ -124,7 +124,9 @@ function sass() {
     outputStyle: "compressed",
     includePaths: [node_modules] // find node_modules above the cwd
   }
-  return src("src/sass/main.scss")
+  return src([
+    "src/sass/taffrail.scss"
+  ])
     .pipe(sourcemaps.init())
     .pipe(gSass(options).on("error", gSass.logError))
     .pipe(sourcemaps.write("."))

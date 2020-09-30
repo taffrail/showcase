@@ -5,7 +5,7 @@ import ShowcaseVirtualAsst from "./showcaseVirtualAsst";
 import ShowcaseSalesforce from "./showcaseSalesforce";
 
 // demo nav links
-$("main").on("click", ".demo-nav a[data-target]", e => {
+$("main").on("click", "nav.menubar a[data-target]", e => {
   e.preventDefault();
   const $el = $(e.currentTarget);
   const { target } = $el.data();

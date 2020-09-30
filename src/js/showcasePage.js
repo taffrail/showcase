@@ -4,7 +4,9 @@ import { createBrowserHistory } from "history";
 import Handlebars from "handlebars";
 import Inputmask from "inputmask";
 import Loading from "./loading";
+import pluralize from "pluralize";
 import qs from "querystring";
+import store from "store";
 
 export default class ShowcasePage {
   constructor(){
@@ -34,10 +36,16 @@ export default class ShowcasePage {
     window.jga.api._links = { self: `${this.config.api_host}/api/advice/${this.api.adviceset.id}` }
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
+    // mode
+    this.primaryAdviceModeEnabled = store.get("primaryAdviceModeEnabled", false);
     // events
     this.handleChangeAudience();
     this.handleCopyLink();
     this.handleCopyLinkAndSaveScenario();
+    this.handleShowAllRecommendationsFromPrimaryAdvice();
+    this.handleClickOpenRawDataModal();
+    this.handleClickTogglePrimaryAdviceMode();
+    this.handleClickShowAllSources();
   }
 
   // #region getter/setter
@@ -58,7 +66,14 @@ export default class ShowcasePage {
   }
 
   get baseUrl() {
-    return `/s/${this.api.adviceset.id}`;
+    const prefix = "s";
+    return `/${prefix}/${this.api.adviceset.id}`;
+  }
+
+  // these are API params set by default
+  // do not save them as visible parts of the URL or in Advice Builder scenarios
+  get paramsToOmit() {
+    return ["include", "showcase", "returnFields"];
   }
 
   // eslint-disable-next-line accessor-pairs
@@ -71,16 +86,21 @@ export default class ShowcasePage {
   /**
    * Capture new form data, merge with current state and make new Advice API request.
    * @param {object} newFormData Form data from input request.
+   * @param {jQuery} $loadingContainer
+   * @param {boolean} usePlaceholder
    * @returns Promise<jqXHR>
    */
-  _loadApi(newFormData, $loadingContainer = this.$loadingContainer){
+  _loadApi(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = true){
     const currFormData = this.api.params;
     const formData = _.assign({
       include: ["filteredVars"],
       showcase: true
     }, currFormData, qs.parse(newFormData));
+    // internal JGA: don't include this legacy field
+    delete formData.returnFields;
+
     const [apiUrlWithoutQuerystring] = this.api._links.self.split("?");
-    const loadingId = Loading.show($loadingContainer);
+    const loadingId = Loading.show($loadingContainer, undefined, usePlaceholder);
 
     return $.ajax({
       url: apiUrlWithoutQuerystring,
@@ -106,24 +126,34 @@ export default class ShowcasePage {
       return api;
     }).catch((jqXHR) => {
       let err;
+      let reason = "";
       if (jqXHR.responseJSON) {
         err = jqXHR.responseJSON.error.message;
+        if (jqXHR.responseJSON.error.reason) {
+          ({ reason } = jqXHR.responseJSON.error);
+        }
       } else if (jqXHR.statusText) {
         err = jqXHR.statusText;
       } else {
         err = jqXHR.message;
       }
-      this.api = _.assign({}, {
-        adviceset: {
+      if (reason) {
+        err += ` (${reason})`;
+      }
+      this.api = _.assign({}, window.jga.api, {
+        adviceset: _.assign({}, window.jga.api.adviceset,{
           id: window.jga.adviceSetId, // this is saved to the window on page-load
           title: "Error",
-          description: err
-        }
+          description: err != "error" ? err : "API unavailable",
+          referenceDocuments: [],
+          owner: {}
+        }),
+        advice: []
       });
       Loading.hide(loadingId);
       this.showToast(undefined, {
-        title: "Just Good Advice",
-        message: `${err}`,
+        title: "Taffrail",
+        message: `${this.api.adviceset.description}`,
         delay: 10000
       });
     });
@@ -133,6 +163,7 @@ export default class ShowcasePage {
    * Helper to find the "last" Advice node, including a check for the
    * System Advice Node with special ID -32768
    */
+  // eslint-disable-next-line complexity
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
@@ -155,7 +186,120 @@ export default class ShowcasePage {
       }
     }
 
-    return allAdvice;
+    // group all advice into bucketed recommendations
+    let groupedAdvice = _.groupBy(allAdvice, (a) => {
+      return (a.tagGroup) ? a.tagGroup.name : "Recommendations";
+    });
+
+    // This is hard to read but straightforward chained lodash logic. Steps:
+    // 1.convert groupedAdvice object `toPairs` (new array of arrays [[tagGroup, itemsArr]])
+    // 2.sort by weight of tagGroup (pull from 1st item)
+    // 3.reverse the sort, order DESC
+    // 4.convert `fromPairs` back to object
+    // 5.retrieve chained value
+    //
+    // Cribbed from:
+    // https://github.com/lodash/lodash/issues/1459#issuecomment-253969771
+    groupedAdvice = _(groupedAdvice).toPairs().sortBy([(group) => {
+      const [/* key*/, items] = group;
+      // get the weight (defaults to 0) from first item in group
+      const { tagGroup: { weight = 0 } = {} } = _.first(items);
+      return weight;
+    }]).reverse().fromPairs().value();
+
+    const groupKeys = Object.keys(groupedAdvice);
+
+    // add handlebars helpers
+    groupKeys.forEach((key, idx) => {
+      // map each array of advice with some props
+      groupedAdvice[key] = groupedAdvice[key].map(a => {
+        // determine if this is an interactive chart attachment
+        const { attachment } = a;
+        let isChart = false;
+        if (attachment) {
+          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
+          // handlebars helper
+          attachment._isInteractiveChart = isChart;
+        }
+
+        // only show icon for advice with summary or attachment
+        let icon = "";
+        if (a.summary && isChart) {
+          icon = "fal fa-chevron-down";
+        } else if (a.summary) {
+          icon = "fal fa-chevron-right";
+        } else {
+          icon = "fal fa-circle bullet-sm";
+        }
+        // handlebars helper
+        a._icon = icon;
+
+        return a;
+      });
+    });
+
+    // find "primary advice" -- last advice in highest weighted group
+    const [highestWeightedGroup] = groupKeys;
+    if (groupedAdvice[highestWeightedGroup] && groupedAdvice[highestWeightedGroup].length){
+      const primaryAdvice = _.last(groupedAdvice[highestWeightedGroup]);
+      primaryAdvice._isPrimary = true;
+
+      if (this.primaryAdviceModeEnabled) {
+        // assign it to temp prop
+        this.api.display_primary_advice = primaryAdvice;
+        // remove it from list that will become `recommendations`
+        groupedAdvice[highestWeightedGroup].pop();
+        // are there any recommendations left in this group?
+        if (!groupedAdvice[highestWeightedGroup].length) {
+          delete groupedAdvice[highestWeightedGroup];
+        }
+
+        // build a string for use below primary advice
+        const varStr = ` ${pluralize("inputs", this.api.variables.length, true)}`;
+        let factoredStr = "";
+        const assumptionLen = _.flatMap(this.api.assumptions).length;
+        const recommendationLen = _.flatMap(groupedAdvice).length;
+        if (assumptionLen > 0) {
+          factoredStr = `${pluralize("assumption", assumptionLen, true)}`;
+        }
+        this.api.display_primary_advice._evaluated = `<strong>${factoredStr}</strong> and <strong>${varStr}</strong>`;
+        this.api.display_primary_advice._recommended = `${pluralize("recommendation", recommendationLen, true)}`;
+      }
+    }
+
+    // all advice to render is saved to `recommendations`
+    this.api.recommendations = groupedAdvice;
+  }
+
+  /**
+   * Map reference doc data
+   */
+  mapReferenceDocuments() {
+    let hasMoreThanLimit = false;
+    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.map((rd, i) => {
+      const { _links: { original = "" } } = rd;
+      if (original) {
+        const u = new URL(original);
+        rd._links.original_without_prefix = `${u.host.replace("www.","")}${u.pathname}`;
+      }
+      // show only first 6 docs
+      rd._hidden = (i >= 6);
+      hasMoreThanLimit = (i >= 6);
+      return rd;
+    });
+
+    this.api.adviceset.referenceDocuments_hasMoreThanLimit = hasMoreThanLimit;
+
+    this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.reverse();
+  }
+
+  /**
+	 * Update variables list
+	 */
+  updateVariablesList(){
+    // render
+    const template = Handlebars.compile($("#tmpl_variablesList").html());
+    $("#dataModal .variables").html(template(this.api));
   }
 
   /**
@@ -207,13 +351,13 @@ export default class ShowcasePage {
           return $.post("/s/api/shorten", {
             long_url: url,
             title: `${this.api.adviceset.title} - ${title}`
-          });
+          }).then(resolve);
         }
       }).then(bitly => {
         // copy to clipboard
         return copy(bitly.link).then(() => {
           this.showToast(linkGenId, {
-            title: "Just Good Advice",
+            title: "Taffrail",
             message: "Link copied!"
           });
         });
@@ -250,17 +394,20 @@ export default class ShowcasePage {
           return $.post("/s/api/shorten", {
             long_url: url,
             title: `${this.api.adviceset.title} - ${title}`
-          }).then(resolve);
+          }).then(resolve).catch(reject);
         }
       }).then(bitly => {
         const paramsEntitiesUsed = [];
         let inputParams = { ...this.api.params };
-        // Build inputParams with values
-        this.api.variables.forEach(v => {
-          inputParams[v.name] = v.value;
-          paramsEntitiesUsed.push(v.id);
+        // internal JGA: don't include these fields for scenarios
+        inputParams = _.omit(inputParams, this.paramsToOmit);
+        // lookup input param IDs to save with scenario
+        Object.keys(inputParams).forEach(key => {
+          const variable = this.api.variables.find(v => { return v.name == key; });
+          if (variable) {
+            paramsEntitiesUsed.push(variable.id);
+          }
         });
-        inputParams = _.omit(inputParams, "include", "showcase");
 
         // save scenario to advice builder
         return $.ajax({
@@ -300,11 +447,11 @@ export default class ShowcasePage {
                     <p>A <span class="underline-highlight">short link was copied to your clipboard</span> and an Advice Builder scenario was saved.</p>
                     <ul class="fa-ul">
                       <li>
-                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
                         <a href="${adviceBuilderScenarioUrl}" target="_blank">Advice Builder Scenario</a>
                       </li>
                       <li>
-                        <span class="fa-li"><i class="fad fa-arrow-circle-right"></i></span>
+                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
                         <a href="${bitly.link}" target="_blank">${bitly.link}</a>
                       </li>
                     </ul>
@@ -325,7 +472,7 @@ export default class ShowcasePage {
           // copy to clipboard
           return copy(bitly.link).then(() => {
             this.showToast(linkGenId, {
-              title: "Just Good Advice",
+              title: "Taffrail",
               message: "Link copied!"
             });
           });
@@ -341,10 +488,68 @@ export default class ShowcasePage {
   }
 
   /**
+   * Handle clicks to open variable modal
+   */
+  handleClickOpenRawDataModal() {
+    $("main").on("click", "a[data-action='modal-raw-data']", e => {
+      e.preventDefault();
+      $("#dataModal").modal();
+    });
+  }
+
+  /**
+   * Handle clicks to toggle primnary advice mode
+   */
+  handleClickTogglePrimaryAdviceMode() {
+    $("main").on("click", "a[data-action='toggle-primary-advice-mode']", e => {
+      e.preventDefault();
+      const currentlyEnabled = this.primaryAdviceModeEnabled;
+      const modeEnabled = !currentlyEnabled ? true : false;
+      store.set("primaryAdviceModeEnabled", modeEnabled);
+      this.primaryAdviceModeEnabled = modeEnabled;
+      this.showToast(undefined, {
+        title: "Challenge accepted!",
+        message: `Primary mode ${modeEnabled ? "enabled" : "disabled"}. Refreshing in 3 seconds...`
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
+    });
+  }
+
+  /**
+   * Handle clicks to toggle primnary advice mode
+   */
+  handleClickShowAllSources() {
+    $("main").on("click", "a[data-action='showAllSources']", e => {
+      e.preventDefault();
+      const $btn = $(e.currentTarget);
+      $btn.hide()
+      $("#group_references").find(".card.d-none").removeClass("d-none");
+    });
+  }
+
+  /**
+   * Handle click to show/hide all recommendations
+   */
+  handleShowAllRecommendationsFromPrimaryAdvice(){
+    $("main").on("click", "a[data-action=toggleRecommendations]", e => {
+      e.preventDefault();
+      const $btn = $(e.currentTarget);
+      $("html, body").animate({ scrollTop: $(".expand-history hr").offset().top + 1 });
+      $(".list-all-recommendations").slideToggle(function() {
+        const isVisible = $(this).is(":visible");
+        $(this).toggleClass("show", isVisible);
+        $btn.find("span").text( isVisible ? "Hide" : "Show" );
+      });
+    });
+  }
+
+  /**
    * Set the active audience in the switcher
    */
   setActiveAudience(audienceId = -1) {
-    const $switcher = $("li.audience-switcher");
+    const $switcher = $(".audience-switcher");
     const $audItem = $(`a[data-audience-id=${audienceId}]`);
     this.api.audienceType = {
       id: audienceId,
@@ -361,7 +566,7 @@ export default class ShowcasePage {
     $("main").on("click", "a[data-action=set-audience]", e => {
       const $el = $(e.currentTarget);
       const { audienceId = -1 } = $el.data();
-      this._loadApi(`audienceId=${audienceId}`).then(() => {
+      this._loadApi(`audienceId=${audienceId}`, undefined, false).then(() => {
         this.updateFn && this.updateFn();
       });
     });
@@ -371,6 +576,9 @@ export default class ShowcasePage {
    *
    * @param {string=} id Optional ID
    * @param {object} opts Toast options
+   * @param {string} opts.title Toast title
+   * @param {string=} opts.message Toast message
+   * @param {number=} opts.delay Toast delay, default to 2 seconds
    */
   showToast(id = _.uniqueId("toast"), opts = {}) {
     if (!opts.id) {
