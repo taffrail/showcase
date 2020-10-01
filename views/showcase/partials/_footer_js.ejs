@@ -1,7 +1,15 @@
 <script type="text/javascript">
 	window.jga=window.jga||{};
 	window.jga._isMobile=<%= locals.isMobile || false %>;
-	window.jga.api={adviceset:{id: "<%= locals.adviceSetId %>"}};
+	window.jga.api={
+		adviceset:{
+			id: "<%= locals.adviceSetId %>",
+			_links: {
+				advicebuilder: "<%= locals.linkAdviceBuilder %>"
+			}
+		},
+		_links:{self:"<%- locals.linkApi %>"}
+	};
 	window.jga.adviceSetId="<%= locals.adviceSetId %>";
 </script>
 <% if (locals.SENTRY_DSN) { %>
@@ -23,7 +31,7 @@
 	<script>
 		window.intercomSettings = {
 			app_id: "<%= locals.INTERCOM_APP_ID %>",
-			alignment: 'left'
+			custom_launcher_selector: ".intercom_messenger_launcher"
 		};
 	</script>
 

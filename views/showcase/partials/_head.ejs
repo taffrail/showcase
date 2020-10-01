@@ -13,7 +13,8 @@
 <meta name="robots" content="index,follow">
 <meta name="google" content="nositelinkssearchbox">
 
-<link rel="stylesheet" href="/dist/css/main.css" />
+<link href="//fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,200;0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/dist/css/taffrail.css" />
 
 <!--favicons-->
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -26,7 +27,7 @@
 <script>window.jga=window.jga||{};window.jga.config={web_host:"<%= locals.WEB_HOST %>",api_host:"<%= locals.API_HOST %>",api_key:"<%= locals.API_KEY %>"};</script>
 <% if (locals.GTAG_ID) { %>
 	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=<%= GTAG_ID %>"></script>
+	<script async src="//www.googletagmanager.com/gtag/js?id=<%= GTAG_ID %>"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}

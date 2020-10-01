@@ -20,7 +20,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
     this.initCache();
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
-    this._loadApi(querystring, $("main.screen")).then(api => {
+    this._loadApi(querystring, $("main.screen"), false).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
@@ -52,6 +52,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
     this.updateChatHistory();
     this.updateRecommendationsList();
     this._scrollChatBubbles();
+    this.updateVariablesList();
   }
 
   // #region event handlers
@@ -92,7 +93,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $("main.screen")).then(()=> {
+      this._loadApi(data, $("main.screen"), false).then(()=> {
         // update content
         this.updatePanes();
         // save state
@@ -212,38 +213,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       this.api.answers.pop();
     }
 
-    const allAdvice = this.mapAdviceData();
-
-    // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
-    // add icon
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      // add icons
-      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
-        // use thumbs up icon by default
-        // let icon = "fal fa-thumbs-up";
-        let icon = "fal fa-arrow-circle-right";
-        // support To Do/Completed checklist icons
-        if (key.includes("To Do")) {
-          icon = "fal fa-circle";
-        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "fal fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-
-        // determine if this is an interactive chart attachment
-        const { attachment } = a;
-        let isChart = false;
-        if (attachment) {
-          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-          // handlebars helper
-          attachment._isInteractiveChart = isChart;
-        }
-
-        return a;
-      });
-    });
+    this.mapAdviceData();
   }
 
   /**

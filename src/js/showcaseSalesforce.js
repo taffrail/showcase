@@ -30,11 +30,11 @@ export default class showcaseSalesforce extends ShowcasePage {
 
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
-    this._loadApi(querystring, $(".column-card")).then(api => {
+    this._loadApi(querystring, $(".column-card"), false).then(api => {
       // on page load, save current state
       this.history.replace(`${this.baseUrl}/${location.search}`, this.api);
       // DOM updates
-      // this.updateAdviceSetDetails();
+      this.updateAdviceSetDetails();
       this.updatePanes();
 
       // keyboard shortcuts
@@ -75,6 +75,7 @@ export default class showcaseSalesforce extends ShowcasePage {
     this.updateMainPane();
     this.updateAssumptionsList();
     this.updateRecommendationsList();
+    this.updateVariablesList();
   }
 
   // #region event handlers
@@ -105,7 +106,7 @@ export default class showcaseSalesforce extends ShowcasePage {
 
       const data = $form.serialize();
 
-      this._loadApi(data, $(".column-card")).then(()=> {
+      this._loadApi(data, $(".column-card"), false).then(()=> {
         // update content
         this.updatePanes();
         // save state
@@ -310,39 +311,7 @@ export default class showcaseSalesforce extends ShowcasePage {
       });
     });
 
-    const allAdvice = this.mapAdviceData();
-
-    // group all advice into bucketed recommendations
-    this.api.recommendations = _.groupBy(allAdvice, (a) => { return (a.tagGroup) ? a.tagGroup.name : "Recommendations"; });
-    // add icon
-    Object.keys(this.api.recommendations).forEach((key, idx) => {
-      // add icons
-      this.api.recommendations[key] = this.api.recommendations[key].map(a => {
-        // use thumbs up icon by default
-        // let icon = "fad fa-thumbs-up";
-        let icon = "far fa-arrow-right";
-        // support To Do/Completed checklist icons
-        if (key.includes("To Do")) {
-          icon = "far fa-circle";
-        } else if (key.includes("Completed") || key.includes("Accomplishments")) {
-          icon = "far fa-check-circle";
-        }
-        // save the helper for handlebars
-        a._icon = icon;
-
-        // determine if this is an interactive chart attachment
-        const { attachment } = a;
-        let isChart = false;
-        if (attachment) {
-          isChart = attachment.contentType == "application/vnd+interactive.chart+html";
-          // handlebars helper
-          attachment._isInteractiveChart = isChart;
-        }
-
-        // manually "fix" any headlines
-        return this._forAdvisor(a);
-      });
-    });
+    this.mapAdviceData();
   }
 
   /**

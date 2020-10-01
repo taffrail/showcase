@@ -1,0 +1,512 @@
+@import 'variables';
+@import '../../node_modules/bootstrap/scss/bootstrap';
+@import '../../node_modules/@fortawesome/fontawesome-pro/scss/fontawesome';
+@import '../../node_modules/@fortawesome/fontawesome-pro/scss/light';
+@import "../../node_modules/placeholder-loading/src/scss/placeholder-loading";
+@import 'loading';
+
+#toastWrapper {
+  display: none;
+  min-height: 200px;
+  min-width: 320px;
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 9999999;
+
+  #toastContainer {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+}
+
+.ph-item {
+	border: 0 none;
+	padding: 0;
+
+	> * {
+		padding-left: 0;
+		padding-right: 0;
+	}
+}
+
+// mixin
+@mixin text-link($color: $body-color, $hoverUnderline: true) {
+	color: $color;
+	text-decoration: none;
+
+	@if $hoverUnderline == true {
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+.showcase.showcase--redux {
+	background-color: $gray-200;
+
+	main.container {
+		background-color: $white;
+	}
+
+	header.row {
+		border-bottom: 1px solid $gray-light;
+	}
+
+	nav.menubar {
+		a.text-dark {
+			@include text-link($body-color, false);
+			font-size: $font-size-sm;
+		}
+	}
+
+	.jumbotron {
+		margin-bottom: 0;
+		padding-bottom: 1rem;
+	}
+
+	.advice-set-details {
+		h1 {
+			font-weight: bold;
+			margin-bottom: 0;
+
+			a {
+				@include text-link();
+			}
+		}
+	}
+
+	.main-content {
+		padding-top: 0;
+	}
+
+	.assumptions-outer-container {
+		border-right: 1px solid $gray-light;
+
+		&.assumptions-outer-container--empty {
+			border-right: 1px solid $white;	
+		}
+
+		padding-top: 1rem;
+
+		footer {
+			margin: 2rem 0 2.5rem 0;
+		}
+	}
+
+	.assumptions-container-header {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+
+		// match "on this page" on right column
+		h5 {
+			@include text-link($gray-dark, false);
+			font-size: $font-size-sm;
+			font-weight: bold;
+			text-transform: uppercase;
+			width: 100%;
+		} 
+	}
+
+	.assumptions-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		justify-content: space-between;
+	}
+
+	.assumptions {
+		color: $gray-light;
+		font-size: $font-size-sm;
+
+		// expandable header
+		.assumption-group {
+			margin-bottom: .25rem;
+
+			> a {
+				@include text-link($primary, false);
+				font-weight: bold;
+
+				i {
+					max-width: 1rem;
+					width: 1rem;
+				}
+			}
+		}
+
+		// list
+		ol.assumptions-list {
+			@extend .list-unstyled;
+			padding-left: .75rem;
+
+			&.ungrouped {
+				padding-left: 0;
+			}
+
+			li {
+				border-radius: $border-radius;
+				padding: .25rem;
+				position: relative;
+
+				&.active,
+				&:hover {
+					background-color: $gray-200;
+				}
+
+				a {
+					@include text-link($gray-dark, false);
+					@extend .stretched-link;
+				}
+			}
+		}
+	}
+
+	ol.answers {
+		@include text-link($gray-dark, false);
+		font-size: $font-size-sm;
+		padding-left: 1rem;
+
+		li {
+			border-radius: $border-radius;
+			padding: .25rem;
+			position: relative;
+
+			&.active,
+			&:hover {
+				background-color: $gray-200;
+			}
+
+			.a {
+				font-weight: bold;
+			}
+
+			a {
+				@include text-link($primary, false);
+				@extend .stretched-link;
+			}
+		}
+	}
+
+	.advice-outer-container {
+		min-height: 600px;
+		padding-top: 1rem;
+		width: 100%;
+
+		.question {
+			background-color: $gray-200;
+			border-radius: $border-radius;
+			margin-bottom: 3rem;
+			margin-top: -.5rem;
+			padding: 1rem;
+
+			.explanation {
+				color: $gray-dark;
+			}
+
+			form {
+				padding: .5rem;
+
+				.custom-control {
+					margin-bottom: .5rem;
+
+					label {
+						cursor: pointer;
+						width: 100%;
+					}
+				}
+			}
+		}
+
+		// when there's primary advice
+		.advice-primary {
+			h4 {
+				color: $primary;
+				margin-right: 1.5rem; // space dropdown ellipsis
+
+				.highlighted {
+					border-bottom: 1px solid $tertiary;
+					box-shadow: 0px -8px 0px $tertiary inset;
+				}
+			}
+
+			// don't negative offset chart
+			.advice-attachment.advice-chart--interactive {
+				margin: 0 0 0 -1rem;
+				padding: 0;
+			}
+
+			.expand-history {
+				margin-top: 2rem;
+				padding-top: 2rem;
+			}
+		}
+
+		.list-all-recommendations {
+			margin-bottom: 2rem;
+
+			// &.unfocused {
+				
+			// }
+
+			&.has-primary-advice {
+				display: none;
+				margin-top: 2rem;
+
+				&.show {
+					display: block;
+				}
+			}
+		}	
+
+		.advice-group {
+			header {
+				margin-bottom: $headings-margin-bottom * 2;
+				
+				a:not(.dropdown-item) {
+					@include text-link($body-color, false);
+				}
+
+				i {
+					min-width: 1.25rem;
+				}
+			}
+		}
+
+		.advice-group + .advice-group {
+			margin-top: 2rem;
+		}
+
+		.advice-list {
+			&.fa-ul {
+				margin-left: 1.5rem;
+			}
+
+			li {
+				margin-bottom: 1rem;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				.fa-li a {
+					color: $primary;
+				}
+
+				.fa-li.no-summary {
+					top: -2px;
+				}
+				
+				i.bullet-sm {
+					color: $primary;
+					font-size: 7px;
+				}
+
+				a.headline {
+					@include text-link();
+					display: block;
+					font-weight: $font-weight-medium;
+				}
+
+				&.is-primary {
+					background-color: $gray-200;
+					border-radius: $border-radius;
+					margin-left: -2rem;
+					padding-left: 2rem;
+					padding-right: 2rem;
+					padding-top: .5rem;
+
+					.fa-li {
+						left: 0;
+						padding-top: 0;
+
+						&.no-summary {
+							top: 4px;
+						}
+					}
+
+					a.headline {
+						padding: 0 0 .5rem 0;
+					}
+
+					.collapse {
+						padding: 0 0 .5rem 0;
+					}
+				}
+			}
+
+			.summary {
+				// color: $primary;
+				font-weight: 300; // Plex light //$font-weight-normal;
+				margin-bottom: 0;
+			}
+		}
+
+		// only when centered...
+		.advice-attachment.advice-chart--interactive {
+			margin: -.5rem 0 1rem -.5rem;
+			padding: 0;
+		}
+	}
+
+	.recommendations-on-this-page {
+		position: relative;
+	}
+
+	.advice-on-this-page {
+		position: absolute;
+		top: 0;
+
+		// match assumptions spacing on left column
+		h5 {
+			@include text-link($gray-dark, false);
+			font-size: $font-size-sm;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		li {
+			color: $gray-light;
+			border-radius: $border-radius;
+			font-size: $font-size-sm;
+			padding: .25rem;
+			position: relative;
+
+			&.active,
+			&:hover {
+				background-color: $gray-200;
+			}
+
+			a {
+				@include text-link($gray-dark, false);
+				@extend .stretched-link;
+			}
+		}
+	}
+
+	.references {
+		margin: 3rem 0;
+
+		.card {
+			$height: 125px;
+			$width: 235px;
+			$border-width: 2px;
+
+			@extend .shadow-sm;
+			margin-bottom: .5rem;
+			margin-left: .5rem;
+			margin-right: .5rem;
+			max-width: $width;
+			min-width: $width;
+
+			.img-ph,
+			.img-ph .ph-picture {			
+				height: $height;
+				width: $width - $border-width;
+			}
+
+			.img-ph {
+				background-repeat: no-repeat;
+				background-size: cover;
+				background-position-y: -1rem;
+			}
+
+			.card-img-top {
+				height: $height;
+				width: $width - $border-width;
+			}
+
+			.img-header {
+				position: relative;
+
+				.dropdown {
+					position: absolute;
+					right: .75rem;
+					top: .25rem;
+				}
+			}
+
+			.card-title {
+				font-size: $font-size-sm;
+				font-weight: $font-weight-normal;
+			}
+
+			.card-body {
+				padding: .75rem;
+				position: relative;
+			}
+
+			.card-text {
+				&.text-sm {
+					font-size: .8rem;
+				}
+			}
+
+			.source-url {
+				display: block;
+				font-size: .7rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+		}
+	}
+
+	footer {
+		&.footer {
+			margin: 2rem;
+
+			section {
+				color: $gray;
+				font-size: $font-size-sm;
+				text-align: right;
+
+				p {
+					margin-bottom: 0;
+				}
+
+				a {
+					@include text-link($gray-dark, false);
+
+					&:hover {
+						color: $primary;
+					}
+				}
+			}
+		}
+	}
+
+	// inside a modal
+	.variables-container {
+
+		.variables {
+			font-family: $font-family-monospace;
+			font-size: 12px;
+			td:nth-child(1) {
+				max-width: 1px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			td:nth-child(2) {
+				max-width: 1px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+		}
+	}
+}
+
+.showcase {
+	@import "mobile";
+}
+
+.showcase--redux_mobile.showcase--redux_mobile-asst {
+	@import "virtual-asst";
+}
+
+.showcase--redux_salesforce {
+	@import "salesforce";
+}
