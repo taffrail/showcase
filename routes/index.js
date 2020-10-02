@@ -8,7 +8,7 @@ router.get("/", (req, res, next) => {
 
   // temp redirect to this "error", we don't have a "home page" for this app.
   console.warn("temp redirect to this \"error\", we don't have a \"home page\" for this app.");
-  return res.redirect("https://justgoodadvice-status-pages.s3.amazonaws.com/404.html");
+  return res.redirect("https://taffrail-status-pages.s3.amazonaws.com/404.html");
 });
 
 // Handle redirects from classic `app` URL to this new format
