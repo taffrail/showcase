@@ -68,6 +68,8 @@ if (!process.env.WEB_HOST.includes("localhost")) {
   app.use(sslRedirect());
 }
 
+app.use(require("./middleware/redirect-jga"));
+
 if (isProduction) {
   app.use(Sentry.Handlers.errorHandler());
 }
