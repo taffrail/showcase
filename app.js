@@ -49,6 +49,8 @@ app.use(express.static(path.join(__dirname, "node_modules/")));
 
 // setup healthcheck
 health.check(app);
+// redirect old to new host
+app.use(require("./middleware/redirect-jga"));
 
 app.use((req, res, next) => {
   res.locals.WEB_HOST = process.env.WEB_HOST;
@@ -67,8 +69,6 @@ app.use("/s", showcaseRouter);
 if (!process.env.WEB_HOST.includes("localhost")) {
   app.use(sslRedirect());
 }
-
-app.use(require("./middleware/redirect-jga"));
 
 if (isProduction) {
   app.use(Sentry.Handlers.errorHandler());
