@@ -537,7 +537,7 @@ export default class showcaseFull extends ShowcasePage {
 
             // custom image for IRS website, their blue logo is too blue.
             if (originalUrl && originalUrl.includes("irs.gov")) {
-              url = "https://justgoodadvice-web.s3.amazonaws.com/demos/irs-logo-white.png";
+              url = `${window.jga.config.cdn_host}/demos/irs-logo-white.png`;
             }
 
             // update DOM
