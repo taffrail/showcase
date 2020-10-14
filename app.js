@@ -53,6 +53,7 @@ health.check(app);
 app.use(require("./middleware/redirect-jga"));
 
 app.use((req, res, next) => {
+  res.locals.CDN_HOST = process.env.CDN_HOST;
   res.locals.WEB_HOST = process.env.WEB_HOST;
   res.locals.API_HOST = process.env.API_HOST;
   res.locals.API_KEY = process.env.API_KEY;
