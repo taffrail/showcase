@@ -3,6 +3,7 @@ import Showcase from "./showcase";
 import ShowcaseMobile from "./showcaseMobile";
 import ShowcaseVirtualAsst from "./showcaseVirtualAsst";
 import ShowcaseSalesforce from "./showcaseSalesforce";
+import ShowcaseCleanshot from "./showcaseCleanshot";
 
 // demo nav links
 $("main").on("click", "nav.menubar a[data-target]", e => {
@@ -30,7 +31,8 @@ const imports = {
   showcase: Showcase,
   showcaseMobile: ShowcaseMobile,
   showcaseVirtualAsst: ShowcaseVirtualAsst,
-  showcaseSalesforce: ShowcaseSalesforce
+  showcaseSalesforce: ShowcaseSalesforce,
+  showcaseCleanshot: ShowcaseCleanshot
 }
 
 // init appropriate view

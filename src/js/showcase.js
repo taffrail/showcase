@@ -36,14 +36,19 @@ export default class showcaseFull extends ShowcasePage {
       // this.handleResizeChart();
 
       // keyboard shortcuts
-
+      // screenshot
+      Mousetrap.bind("p s", () => {
+        const link = `/s/${window.jga.api.adviceset.id}/__cleanshot`;
+        const querystr = qs.parse(location.search.substr(1));
+        window.location.href = `${link}?${qs.stringify(querystr)}`;
+      });
       // expand/collapse advice
       Mousetrap.bind("a", () => {
-        $("a[data-expand=advice]").click();
+        $("a[data-expand=advice]").trigger("click");
       });
       // expand/collapse assumptions
       Mousetrap.bind("s", () => {
-        $("a[data-expand=assumptions]").click();
+        $("a[data-expand=assumptions]").trigger("click");
       });
       // show toast with keyboard shortcut map
       Mousetrap.bind("?", () => {
@@ -159,7 +164,7 @@ export default class showcaseFull extends ShowcasePage {
       const isContentVisible = $(".list-all-recommendations").is(":visible");
       // if content isn't visible yet, expand it when user clicks on TOC
       if (!isContentVisible) {
-        $("a[data-action=toggleRecommendations]").click();
+        $("a[data-action=toggleRecommendations]").trigger("click");
       }
     });
   }

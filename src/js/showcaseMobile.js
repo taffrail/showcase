@@ -159,7 +159,7 @@ export default class showcaseMobile extends ShowcasePage {
         $bubbles.last().after(`<aside class="changing" id="change_bubble_${this.api.display.id}"></aside>`)
         this._updateForInputRequest($(`#change_bubble_${this.api.display.id}`));
       } else {
-        $("a[data-sheet=assumptions]").first().click();
+        $("a[data-sheet=assumptions]").first().trigger("click");
         setTimeout(() => {
           this.updateMainPane();
         }, 300);
@@ -201,7 +201,7 @@ export default class showcaseMobile extends ShowcasePage {
 
       let $collapsibles;
       if (expand == "assumptions") {
-        $("#pills-assumptions-tab").click();
+        $("#pills-assumptions-tab").trigger("click");
         $collapsibles = $(".assumptions-list.collapse");
       } else if (expand == "advice") {
         $collapsibles = $(".advice-list").find(".collapse");
@@ -245,7 +245,7 @@ export default class showcaseMobile extends ShowcasePage {
         // if there's < 3 advice recommendations displayed, expand them automatically
         if (_.flatMap(this.api.recommendations).length < 3) {
           setTimeout(()=>{
-            $(".advice-list").find("a[data-toggle=collapse]").click();
+            $(".advice-list").find("a[data-toggle=collapse]").trigger("click");
           }, 450);
         }
       }

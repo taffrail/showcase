@@ -41,11 +41,11 @@ export default class showcaseSalesforce extends ShowcasePage {
 
       // expand/collapse advice
       Mousetrap.bind("a", () => {
-        $("a[data-expand=advice]").click();
+        $("a[data-expand=advice]").trigger("click");
       });
       // expand/collapse assumptions
       Mousetrap.bind("s", () => {
-        $("a[data-expand=assumptions]").click();
+        $("a[data-expand=assumptions]").trigger("click");
       });
       // show toast with keyboard shortcut map
       Mousetrap.bind("?", () => {
@@ -184,7 +184,7 @@ export default class showcaseSalesforce extends ShowcasePage {
 
       let $collapsibles;
       if (expand == "assumptions") {
-        $("#pills-assumptions-tab").click();
+        $("#pills-assumptions-tab").trigger("click");
         $collapsibles = $(".assumptions-list.collapse");
       } else if (expand == "advice") {
         $collapsibles = $(".advice-list").find(".collapse");
@@ -225,7 +225,7 @@ export default class showcaseSalesforce extends ShowcasePage {
         // if there's < 3 advice recommendations displayed, expand them automatically
         if (_.flatMap(this.api.recommendations).length < 3) {
           setTimeout(()=>{
-            $(".advice-list").find("a[data-toggle=collapse]").click();
+            $(".advice-list").find("a[data-toggle=collapse]").trigger("click");
           }, 450);
         }
       }

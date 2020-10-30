@@ -56,7 +56,7 @@ const botMiddleware = (req, res, next) => {
 
 router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
   const { adviceSetId, view = "index" } = req.params;
-  const allowedViews = ["index", "mobile", "virtual-assistant", "salesforce"];
+  const allowedViews = ["index", "mobile", "virtual-assistant", "salesforce", "__cleanshot"];
   const template = (allowedViews.includes(view)) ? view : allowedViews[0];
   const isMobile = view == "mobile" || view == "virtual-assistant";
   const qrystr = Object.assign({}, req.query, {

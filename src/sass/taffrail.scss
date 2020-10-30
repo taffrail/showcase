@@ -499,6 +499,26 @@
 	}
 }
 
+.showcase.showcase--redux_isFramed {
+	background: $white;
+
+	.text-dark .fal.fa-ellipsis-h {
+		color: $gray-300;
+	}
+
+	.shadow-sm {
+		box-shadow: none !important;
+	}
+
+	.assumptions-outer-container {
+		padding-bottom: 800px;
+	}
+
+	footer.footer {
+		display: none;
+	}
+}
+
 .showcase {
 	@import "mobile";
 }
@@ -509,4 +529,8 @@
 
 .showcase--redux_salesforce {
 	@import "salesforce";
+}
+
+.showcase--redux_cleanshot {
+	@import "cleanshot";
 }

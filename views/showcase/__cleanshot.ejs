@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+		<%- include("partials/_head"); %>
+  </head>
+  <body class="showcase showcase--redux showcase--redux_cleanshot">
+
+		<main class="container">
+			<div class="row">
+				<div class="col-12">
+					<header class="mb-4">
+						<a href="#" id="logo_link"><img src="/img/Taffrail_Logo_Stacked_Navy@2x.png" height=65></a>
+						<div class="d-flex align-items-center">
+							<p class="lead mb-0 text-muted">Screenshot generator</p>
+							<ul class="ml-2 nav nav-pills">
+								<li class="nav-item"><a href="#full" class="nav-link active">Full</a></li>
+								<li class="nav-item"><a href="#assumptions" class="nav-link">Assumptions</a></li>
+								<li class="nav-item"><a href="#advice" class="nav-link">Advice</a></li>
+							</ul>
+							<div id="coords"></div>
+						</div>
+					</header>
+					<section class="screenshot-zone ss-type--full">
+						<section class="safari">
+							<aside class="url">launch.taffrail.app</aside>
+							<section class="viewport"></section>
+						</section>
+						<div class="assumptions floater">
+							<div class="assumptions-container">
+								<div style="visibility:hidden;">
+									<header class="assumptions-container-header">
+										<h5>&nbsp;</h5>
+									</header>
+									<div class="assumptions"></div>
+									<div class="answers"></div>
+								</div>
+							</div>
+						</div>
+						<div class="advice floater">
+							<div class="advice-outer-container">
+								<div class="advice"></div>
+								<div class="list-all-recommendations"></div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</main>
+		
+<%- include("index/advice"); %>
+<%- include("index/answers"); %>
+<%- include("index/assumptions"); %>
+<%- include("index/recommendations"); %>
+
+<div id="__init" data-page-init="showcaseCleanshot"></div>
+
+		<%- include("partials/_footer_js"); %>
+  </body>
+</html>

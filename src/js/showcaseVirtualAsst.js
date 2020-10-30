@@ -167,7 +167,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
         // if there's < 3 advice recommendations displayed, expand them automatically
         if (_.flatMap(this.api.recommendations).length < 3) {
           setTimeout(()=>{
-            $(".advice-list").find("a[data-toggle=collapse]").click();
+            $(".advice-list").find("a[data-toggle=collapse]").trigger("click");
           }, 450);
         }
       }

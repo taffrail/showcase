@@ -46,6 +46,13 @@ export default class ShowcasePage {
     this.handleClickOpenRawDataModal();
     this.handleClickTogglePrimaryAdviceMode();
     this.handleClickShowAllSources();
+
+    // inside iframe? screenshot generator helper
+    const isFramed = window.location !== window.parent.location;
+    if (isFramed) {
+      $("body").addClass("showcase--redux_isFramed");
+      $("main.container").removeClass("container").addClass("container-fluid");
+    }
   }
 
   // #region getter/setter
