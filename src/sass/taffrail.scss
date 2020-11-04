@@ -531,6 +531,12 @@
 	@import "salesforce";
 }
 
+.showcase--redux_isFramed_advice2 {
+	.row.main-content {
+		opacity: .10;
+	}
+}
+
 .showcase--redux_cleanshot {
 	@import "cleanshot";
 }

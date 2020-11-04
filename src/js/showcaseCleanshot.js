@@ -40,6 +40,8 @@ export default class showcaseCleanshot extends ShowcasePage {
       $el.parent().siblings().find(".nav-link").removeClass("active");
       $el.addClass("active");
       $("iframe").prop("scrolling", type == "full" ? "yes" : "no");
+      
+      $('iframe').contents().find("body").addClass("showcase--redux_isFramed_" + type)
     })
   }
 

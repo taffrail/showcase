@@ -67,9 +67,16 @@ $saf_bg_img_noshadow: "/img/BigSurSafariEmpty_NoShadow@2x.png";
 		}
 
 		&.ss-type--assumptions, 
-		&.ss-type--advice {
+		&.ss-type--advice,
+		&.ss-type--advice2 {
 			.safari {
 				box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.7);
+			}
+		}
+		
+		&.ss-type--assumptions, 
+		&.ss-type--advice {
+			.safari {
 				opacity: .10;
 			}
 		}
@@ -90,7 +97,8 @@ $saf_bg_img_noshadow: "/img/BigSurSafariEmpty_NoShadow@2x.png";
 			}
 		}
 
-		&.ss-type--advice {
+		&.ss-type--advice,
+		&.ss-type--advice2 {
 			position: relative;
 
 			.advice.floater {
@@ -112,6 +120,10 @@ $saf_bg_img_noshadow: "/img/BigSurSafariEmpty_NoShadow@2x.png";
 					margin-bottom: 0;
 				}
 			}
+		}
+		
+		&.ss-type--advice2 {
+			
 		}
 	}
 }
