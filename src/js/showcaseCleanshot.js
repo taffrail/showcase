@@ -20,10 +20,12 @@ export default class showcaseCleanshot extends ShowcasePage {
     const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".viewport"), false).then(api => {
       this.addIframe();
+      try {
       this.updatePanes();
       this.initGeneratorNav();
       this.handleCollapseAdviceSummaries();
       this.handleCollapseAssumptionGroup();
+    }catch(e){console.error(e)}
     });
 
     // add link back to main showcase
@@ -106,7 +108,7 @@ export default class showcaseCleanshot extends ShowcasePage {
   initCache() {
     // cache templates
     this.TEMPLATES = {
-      // "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
+      "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       // "Advice": Handlebars.compile($("#tmpl_adviceAdvice").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
@@ -155,6 +157,11 @@ export default class showcaseCleanshot extends ShowcasePage {
     this.windowTitle = `${this.api.adviceset.title} - Screenshot Generator`;
 
     this._setCurrentIdx();
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this._updateForInputRequest();
+    } else {
+      // see `updateRecommendationsList`
+    }
   }
 
   /**
@@ -172,9 +179,6 @@ export default class showcaseCleanshot extends ShowcasePage {
   _updateForPrimaryAdvice() {
     // if this is the LAST advice, hide center column and move advice list into center focus
     if (this.api.display._isLast) {
-      // $(".question").hide();
-      $(".list-all-recommendations").removeClass("unfocused");
-
       // if there's < 3 expandable advice recommendations displayed, expand them automatically
       if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
         setTimeout(()=>{
@@ -182,6 +186,20 @@ export default class showcaseCleanshot extends ShowcasePage {
         }, 50);
       }
     }
+  }
+
+  /**
+   * Template update for INPUT_REQUEST
+   */
+  _updateForInputRequest() {
+    // render
+    const str = this.TEMPLATES["InputRequest"](this.api);
+    $(".advice").html(str);
+  
+    // set value
+    this._setValue();
+    // set input masks
+    this._handleInputMasks($(".advice"));
   }
 
   /**
