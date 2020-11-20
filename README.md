@@ -1,12 +1,14 @@
-# Best-interest financial advice, automated.
+# Taffrail is the leading provider of personalized digital advice for the financial brokerage industry.
 
-Taffrail is the first service to enable online brokers to provide automated, personalized, contextual advice to their clients that is convenient and compliant with all regulations.
+Taffrail is on a mission to bring objective, contextual, and automated guidance to individual investors. Our platform offers the most comprehensive and compliant solution for digital advice.
 
-**We are redefining digital advice in financial services.**
+**We help brokers bring automated, personalized advice to individual investors.**
 
 Learn more at [taffrail.com](https://taffrail.com) and contact us at hello@taffrail.com.
 
 ## Taffrail Showcase
+
+Taffrail has built an API that brokerages and banks integrate into their existing apps to provide their clients with compliant recommendations and guidance.
 
 This is our Advice showcase app. Integrating our Advice API into your app is demonstrated in this fully-functional javascript app. We created this project and open sourced the code to make it easier for you to explore using our Advice API.
 
@@ -33,6 +35,7 @@ Have a question? Find a bug? [Open an Issue](https://github.com/taffrail/showcas
 To track bugs, issues and enhancement requests, we are using [Issues on GitHub](https://github.com/taffrail/showcase/issues).
 
 # Copyright and License
+
 Copyright © 2020 Taffrail, LLC.
 
 The Taffrail "Showcase" is licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at:
