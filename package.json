@@ -18,7 +18,7 @@
     "@sentry/node": "^5.27.4",
     "bitly": "^7.1.0",
     "bootstrap": "^4.5",
-    "clipboard-copy": "^3.1.0",
+    "clipboard-copy": "^4.0.1",
     "cookie-parser": "~1.4.4",
     "debug": "~4.2.0",
     "ejs": "~3.1.5",
