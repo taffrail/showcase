@@ -68,6 +68,6 @@
     "webpack-stream": "^6.1.0"
   },
   "engines": {
-    "node": "15.2.x"
+    "node": "14.15.x"
   }
 }
