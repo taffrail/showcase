@@ -285,7 +285,7 @@ export default class ShowcasePage {
     let hasMoreThanLimit = false;
     this.api.adviceset.referenceDocuments = this.api.adviceset.referenceDocuments.map((rd, i) => {
       const { _links: { original = "" } } = rd;
-      if (original) {
+      if (original && original != "null") {
         const u = new URL(original);
         rd._links.original_without_prefix = `${u.host.replace("www.","")}${u.pathname}`;
       }
