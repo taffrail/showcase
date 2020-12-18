@@ -14,6 +14,7 @@ export default class showcaseFull extends ShowcasePage {
   init() {
     super.init();
     this.initCache();
+    this.AUTO_EXPAND_RECOMMENDATION_COUNT = 4;
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".row .advice")).then(api => {
@@ -324,8 +325,9 @@ export default class showcaseFull extends ShowcasePage {
         $(".list-all-recommendations").addClass("has-primary-advice");
       }
 
-      // if there's < 3 expandable advice recommendations displayed, expand them automatically
-      if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < 3) {
+      // if there's < N expandable advice recommendations displayed, expand them automatically
+      const { AUTO_EXPAND_RECOMMENDATION_COUNT: ct } = this;
+      if (_.flatMap(this.api.recommendations).filter(a => { return a.summary }).length < ct) {
         setTimeout(()=>{
           $(".advice-list .collapse").collapse("show");
         }, 50);
