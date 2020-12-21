@@ -103,7 +103,9 @@ export default class ShowcasePage {
       include: ["filteredVars"],
       showcase: true
     }, currFormData, qs.parse(newFormData));
-    // internal JGA: don't include this legacy field
+    // does link contain referring AI User Request ID (aiUrId)?
+    this.fromAiUrId = formData.aiUrId;
+    // internal JGA: don't include these fields
     delete formData.returnFields;
 
     const [apiUrlWithoutQuerystring] = this.api._links.self.split("?");

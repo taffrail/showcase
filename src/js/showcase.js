@@ -69,6 +69,7 @@ export default class showcaseFull extends ShowcasePage {
       // update content
       this.updatePanes();
       // save state
+      this.api.params.push(this.fromAiUrId);
       this.history.push(`${this.baseUrl}/?${qs.stringify(_.omit(this.api.params, this.paramsToOmit))}`, this.api);
     }
   }
@@ -446,8 +447,42 @@ export default class showcaseFull extends ShowcasePage {
 	 */
   updateAdviceSetDetails(){
     // render
-    const str = this.TEMPLATES["AdviceSetDetails"](this.api);
-    $(".advice-set-details").html(str);
+    if (this.fromAiUrId) {
+      // if link contains referring AI User Request ID, match it for the page title
+      const { title: ogTitle, description: ogDescription } = this.api.adviceset;
+      this.api.adviceset.title = "Loading...";
+      this.api.adviceset.description = "";
+      const str = this.TEMPLATES["AdviceSetDetails"](this.api);
+      $(".advice-set-details").html(str);
+      $.ajax({
+        url: this.api.adviceset._links.self,
+        type: "GET",
+        dataType: "json",
+        headers: {
+          "Accept": "application/json; chartset=utf-8",
+          "Authorization": `Bearer ${this.config.api_key}`
+        }
+      }).then(api => {
+        const { data: { aiUserRequests = [] } } = api;
+        const matchingAiUr = aiUserRequests.find(aiur => { return aiur.id == this.fromAiUrId });
+        if (matchingAiUr) {
+          this.api.adviceset.title = matchingAiUr.request;
+          this.api.adviceset.description = ogDescription;
+          if (matchingAiUr.description) {
+            this.api.adviceset.description = matchingAiUr.description;
+          }
+        } else {
+          this.api.adviceset.title = ogTitle;
+          this.api.adviceset.description = ogDescription;
+        }
+
+        const str = this.TEMPLATES["AdviceSetDetails"](this.api);
+        $(".advice-set-details").html(str);
+      });
+    } else {
+      const str = this.TEMPLATES["AdviceSetDetails"](this.api);
+      $(".advice-set-details").html(str);
+    }
   }
 
   /**
