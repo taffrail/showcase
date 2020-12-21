@@ -291,11 +291,7 @@ export default class showcaseFull extends ShowcasePage {
   /**
 	 * Update center Advice/Question pane
 	 */
-  // eslint-disable-next-line complexity
   updateMainPane(){
-    // update the window title
-    this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
-
     this._setCurrentIdx();
 
     $(".question").show();
@@ -478,10 +474,14 @@ export default class showcaseFull extends ShowcasePage {
 
         const str = this.TEMPLATES["AdviceSetDetails"](this.api);
         $(".advice-set-details").html(str);
+        // update the window title
+        this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
       });
     } else {
       const str = this.TEMPLATES["AdviceSetDetails"](this.api);
       $(".advice-set-details").html(str);
+      // update the window title
+      this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
     }
   }
 
