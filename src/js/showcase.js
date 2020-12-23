@@ -69,7 +69,6 @@ export default class showcaseFull extends ShowcasePage {
       // update content
       this.updatePanes();
       // save state
-      this.api.params.push(this.fromAiUrId);
       this.history.push(`${this.baseUrl}/?${qs.stringify(_.omit(this.api.params, this.paramsToOmit))}`, this.api);
     }
   }
