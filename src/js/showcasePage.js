@@ -203,9 +203,8 @@ export default class ShowcasePage {
     // This is hard to read but straightforward chained lodash logic. Steps:
     // 1.convert groupedAdvice object `toPairs` (new array of arrays [[tagGroup, itemsArr]])
     // 2.sort by weight of tagGroup (pull from 1st item)
-    // 3.reverse the sort, order DESC
-    // 4.convert `fromPairs` back to object
-    // 5.retrieve chained value
+    // 3.convert `fromPairs` back to object
+    // 4.retrieve chained value
     //
     // Cribbed from:
     // https://github.com/lodash/lodash/issues/1459#issuecomment-253969771
@@ -214,7 +213,7 @@ export default class ShowcasePage {
       // get the weight (defaults to 0) from first item in group
       const { tagGroup: { weight = 0 } = {} } = _.first(items);
       return weight;
-    }]).reverse().fromPairs().value();
+    }]).fromPairs().value();
 
     const groupKeys = Object.keys(groupedAdvice);
 
