@@ -599,41 +599,45 @@ export default class showcaseFull extends ShowcasePage {
    */
   setupChart(isChart, chartId) {
     // setup the chart...
+    const self = this;
     if (isChart) {
-      const $chart = $(`[data-id=${chartId}]`);
-      const { src } = $chart.data();
-      // parent container
-      const containerW = $chart.parents(".advice").outerWidth();
-      const $iframe = $chart.find("iframe");
-      // set chart container size
-      $chart.css({
-        height: 400,
-        width: containerW
-      });
-
-      $iframe.on("load", e => {
-        // specific data chart is expecting
-        // TODO: clean this up in the chart code
-        window.jga.config = _.extend(window.jga.config, {
-          adviceSetId: this.api.adviceset.id,
-          bgColor: "#fff",
-          colors: ["#1C2145", "#3956EF"],
-          width: containerW,
-          height: 400
+      const $charts = $(`[data-id=${chartId}]`);
+      $charts.each(function(){
+        const $chart = $(this);
+        const { src } = $chart.data();
+        // parent container
+        const containerW = $chart.parents(".advice").outerWidth();
+        const $iframe = $chart.find("iframe");
+        // set chart container size
+        $chart.css({
+          height: 400,
+          width: containerW
         });
-        window.jga.advice = {
-          session: Object.assign({
-            ruleSetId: this.api.adviceset._id,
-            ruleId: this.api.display.ruleId,
-          }, this.api.params)
-        }
-        const data = {
-          advice: window.jga.advice,
-          config: window.jga.config
-        }
-        $iframe.get(0).contentWindow.postMessage(data, "*");
+
+        $iframe.on("load", e => {
+          // specific data chart is expecting
+          // TODO: clean this up in the chart code
+          window.jga.config = _.extend(window.jga.config, {
+            adviceSetId: self.api.adviceset.id,
+            bgColor: "#fff",
+            colors: ["#1C2145", "#3956EF"],
+            width: containerW,
+            height: 400
+          });
+          window.jga.advice = {
+            session: Object.assign({
+              ruleSetId: self.api.adviceset._id,
+              ruleId: self.api.display.ruleId,
+            }, self.api.params)
+          }
+          const data = {
+            advice: window.jga.advice,
+            config: window.jga.config
+          }
+          $iframe.get(0).contentWindow.postMessage(data, "*");
+        });
+        $iframe.prop("src", src);
       });
-      $iframe.prop("src", src);
     }
   }
 
