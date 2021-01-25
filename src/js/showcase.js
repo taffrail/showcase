@@ -555,36 +555,45 @@ export default class showcaseFull extends ShowcasePage {
    * Fetch OG meta for each reference
    */
   fetchReferencesOpenGraph() {
-    const { referenceDocuments } = this.api.adviceset;
+    const { referenceDocuments, id: adviceSetId } = this.api.adviceset;
     if (referenceDocuments.length) {
       const fns = [];
       referenceDocuments.forEach((rd, i) => {
         const { id, url, _links: { original: originalUrl = "" } } = rd;
         const size = { width: 235, height: 165 }
         const defaultImg = `https://picsum.photos/${size.width}/${size.height}?grayscale&random=${i}`;
-
+        const localStoreBgImgKey = `${adviceSetId}_refdoc_${id}_bgImg`;
         fns.push(new Promise((resolve, reject) => {
-          return $.post("/s/api/ogs", { url: url }, (meta) => {
-            if (!meta.success) {
-              console.error("og failure", meta);
-              $(`#img_container_${id}`).empty().css("background-image", `url("${defaultImg}")`);
-              return resolve();
-            }
-
-            // pull the card image, default to a grayscale picsum
-            const { ogImage = [] } = meta;
-            const [img = {}] = ogImage;
-            let { url = defaultImg } = img;
-
-            // custom image for IRS website, their blue logo is too blue.
-            if (originalUrl && originalUrl.includes("irs.gov")) {
-              url = `${window.jga.config.cdn_host}/demos/irs-logo-white.png`;
-            }
-
-            // update DOM
-            $(`#img_container_${id}`).empty().css("background-image", `url("${url}")`);
+          const bgImg = store.get(localStoreBgImgKey);
+          if (bgImg) {
+            $(`#img_container_${id}`).empty().css("background-image", `url("${bgImg}")`);
             return resolve();
-          });
+          } else {
+            return $.post("/s/api/ogs", { url: url }, (meta) => {
+              if (!meta.success) {
+                console.error("og failure", meta);
+                $(`#img_container_${id}`).empty().css("background-image", `url("${defaultImg}")`);
+                return resolve();
+              }
+
+              // pull the card image, default to a grayscale picsum
+              const { ogImage = [] } = meta;
+              const [img = {}] = ogImage;
+              let { url = defaultImg } = img;
+
+              // custom image for IRS website, their blue logo is too blue.
+              if (originalUrl && originalUrl.includes("irs.gov")) {
+                url = `${window.jga.config.cdn_host}/demos/irs-logo-white.png`;
+              }
+
+              // update doc so we don't have to do this again
+              store.set(localStoreBgImgKey, url);
+
+              // update DOM
+              $(`#img_container_${id}`).empty().css("background-image", `url("${url}")`);
+              return resolve();
+            });
+          }
         }));
       });
       return Promise.all(fns).then(() => {
