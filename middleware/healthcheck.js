@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 module.exports.check = (app) => {
   const { name } = pkg;
   const testAdviceSetId = process.env.API_CONNECTION_TEST_ADVICESET_ID;
-  const healthUrl = `${process.env.API_HOST}/api/advice/${testAdviceSetId}?include[]=filteredVars&showcase=true`;
+  const healthUrl = `${process.env.API_HOST}/api/advice/${testAdviceSetId}?include[]=filteredVars&showcase=true&healthcheck=1`;
 
   // https://www.npmjs.com/package/express-healthcheck
   app.use("/healthcheck", require("express-healthcheck")({
