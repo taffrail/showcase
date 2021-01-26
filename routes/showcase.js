@@ -67,7 +67,7 @@ router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
   return res.render(`showcase/${template}`, {
     adviceSetId: adviceSetId,
     linkApi: apiUrl,
-    linkAdviceBuilder: `${process.env.API_HOST}/advicesets/${adviceSetId}/show`,
+    linkAdviceBuilder: `${process.env.ADVICEBUILDER_HOST}/advicesets/${adviceSetId}/show`,
     isMobile: isMobile
   });
 });

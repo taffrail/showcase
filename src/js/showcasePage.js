@@ -419,7 +419,7 @@ export default class ShowcasePage {
 
         // save scenario to advice builder
         return $.ajax({
-          url: `${this.config.api_host}/api/advicescenario`,
+          url: `${this.config.advicebuilder_host}/api/advicescenario`,
           type: "POST",
           headers: {
             "Accept": "application/json; chartset=utf-8",
@@ -439,7 +439,7 @@ export default class ShowcasePage {
           }
         }).then((api) => {
           const { data: scenario } = api;
-          const adviceBuilderScenarioUrl = `${this.config.api_host}/advicesets/${this.api.adviceset._id}/advicescenarios/${scenario.id}/show`;
+          const adviceBuilderScenarioUrl = `${this.config.advicebuilder_host}/advicesets/${this.api.adviceset._id}/advicescenarios/${scenario.id}/show`;
 
           const $modalHtml = $(`
             <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" id="link_modal_${linkGenId}">
