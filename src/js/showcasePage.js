@@ -151,7 +151,7 @@ export default class ShowcasePage {
       }
       this.api = _.assign({}, window.jga.api, {
         adviceset: _.assign({}, window.jga.api.adviceset,{
-          id: window.jga.adviceSetId, // this is saved to the window on page-load
+          id: window.jga.adviceSetId, // this is saved to the window on page-load, it contains ownerId
           title: "Error",
           description: err != "error" ? err : "API unavailable",
           referenceDocuments: [],

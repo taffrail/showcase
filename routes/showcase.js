@@ -56,6 +56,8 @@ const botMiddleware = (req, res, next) => {
 
 router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
   const { adviceSetId, view = "index" } = req.params;
+  if (!adviceSetId) { return next(); }
+
   const allowedViews = ["index", "mobile", "virtual-assistant", "salesforce", "__cleanshot"];
   const template = (allowedViews.includes(view)) ? view : allowedViews[0];
   const isMobile = view == "mobile" || view == "virtual-assistant";
@@ -67,7 +69,7 @@ router.get("/:adviceSetId/:view?", botMiddleware, (req, res, next) => {
   return res.render(`showcase/${template}`, {
     adviceSetId: adviceSetId,
     linkApi: apiUrl,
-    linkAdviceBuilder: `${process.env.ADVICEBUILDER_HOST}/advicesets/${adviceSetId}/show`,
+    linkAdviceBuilder: `${process.env.ADVICEBUILDER_HOST}/advicesets/${adviceSetId.substring(2)}/show`,
     isMobile: isMobile
   });
 });
