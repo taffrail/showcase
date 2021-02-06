@@ -15,6 +15,8 @@ export default class showcaseFull extends ShowcasePage {
     super.init();
     this.initCache();
     this.AUTO_EXPAND_RECOMMENDATION_COUNT = 4;
+    // get banner
+    this.updateAdviceSetDetails();
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
     this._loadApi(querystring, $(".row .advice")).then(api => {
@@ -22,7 +24,6 @@ export default class showcaseFull extends ShowcasePage {
       const currQs = qs.stringify(_.omit(qs.parse(querystring), this.paramsToOmit));
       this.history.replace(`${this.baseUrl}/?${currQs}`, this.api);
       // DOM updates
-      this.updateAdviceSetDetails();
       this.updatePanes();
       // events
       this.handleClickContinue();
@@ -438,50 +439,73 @@ export default class showcaseFull extends ShowcasePage {
   // #endregion
 
   /**
-	 * Update Advice Set details (left side)
+	 * Update Advice Set details (banner + detail)
 	 */
   updateAdviceSetDetails(){
-    // render
-    if (this.fromAiUrId) {
-      // if link contains referring AI User Request ID, match it for the page title
-      const { title: ogTitle, description: ogDescription } = this.api.adviceset;
-      this.api.adviceset.title = "Loading...";
-      this.api.adviceset.description = "";
-      const str = this.TEMPLATES["AdviceSetDetails"](this.api);
-      $(".advice-set-details").html(str);
-      $.ajax({
-        url: this.api.adviceset._links.self,
-        type: "GET",
-        dataType: "json",
-        headers: {
-          "Accept": "application/json; chartset=utf-8",
-          "Authorization": `Bearer ${this.config.api_key}`
-        }
-      }).then(api => {
-        const { data: { aiUserRequests = [] } } = api;
-        const matchingAiUr = aiUserRequests.find(aiur => { return aiur.id == this.fromAiUrId });
-        if (matchingAiUr) {
-          this.api.adviceset.title = matchingAiUr.request;
-          this.api.adviceset.description = ogDescription;
-          if (matchingAiUr.description) {
-            this.api.adviceset.description = matchingAiUr.description;
-          }
-        } else {
-          this.api.adviceset.title = ogTitle;
-          this.api.adviceset.description = ogDescription;
-        }
 
-        const str = this.TEMPLATES["AdviceSetDetails"](this.api);
-        $(".advice-set-details").html(str);
-        // update the window title
-        this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
-      });
-    } else {
-      const str = this.TEMPLATES["AdviceSetDetails"](this.api);
+    // internal helper to render banner & update <title>
+    const _render = (data) => {
+      const str = this.TEMPLATES["AdviceSetDetails"](data);
       $(".advice-set-details").html(str);
       // update the window title
-      this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
+      this.windowTitle = `${data.adviceset.title} - ${data.adviceset.owner.name}`;
     }
+
+    const data = { adviceset: {} }
+
+    $.ajax({
+      url: this.api.adviceset._links.self,
+      type: "GET",
+      dataType: "json",
+      headers: {
+        "Accept": "application/json; chartset=utf-8",
+        "Authorization": `Bearer ${this.config.api_key}`
+      }
+    }).then(api => {
+      const { data: { aiUserRequests = [], adviceScenarios, entity, publishing, owner, tags } } = api;
+
+      data.adviceset = {
+        title: entity.name,
+        description: entity.description,
+        owner: owner,
+        _links: this.api.adviceset._links
+      }
+
+      // add new adviceset data to the state
+      this.api.adviceset = _.extend(this.api.adviceset, {
+        adviceScenarios,
+        aiUserRequests,
+        publishing,
+        tags
+      });
+
+      // check for referring AI UserRequest ID on querystring
+      // and find matching question for banner
+      if (this.fromAiUrId) {
+        const matchingAiUr = aiUserRequests.find(aiur => { return aiur.id == this.fromAiUrId });
+        if (matchingAiUr) {
+          const { request, description } = matchingAiUr;
+          data.adviceset.title = request;
+          data.adviceset.description = description ? description : entity.description;
+        }
+      }
+
+      _render(data);
+    }).catch(jqXHR => {
+      let err = "Error";
+      if (jqXHR.responseJSON) {
+        err = jqXHR.responseJSON.error.message;
+      } else {
+        err = jqXHR.statusText || jqXHR.message;
+      }
+      // insert error on banner
+      _render({
+        adviceset: {
+          title: err,
+          description: "API unavailable"
+        }
+      });
+    });
   }
 
   /**

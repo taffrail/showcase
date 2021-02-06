@@ -5,6 +5,7 @@
 		adviceset:{
 			id: "<%= locals.adviceSetId %>",
 			_links: {
+				self: "<%= locals.API_HOST %>/api/adviceset/<%= locals.adviceSetId.substring(2) %>",
 				advicebuilder: "<%= locals.linkAdviceBuilder %>"
 			}
 		},
@@ -13,7 +14,7 @@
 	window.jga.adviceSetId="<%= locals.adviceSetId %>";
 </script>
 <% if (locals.SENTRY_DSN) { %>
-<script src="//browser.sentry-cdn.com/5.20.0/bundle.apm.min.js" crossorigin="anonymous"></script>
+<script src="//browser.sentry-cdn.com/5.28.0/bundle.apm.min.js" crossorigin="anonymous"></script>
 <script type="text/javascript">
 	Sentry.init({ 
 		dsn: '<%= locals.SENTRY_DSN %>',
