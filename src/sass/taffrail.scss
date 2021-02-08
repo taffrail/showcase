@@ -303,10 +303,17 @@
 					font-size: 7px;
 				}
 
-				a.headline {
-					@include text-link();
+				.headline {
 					display: block;
 					font-weight: $font-weight-medium;
+				}
+
+				a.headline {
+					@include text-link();
+				}
+
+				.madlib_answer {
+					color: $secondary;
 				}
 
 				&.is-primary {
@@ -326,7 +333,7 @@
 						}
 					}
 
-					a.headline {
+					.headline {
 						padding: 0 0 .5rem 0;
 					}
 

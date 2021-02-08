@@ -215,6 +215,17 @@ export default class ShowcasePage {
     groupKeys.forEach((key, idx) => {
       // map each array of advice with some props
       groupedAdvice[key] = groupedAdvice[key].map(a => {
+        // TEMP: add links to headline_raw
+        if (a.headline_raw) {
+          // const vars = new RegExp(/\{\{.+?\}\}/, "g").match(a.headline_raw);
+          const vars = a.headline_raw.match(new RegExp(/\{\{.+?\}\}/, "g"));
+          if (vars) {
+            vars.forEach(varInBrackets => {
+              a.headline_raw = a.headline_raw.replace(varInBrackets, `<a href="#q_${varInBrackets}" class="madlib_answer">${varInBrackets}</a>`, "g");
+            });
+          }
+        }
+
         // determine if this is an interactive chart attachment
         const { attachment } = a;
         let isChart = false;

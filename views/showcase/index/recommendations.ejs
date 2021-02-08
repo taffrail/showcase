@@ -40,7 +40,15 @@
 									{{#if _icon}}<i class="{{_icon}}"></i>{{/if}}
 								{{/if}}
 								</span>
-								<a href="https://taffrail.app/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}" target="_blank" class="headline">{{headline}}</a>
+
+								{{#if headline_raw}}
+									<span class="headline">{{{headline_raw}}}</span>
+								{{else}}
+									<a href="https://taffrail.app/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}"
+										target="_blank" class="headline">
+										{{headline}}
+									</a>
+								{{/if}}
 								{{#if summary}}
 									<div class="collapse {{#if attachment}}show{{/if}}" id="collapse_{{id}}">
 										{{#if attachment}}
