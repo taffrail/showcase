@@ -228,6 +228,7 @@ export default class showcaseVirtualAsst extends ShowcasePage {
       "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
     };
   }
   // #endregion

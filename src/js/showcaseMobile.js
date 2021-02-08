@@ -325,6 +325,7 @@ export default class showcaseMobile extends ShowcasePage {
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "AnswerChatBubbles": Handlebars.compile($("#tmpl_answersList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
     };
   }
   // #endregion

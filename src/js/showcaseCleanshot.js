@@ -21,11 +21,11 @@ export default class showcaseCleanshot extends ShowcasePage {
     this._loadApi(querystring, $(".viewport"), false).then(api => {
       this.addIframe();
       try {
-      this.updatePanes();
-      this.initGeneratorNav();
-      this.handleCollapseAdviceSummaries();
-      this.handleCollapseAssumptionGroup();
-    }catch(e){console.error(e)}
+        this.updatePanes();
+        this.initGeneratorNav();
+        this.handleCollapseAdviceSummaries();
+        this.handleCollapseAssumptionGroup();
+      } catch (e){console.error(e)}
     });
 
     // add link back to main showcase
@@ -42,8 +42,8 @@ export default class showcaseCleanshot extends ShowcasePage {
       $el.parent().siblings().find(".nav-link").removeClass("active");
       $el.addClass("active");
       $("iframe").prop("scrolling", type == "full" ? "yes" : "no");
-      
-      $('iframe').contents().find("body").addClass("showcase--redux_isFramed_" + type)
+
+      $("iframe").contents().find("body").addClass("showcase--redux_isFramed_" + type)
     })
   }
 
@@ -113,6 +113,7 @@ export default class showcaseCleanshot extends ShowcasePage {
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
     };
   }
 
@@ -195,7 +196,7 @@ export default class showcaseCleanshot extends ShowcasePage {
     // render
     const str = this.TEMPLATES["InputRequest"](this.api);
     $(".advice").html(str);
-  
+
     // set value
     this._setValue();
     // set input masks

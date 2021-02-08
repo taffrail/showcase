@@ -328,6 +328,7 @@ export default class showcaseSalesforce extends ShowcasePage {
       "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
     };
   }
   // #endregion

@@ -150,21 +150,15 @@ export default class ShowcasePage {
         err += ` (${reason})`;
       }
       this.api = _.assign({}, window.jga.api, {
-        adviceset: _.assign({}, window.jga.api.adviceset,{
-          id: window.jga.adviceSetId, // this is saved to the window on page-load, it contains ownerId
+        error: {
           title: "Error",
           description: err != "error" ? err : "API unavailable",
-          referenceDocuments: [],
-          owner: {}
-        }),
+        },
         advice: []
       });
       Loading.hide(loadingId);
-      this.showToast(undefined, {
-        title: "Taffrail",
-        message: `${this.api.adviceset.description}`,
-        delay: 10000
-      });
+      const str = this.TEMPLATES["Error"](this.api);
+      this.$advice.html(str);
     });
   }
 

@@ -434,6 +434,7 @@ export default class showcaseFull extends ShowcasePage {
       "RecommendationsOnThisPage": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceListTOC").html()),
       "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
       "QuestionsAnswers": Handlebars.compile($("#tmpl_answersList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
     };
   }
   // #endregion
