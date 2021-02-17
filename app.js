@@ -61,6 +61,10 @@ app.use((req, res, next) => {
   res.locals.GTAG_ID = process.env.GTAG_ID;
   res.locals.INTERCOM_APP_ID = process.env.INTERCOM_APP_ID;
   res.locals.SENTRY_DSN = process.env.SENTRY_DSN;
+  const [, sentryVersionApm] = pkg.dependencies["@sentry/apm"].split("^");
+  const [, sentryVersionBrowser] = pkg.dependencies["@sentry/browser"].split("^");
+  res.locals.SENTRY_VERSION_APM = sentryVersionApm;
+  res.locals.SENTRY_VERSION_BROWSER = sentryVersionBrowser;
   next();
 });
 
