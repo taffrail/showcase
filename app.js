@@ -1,5 +1,6 @@
 const createError = require("http-errors");
 const express = require("express");
+const expressLayouts = require("express-ejs-layouts");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const health = require("./middleware/healthcheck");
@@ -10,7 +11,9 @@ const { Integrations: ApmIntegrations } = require("@sentry/apm");
 const { default: sslRedirect } = require("heroku-ssl-redirect");
 
 const indexRouter = require("./routes/index");
+const apiRouter = require("./routes/api");
 const showcaseRouter = require("./routes/showcase");
+const frbRouter = require("./routes/frb");
 
 const pkg = require("./package.json");
 const app = express();
@@ -31,8 +34,9 @@ if (isProduction) {
 }
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(expressLayouts);
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -61,6 +65,7 @@ app.use((req, res, next) => {
   res.locals.GTAG_ID = process.env.GTAG_ID;
   res.locals.INTERCOM_APP_ID = process.env.INTERCOM_APP_ID;
   res.locals.SENTRY_DSN = process.env.SENTRY_DSN;
+  res.locals._ = require("lodash");
   const [, sentryVersionApm] = pkg.dependencies["@sentry/apm"].split("^");
   const [, sentryVersionBrowser] = pkg.dependencies["@sentry/browser"].split("^");
   res.locals.SENTRY_VERSION_APM = sentryVersionApm;
@@ -70,6 +75,8 @@ app.use((req, res, next) => {
 
 app.use("/", indexRouter);
 app.use("/s", showcaseRouter);
+app.use("/api", apiRouter);
+app.use("/frb", frbRouter);
 
 // redirect all requests to HTTPS
 if (!process.env.WEB_HOST.includes("localhost")) {

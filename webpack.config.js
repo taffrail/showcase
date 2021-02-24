@@ -8,8 +8,12 @@ module.exports = {
       new TerserPlugin({ cache: true, parallel: true, sourceMap: false })
     ]
   },
+  entry: {
+    main: "./src/js/main.js",
+    frb: "./src/js/entryFrb.js"
+  },
   output: {
-    filename: "main.js",
+    filename: "[name].bundle.js",
     path: path.resolve(__dirname, "./public/dist/js/")
   },
   stats: {
@@ -21,7 +25,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: "babel-loader",
+          options: {
+            presets: [["@babel/preset-env", { "shippedProposals": true }]]
+          }
         }
       }
     ]

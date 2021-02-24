@@ -1,16 +1,15 @@
 import _ from "lodash";
-import copy from "clipboard-copy";
-import { createBrowserHistory } from "history";
+// import copy from "clipboard-copy";
+// import { createBrowserHistory } from "history";
 import Handlebars from "handlebars";
 import Inputmask from "inputmask";
-import Loading from "./loading";
-import pluralize from "pluralize";
+import Loading from "../loading";
 import qs from "querystring";
 import store from "store";
 
-export default class ShowcasePage {
+export default class TaffrailApi {
   constructor(){
-    this.history = createBrowserHistory();
+    // this.history = createBrowserHistory();
 
     // handlebars helpers
     Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
@@ -22,39 +21,38 @@ export default class ShowcasePage {
     });
 
     Handlebars.registerHelper("breaklines", (text) => {
-      if (text && !text.includes("<taffrail-var")) {
-        text = Handlebars.Utils.escapeExpression(text);
-      }
+      text = Handlebars.Utils.escapeExpression(text);
       text = text.replace(/(\r\n|\n|\r)/gm, "<br>");
       return new Handlebars.SafeString(text);
     });
   }
 
   /**
-   * Page onload, one time
+   * Initialize
    */
   init(){
+    if (!this.api?.adviceset) {
+      // console.info("AdviceSetId not present on DOM, reloading...");
+      window.location.reload();
+    }
+
     // set the base URL for loading data
     window.jga.api._links = { self: `${this.config.api_host}/api/advice/${this.api.adviceset.id}` }
     // helpers
     $("body").tooltip({ selector: "[data-toggle=tooltip]" });
-    // mode
-    this.primaryAdviceModeEnabled = store.get("primaryAdviceModeEnabled", false);
     // events
+    this.initCache();
+    this.handleClickContinue();
+    this.handleClickTipTakeAction();
+    this.handleClickBack();
+    this.handleClickSheet();
+    this.handleClickAssumption();
+    this.handleClickTaffrailVar();
+    this.handleCollapseAssumptionGroup();
     this.handleChangeAudience();
-    this.handleCopyLink();
-    this.handleCopyLinkAndSaveScenario();
-    this.handleShowAllRecommendationsFromPrimaryAdvice();
+    // this.handleCopyLink();
     this.handleClickOpenRawDataModal();
-    this.handleClickTogglePrimaryAdviceMode();
-    this.handleClickShowAllSources();
-
-    // inside iframe? screenshot generator helper
-    const isFramed = window.location !== window.parent.location;
-    if (isFramed) {
-      $("body").addClass("showcase--redux_isFramed");
-      $("main.container").removeClass("container").addClass("container-fluid");
-    }
+    // this.handleClickShowAllSources();
   }
 
   // #region getter/setter
@@ -99,12 +97,18 @@ export default class ShowcasePage {
    * @param {boolean} usePlaceholder
    * @returns Promise<jqXHR>
    */
-  _loadApi(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = true){
+  load(newFormData, $loadingContainer = this.$loadingContainer, usePlaceholder = true){
     const currFormData = this.api.params;
-    const formData = _.assign({
-      include: ["filteredVars"],
-      showcase: true
-    }, currFormData, qs.parse(newFormData));
+    const userProfileData = window.jga.UserProfile ? _.omit(window.jga.UserProfile.savedProfile, "_name") : {};
+    const formData = _.assign(
+      {
+        include: ["filteredVars"],
+        showcase: true
+      },
+      currFormData,
+      userProfileData,
+      qs.parse(newFormData)
+    );
     // does link contain referring AI User Request ID (aiUrId)?
     this.fromAiUrId = formData.aiUrId;
     // internal JGA: don't include these fields
@@ -165,10 +169,67 @@ export default class ShowcasePage {
   }
 
   /**
+   * Slight speed update to cache frequently-used templates and selectors
+   */
+  initCache() {
+    // cache element selectors
+    this.$advice = $(".phone .advice");
+    // cache templates
+    this.TEMPLATES = {
+      "InputRequest": Handlebars.compile($("#tmpl_adviceInputRequest").html()),
+      "Recommendations": Handlebars.compile($("#tmpl_groupedRecommendationsAdviceList").html()),
+      "Assumptions": Handlebars.compile($("#tmpl_assumptionsList").html()),
+      "Error": Handlebars.compile($("#tmpl_error").html()),
+    };
+  }
+
+  /**
+   * Map data from API for this showcase's handlebars templates
+   */
+  mapData() {
+    // setup "display" card — either question or "advice".
+    // `api.advice` is an array of every input + advice node
+    this.api.display = _.last(this.api.advice) || {};
+    // build collection of just answers/assumptions
+    this.api.answers = this.api.advice.filter(a => { return a.type == "INPUT_REQUEST"; }).map((a, i) => {
+      a.idx = i;
+      return a;
+    });
+
+    // remove last item, it's always an unanswered question
+    if (this.api.display.type == "INPUT_REQUEST") {
+      this.api.answers.pop();
+    }
+
+    // assumptions are grouped, answers are not
+    const ASSUMPTIONS_UNGROUPED = "Assumptions";
+    this.api.assumptions = _.groupBy(this.api.answers, (a) => {
+      return (a.tagGroup) ? a.tagGroup.name : ASSUMPTIONS_UNGROUPED;
+    });
+
+    // go through each assumption group and set open/close state
+    Object.keys(this.api.assumptions).forEach((key, idx) => {
+      // add `_isOpen` flag to each item
+      const arr = this.api.assumptions[key];
+      this.api.assumptions[key] = arr.map(a => {
+        if (key == ASSUMPTIONS_UNGROUPED){
+          a.tagGroup = {
+            id: "ag",
+            name: ASSUMPTIONS_UNGROUPED
+          }
+        }
+        a._isOpen = store.get(`assumption_${a.tagGroup.id}_${this.api.adviceset.id}`, false);
+        return a;
+      });
+    });
+
+    this.mapAdviceData();
+  }
+
+  /**
    * Helper to find the "last" Advice node, including a check for the
    * System Advice Node with special ID -32768
    */
-  // eslint-disable-next-line complexity
   mapAdviceData() {
     // if the `display` is the LAST advice node, set the "isLast" flag
     const allAdvice = this.api.advice.filter(a => { return a.type == "ADVICE"; });
@@ -197,7 +258,7 @@ export default class ShowcasePage {
 
     // group all advice into bucketed recommendations
     let groupedAdvice = _.groupBy(allAdvice, (a) => {
-      return (a.tagGroup) ? a.tagGroup.name : "Recommendations";
+      return (a.tagGroup) ? a.tagGroup.name : "Goals";
     });
 
     // This is hard to read but straightforward chained lodash logic. Steps:
@@ -246,37 +307,24 @@ export default class ShowcasePage {
       });
     });
 
-    // find "primary advice" -- last advice in highest weighted group
-    const [highestWeightedGroup] = groupKeys;
-    if (groupedAdvice[highestWeightedGroup] && groupedAdvice[highestWeightedGroup].length){
-      const primaryAdvice = _.last(groupedAdvice[highestWeightedGroup]);
-      primaryAdvice._isPrimary = true;
-
-      if (this.primaryAdviceModeEnabled) {
-        // assign it to temp prop
-        this.api.display_primary_advice = primaryAdvice;
-        // remove it from list that will become `recommendations`
-        groupedAdvice[highestWeightedGroup].pop();
-        // are there any recommendations left in this group?
-        if (!groupedAdvice[highestWeightedGroup].length) {
-          delete groupedAdvice[highestWeightedGroup];
-        }
-
-        // build a string for use below primary advice
-        const varStr = ` ${pluralize("inputs", this.api.variables.length, true)}`;
-        let factoredStr = "";
-        const assumptionLen = _.flatMap(this.api.assumptions).length;
-        const recommendationLen = _.flatMap(groupedAdvice).length;
-        if (assumptionLen > 0) {
-          factoredStr = `${pluralize("assumption", assumptionLen, true)}`;
-        }
-        this.api.display_primary_advice._evaluated = `<strong>${factoredStr}</strong> and <strong>${varStr}</strong>`;
-        this.api.display_primary_advice._recommended = `${pluralize("recommendation", recommendationLen, true)}`;
-      }
-    }
-
     // all advice to render is saved to `recommendations`
     this.api.recommendations = groupedAdvice;
+
+    this.mapVariables();
+  }
+
+  /**
+   * Map variables into named list
+   */
+  mapVariables() {
+    const vars = this.api.variables||[];
+    this.api.variables_map = {}
+    vars.forEach(v => {
+      if (!v.value) {
+        v.value = null; // sometimes API doesn't return value property
+      }
+      this.api.variables_map[v.name] = v;
+    });
   }
 
   /**
@@ -302,20 +350,17 @@ export default class ShowcasePage {
   }
 
   /**
-	 * Update variables list
-	 */
-  updateVariablesList(){
-    // render
-    const template = Handlebars.compile($("#tmpl_variablesList").html());
-    $("#dataModal .variables").html(template(this.api));
-  }
-
-  /**
-   * Update inline HTML for taffrail variables
+   *
    */
-  updateTaffrailVarHtml() {
+  updatePanes() {
+    // update the window title
+    this.windowTitle = `${this.api.adviceset.title} - ${this.api.adviceset.owner.name}`;
+
+    this._setCurrentIdx();
+    this.updateVariablesList();
+
     // handle taffrail-var
-    $("body").find("taffrail-var").each((i, el) => {
+    this.$advice.find("taffrail-var").each((i, el) => {
       const $el = $(el);
       const { variableName } = $el.data();
       // find corresponding question
@@ -329,6 +374,208 @@ export default class ShowcasePage {
           .attr("title", "Click to change")
         ;
       }
+    });
+
+    $("#showcase_url").prop("href", `/s/${this.api.adviceset.id}/?${this.api.paramsAsQueryStr}`).prop("target","_blank");
+  }
+
+  /**
+   * Template update for INPUT_REQUEST
+   */
+  updateForInputRequest($container = this.$advice) {
+    // hide goal pane
+    $(".goal-result").hide();
+    // render
+    const str = this.TEMPLATES["InputRequest"](this.api);
+    $container.html(str);
+
+    // hide "next" button unless it's a numeric input
+    const isRadio = this.api.display.form.fieldType.match(/Radio|Boolean/);
+    $container.find("button[type=submit]").toggle(!(isRadio && isRadio.length > 0));
+
+    // set value
+    this._setValue($container);
+    // // set input masks
+    this._handleInputMasks($container);
+    // // focus input
+    this._focusFirstInput($container);
+  }
+
+  /**
+   * Update advice list by group
+   */
+  updateForAdvice($container = this.$advice) {
+    // simple helper for UX
+    this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
+
+    // render
+    const str = this.TEMPLATES["Recommendations"](this.api);
+    $container.html(str);
+
+    // this._setupChartsAll();
+  }
+
+  /**
+   * Update assumptions/answers/history list
+   */
+  updateAssumptionsList() {
+    // do we have ANY assumptions/answers yet?
+    // show or hide depending
+    // simple helper for UX
+    this.api._answersExist = this.api.answers.length > 0;
+
+    // PERSONAL PROFILE
+    // map user data into new group
+    const savedProf = window.jga.UserProfile?.savedProfile;
+    if (savedProf) {
+      // let Taffrail API assume super power over any variables in user profile AND advice variables
+      const answerVariables = this.api.answers.map(a => { return a.form.name });
+      // blacklist any user profile vars present in advice vars
+      const blacklist = ["_name"].concat(answerVariables);
+      let personalProfile = Object.keys(savedProf).map(k => {
+        if (blacklist.includes(k) || k.startsWith("rule_") || k.startsWith("Fit_")) { return null; }
+
+        // map an object to match the templating interface
+        return {
+          id: _.uniqueId(`${k}_`),
+          tagGroup: {
+            id: "pp"
+          },
+          form: {
+            questionVariable: {
+              name: k
+            }
+          },
+          answer: savedProf[k] || ""
+        }
+      });
+
+      personalProfile = _.compact(personalProfile);
+      this.api.assumptions["Client Profile"] = _.sortBy(personalProfile, o => { return o.form.questionVariable.name; });
+    }
+
+    // render
+    const strAssump = this.TEMPLATES["Assumptions"](this.api);
+    $("#assumptions").html(strAssump);
+  }
+
+  /**
+   * Get variable object by name
+   * @param {string} name Variable name
+   */
+  var(name) {
+    return _.find(this.api.variables, { name });
+  }
+
+  /**
+	 * Update variables list
+	 */
+  updateVariablesList(){
+    // render
+    const template = Handlebars.compile($("#tmpl_variablesList").html());
+    $("#dataModal .variables").html(template(this.api));
+  }
+
+  /**
+   * Click handler for taking action in goal footer
+   */
+  handleClickTipTakeAction() {
+    $(".advice").on("click", "a.tip-take-action", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const { action } = $this.data();
+      this.load(action, $("main.screen"), false).then(api => {
+        // update content
+        this.updateFn(api);
+        this.updatePanes();
+        $(document).trigger("pushnotification", ["goal_change", { message: "Great! Your goal was updated" }]);
+      });
+    });
+  }
+
+  /**
+   * Click handler for assumptions or Q&A
+   */
+  handleClickAssumption() {
+    $("#assumptions").on("click", ".a > a, a.statement", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const data = $this.closest("li").data();
+      const { idx, groupId } = data;
+      // do not allow changes to "personal profile" data
+      if (groupId == "pp") {
+        return;
+      }
+      // $("html, body").animate({ scrollTop: this.scrollTo });
+      // temp override `display` global prop to insert question into HTML
+      // when user presses "OK" to keep or change answer, global data is refreshed/restored
+      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == idx; });
+      this.api.display = answer;
+      this.api.display.idx = answer.idx;
+      this.updateForInputRequest();
+      this.triggerClickSheet(); // close
+    });
+  }
+
+  /**
+   * click taffrail var
+   */
+  handleClickTaffrailVar() {
+    $(document).on("click", "taffrail-var.active", e => {
+      e.preventDefault();
+      const $this = $(e.currentTarget);
+      const { idx } = $this.data();
+      // temp override `display` global prop to insert question into HTML
+      // when user presses "OK" to keep or change answer, global data is refreshed/restored
+      const answer = _.flatMap(this.api.assumptions).find((a) => { return a.idx == idx; });
+      this.api.display = answer;
+      this.api.display.idx = answer.idx;
+      this.updateForInputRequest();
+    });
+  }
+
+  /**
+   * Open/close a sheet
+   */
+  handleClickSheet() {
+    $(".phone").on("click", "a[data-sheet]", e => {
+      e.preventDefault();
+      const $el = $(e.currentTarget);
+      const { sheet } = $el.data();
+
+      if (sheet == "drawer") {
+        $("#drawer").toggleClass("show");
+        $(".phone").toggleClass("drawer-open");
+        // 300ms CSS animation
+        setTimeout(()=>{
+          $("#drawer").toggleClass("shown");
+        }, 100);
+      }
+    });
+  }
+
+  triggerClickSheet(){
+    $(".phone").find("a[data-sheet]").trigger("click");
+  }
+
+  /**
+   * Listener for opening/closing assumption groups
+   */
+  handleCollapseAssumptionGroup() {
+    $("#assumptions").on("show.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, true);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").addClass("fa-chevron-down").removeClass("fa-chevron-right");
+    });
+
+    $("#assumptions").on("hidden.bs.collapse", "ol.assumptions-list.collapse", (e) => {
+      const $this = $(e.currentTarget);
+      const { groupId } = $this.find("li").first().data();
+      store.set(`assumption_${groupId}_${this.api.adviceset.id}`, false);
+      const $toggler = $(`a[aria-controls=${$this.prop("id")}]`);
+      $toggler.find("i").removeClass("fa-chevron-down").addClass("fa-chevron-right");
     });
   }
 
@@ -348,172 +595,82 @@ export default class ShowcasePage {
 
   // #endregion
 
+  // /**
+  //  * Listen on the browser history for POP actions to update the page.
+  //  */
+  // listenForUrlChanges() {
+  //   this.history.listen((location, action) => {
+  //     if (action === "POP" && location.state) {
+  //       this.api = location.state;
+  //       this.updatePanes();
+  //     }
+  //   });
+  // }
+
   /**
-   * Listen on the browser history for POP actions to update the page.
+   * "Next" button handler
    */
-  listenForUrlChanges() {
-    this.history.listen((location, action) => {
-      if (action === "POP" && location.state) {
-        this.api = location.state;
+  handleClickContinue() {
+    // pressing radio button auto-advances to next
+    $(".screen").on("click", ".form-check label.form-check-label", e => {
+      const $lbl = $(e.currentTarget);
+      $lbl.prev("input").prop("checked", true);
+      const $form = $lbl.closest("form");
+      $form.trigger("submit");
+    });
+
+    $(".screen").on("submit", "form", e => {
+      const $form = $(e.currentTarget);
+
+      // this._scrollTop();
+
+      // convert values from masked to unmasked for form submission
+      const $inputs = this._findFormInput($form);
+      $inputs.each((i, el) => {
+        const $input = $(el);
+        const { inputmask } = $input.data();
+
+        if (inputmask) {
+          const unmaskedval = inputmask.unmaskedvalue();
+          inputmask.remove();
+          $input.val(unmaskedval);
+        }
+
+        // while we're here, convert percent to precision value
+        if ($input.is("input[data-type=Percent]")) {
+          $input.val($input.val() / 100);
+        }
+      });
+
+      const data = $form.serialize();
+
+      // push answer to this question into saved user profile
+      // window.jga.UserProfile.buildProfileWith(qs.parse(data));
+
+      this.load(data, $("main.screen"), false).then(api => {
+        // update content
+        this.updateFn(api);
         this.updatePanes();
-      }
+      });
+
+      return false; // don't submit form
     });
   }
 
   /**
-   * Handle click to generate and copy a short URL
+   * "Back" button handler
    */
-  handleCopyLink() {
-    $("body").on("click", "a.copy-url", e => {
+  handleClickBack() {
+    this.$advice.on("click", "a[data-action=back]", e => {
       e.preventDefault();
-      const linkGenId = _.uniqueId("link-gen");
-      const url = window.location.href;
-
-      // hit the shorten API
-      const { display } = this.api;
-      const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
-
-      new Promise((resolve, reject) => {
-        // we can't shorten localhost links
-        if (url.includes("localhost")) {
-          return resolve({ link: url });
-        } else {
-          return $.post("/api/shorten", {
-            long_url: url,
-            title: `${this.api.adviceset.title} - ${title}`
-          }).then(resolve);
-        }
-      }).then(bitly => {
-        // copy to clipboard
-        return copy(bitly.link).then(() => {
-          this.showToast(linkGenId, {
-            title: "Taffrail",
-            message: "Link copied!"
-          });
-        });
-      }).catch(e => {
-        console.error(e);
-        this.showToast(linkGenId, {
-          title: "Oops",
-          message: "Link copying error."
-        });
-      })
-    });
-  }
-
-  /**
-   * Handle click to generate and copy a short URL
-   */
-  handleCopyLinkAndSaveScenario() {
-    $("body").on("click", "a.copy-url-with-scenario", e => {
-      e.preventDefault();
-      const linkGenId = _.uniqueId("link-gen");
-      const url = window.location.href;
-
-      // hit the shorten API
-      const { display } = this.api;
-      const title = display.type == "INPUT_REQUEST" ? display.question : display.headline;
-      const summary = display.type == "INPUT_REQUEST" ? display.explanation : display.summary;
-      const isEngineResp = display.id == "-32768";
-
-      new Promise((resolve, reject) => {
-        // we can't shorten localhost links
-        if (url.includes("localhost")) {
-          return resolve({ link: url });
-        } else {
-          return $.post("/api/shorten", {
-            long_url: url,
-            title: `${this.api.adviceset.title} - ${title}`
-          }).then(resolve).catch(reject);
-        }
-      }).then(bitly => {
-        const paramsEntitiesUsed = [];
-        let inputParams = { ...this.api.params };
-        // internal JGA: don't include these fields for scenarios
-        inputParams = _.omit(inputParams, this.paramsToOmit);
-        // lookup input param IDs to save with scenario
-        Object.keys(inputParams).forEach(key => {
-          const variable = this.api.variables.find(v => { return v.name == key; });
-          if (variable) {
-            paramsEntitiesUsed.push(variable.id);
-          }
-        });
-
-        // save scenario to advice builder
-        return $.ajax({
-          url: `${this.config.advicebuilder_host}/api/advicescenario`,
-          type: "POST",
-          headers: {
-            "Accept": "application/json; chartset=utf-8",
-            "Authorization": `Bearer ${this.config.api_key}`
-          },
-          data: {
-            ruleSetId: this.api.adviceset._id,
-            params: inputParams,
-            paramsEntitiesUsed: paramsEntitiesUsed,
-            shortUrl: url.includes("localhost") ? null : bitly.link,
-            expectedRuleNodeId: isEngineResp ? null : display.id,
-            name: isEngineResp ? "Advice Engine Response" : _.truncate(title, { length: 255 }),
-            description: isEngineResp ? null : _.truncate(summary, { length: 255 }),
-            position: 1,
-            verifiedStatus: isEngineResp ? "error": null,
-            verifiedAt: isEngineResp ? new Date() : null
-          }
-        }).then((api) => {
-          const { data: scenario } = api;
-          const adviceBuilderScenarioUrl = `${this.config.advicebuilder_host}/advicesets/${this.api.adviceset._id}/advicescenarios/${scenario.id}/show`;
-
-          const $modalHtml = $(`
-            <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" id="link_modal_${linkGenId}">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">All Set!</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <p>A <span class="underline-highlight">short link was copied to your clipboard</span> and an Advice Builder scenario was saved.</p>
-                    <ul class="fa-ul">
-                      <li>
-                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
-                        <a href="${adviceBuilderScenarioUrl}" target="_blank">Advice Builder Scenario</a>
-                      </li>
-                      <li>
-                        <span class="fa-li"><i class="fal fa-arrow-circle-right"></i></span>
-                        <a href="${bitly.link}" target="_blank">${bitly.link}</a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `);
-
-          $("body").append($modalHtml);
-          $(`#link_modal_${linkGenId}`).modal().on("hidden.bs.modal", e=> {
-            $(`#link_modal_${linkGenId}`).remove();
-          });
-
-          // copy to clipboard
-          return copy(bitly.link).then(() => {
-            this.showToast(linkGenId, {
-              title: "Taffrail",
-              message: "Link copied!"
-            });
-          });
-        })
-      }).catch(e => {
-        console.error(e);
-        this.showToast(linkGenId, {
-          title: "Oops",
-          message: "Link copying error."
-        });
-      })
+      // const { _currIdx } = this.api.display;
+      // const display = this.api.answers.find((a) => { return a.idx == _currIdx - 1; });
+      // if (!display) { return; }
+      // this._scrollTop();
+      // // temp override `display` global prop to insert question into HTML
+      // this.api.display = display;
+      // this.updateMainPane();
+      alert("back!");
     });
   }
 
@@ -530,48 +687,12 @@ export default class ShowcasePage {
   /**
    * Handle clicks to toggle primnary advice mode
    */
-  handleClickTogglePrimaryAdviceMode() {
-    $("main").on("click", "a[data-action='toggle-primary-advice-mode']", e => {
-      e.preventDefault();
-      const currentlyEnabled = this.primaryAdviceModeEnabled;
-      const modeEnabled = !currentlyEnabled ? true : false;
-      store.set("primaryAdviceModeEnabled", modeEnabled);
-      this.primaryAdviceModeEnabled = modeEnabled;
-      this.showToast(undefined, {
-        title: "Challenge accepted!",
-        message: `Primary mode ${modeEnabled ? "enabled" : "disabled"}. Refreshing in 3 seconds...`
-      });
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    });
-  }
-
-  /**
-   * Handle clicks to toggle primnary advice mode
-   */
   handleClickShowAllSources() {
     $("main").on("click", "a[data-action='showAllSources']", e => {
       e.preventDefault();
       const $btn = $(e.currentTarget);
       $btn.hide()
       $("#group_references").find(".card.d-none").removeClass("d-none");
-    });
-  }
-
-  /**
-   * Handle click to show/hide all recommendations
-   */
-  handleShowAllRecommendationsFromPrimaryAdvice(){
-    $("main").on("click", "a[data-action=toggleRecommendations]", e => {
-      e.preventDefault();
-      const $btn = $(e.currentTarget);
-      $("html, body").animate({ scrollTop: $(".expand-history hr").offset().top + 1 });
-      $(".list-all-recommendations").slideToggle(function() {
-        const isVisible = $(this).is(":visible");
-        $(this).toggleClass("show", isVisible);
-        $btn.find("span").text( isVisible ? "Hide" : "Show" );
-      });
     });
   }
 
@@ -596,35 +717,10 @@ export default class ShowcasePage {
     $("main").on("click", "a[data-action=set-audience]", e => {
       const $el = $(e.currentTarget);
       const { audienceId = -1 } = $el.data();
-      this._loadApi(`audienceId=${audienceId}`, undefined, false).then(() => {
+      this.load(`audienceId=${audienceId}`, undefined, false).then(() => {
         this.updateFn && this.updateFn();
       });
     });
-  }
-
-  /**
-   *
-   * @param {string=} id Optional ID
-   * @param {object} opts Toast options
-   * @param {string} opts.title Toast title
-   * @param {string=} opts.message Toast message
-   * @param {number=} opts.delay Toast delay, default to 2 seconds
-   */
-  showToast(id = _.uniqueId("toast"), opts = {}) {
-    if (!opts.id) {
-      opts.id = id;
-    }
-    const toast = Handlebars.compile($("#tmpl_toast").html())(opts);
-    // insert into DOM
-    $("#toastWrapper").show();
-    $("#toastContainer").append(toast);
-    // init Toast component
-    $(`#${id}`).toast({
-      delay: opts.delay || 2000
-    }).on("hidden.bs.toast", function() {
-      $(this).remove(); // remove it when it's been hidden
-      $("#toastWrapper").hide();
-    }).toast("show"); // finally show it
   }
 
   // #region form utils

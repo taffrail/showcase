@@ -70,7 +70,15 @@ function serve(cb) {
     port: port,
     ghostMode: {
       clicks: false // disable syncronized clicks
-    }
+    },
+    snippetOptions: { // inject script in <head> for turbolinks
+      rule: {
+        match: /<\/head>/i,
+        fn: function(snippet, match) {
+          return snippet + match;
+        }
+      }
+    },
   });
 
   // watch SASS & JS to build and auto reload, views to auto reload
@@ -125,7 +133,8 @@ function sass() {
     includePaths: [node_modules] // find node_modules above the cwd
   }
   return src([
-    "src/sass/taffrail.scss"
+    "src/sass/taffrail.scss",
+    "src/sass/frb.scss",
   ])
     .pipe(sourcemaps.init())
     .pipe(gSass(options).on("error", gSass.logError))
@@ -135,7 +144,10 @@ function sass() {
 }
 
 function scripts() {
-  return src("src/js/main.js")
+  return src([
+    "src/js/main.js",
+    "src/js/entryFrb.js"
+  ])
     .pipe(webpack(require("./webpack.config.js")))
     .pipe(dest(paths.scripts.dest))
     .pipe(browserSync.stream());
