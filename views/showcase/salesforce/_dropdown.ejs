@@ -14,10 +14,10 @@
 			<a href="#" class="dropdown-item copy-url-with-scenario">
 				<i class="fal fa-save"></i> Save as Scenario
 			</a>
-			<a href="https://taffrail.app/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" class="dropdown-item" target="_blank">
+			<a href="{{config.advicebuilder_host}}/advicesets/{{display.ruleSetId}}/rules/{{display.ruleId}}/show?selectedNodeId={{display.id}}" class="dropdown-item" target="_blank">
 				<i class="fal fa-pencil"></i> Edit in Advice Builder
 			</a>
-			<a href="https://taffrail.app/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug?{{paramsAsQueryStr}}" class="dropdown-item" target="_blank">
+			<a href="{{config.advicebuilder_host}}/advicesets/{{adviceset._id}}/rules/{{display.ruleId}}/debug?{{paramsAsQueryStr}}" class="dropdown-item" target="_blank">
 				<i class="fal fa-debug"></i> Debug
 			</a>
 			<div class="dropdown-divider"></div>
@@ -29,7 +29,7 @@
 			<a href="#" class="dropdown-item copy-url-with-scenario">
 				<i class="fal fa-save"></i> Save as Scenario
 			</a>
-			<a href="https://taffrail.app/advicesets/{{../adviceset._id}}/rules/{{this.0.ruleId}}/debug?{{../paramsAsQueryStr}}" class="dropdown-item" target="_blank">
+			<a href="{{../config.advicebuilder_host}}/advicesets/{{../adviceset._id}}/rules/{{this.0.ruleId}}/debug?{{../paramsAsQueryStr}}" class="dropdown-item" target="_blank">
 				<i class="fal fa-debug"></i> Debug
 			</a>
 			<a class="dropdown-item" href="#" data-expand="advice"><i class="fal fa-plus-square"></i> <span>Expand</span> Advice</a>

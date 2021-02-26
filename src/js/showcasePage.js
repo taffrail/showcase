@@ -277,6 +277,9 @@ export default class ShowcasePage {
 
     // all advice to render is saved to `recommendations`
     this.api.recommendations = groupedAdvice;
+
+    // add config to api data because handlebars can't access `jga` global
+    this.api.config = window.jga.config;
   }
 
   /**
