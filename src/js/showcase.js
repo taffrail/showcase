@@ -435,6 +435,9 @@ export default class showcaseFull extends ShowcasePage {
       });
     });
 
+    // add config to api data because handlebars can't access `jga` global
+    this.api.config = window.jga.config;
+
     this.mapAdviceData();
     this.mapReferenceDocuments();
   }

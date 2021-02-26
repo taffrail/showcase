@@ -46,7 +46,7 @@
 									{{else}}
 										{{headline}}
 									{{/if}}
-									<a href="https://taffrail.app/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}"
+									<a href="{{../../config.advicebuilder_host}}/advicesets/{{ruleSetId}}/rules/{{ruleId}}/show?selectedNodeId={{id}}{{#if audienceType}}&audienceId={{audienceType.id}}{{/if}}"
 										target="_blank" class="headline-open-advice-in-ab">Edit</a>
 								</span>
 								{{#if summary}}
@@ -119,7 +119,7 @@
 									<i class="fal fa-ellipsis-h"></i>
 								</a>
 								<div class="dropdown-menu" aria-labelledby="dropdownMenuButtonCard_{{id}}">
-									<a class="dropdown-item" href="https://taffrail.app/media/{{id}}/show" target="_blank"><i class="fal fa-pencil"></i>&nbsp;Edit in Advice Builder</a>
+									<a class="dropdown-item" href="{{../config.advicebuilder_host}}/media/{{id}}/show" target="_blank"><i class="fal fa-pencil"></i>&nbsp;Edit in Advice Builder</a>
 								</div>
 							</div>	
 						</div>
