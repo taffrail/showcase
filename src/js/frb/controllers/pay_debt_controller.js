@@ -96,7 +96,7 @@ export default class extends Controller {
       const tips = _.compact([].concat(api.recommendations?.Considerations || []).map(r => {
         let action;
         if (Debt_Payoff_Period.value >= 6 && Debt_Type_FRB.value == "credit card") {
-          action = `Debt_Payment_Additional=${Debt_Payment_Additional.value + Debt_Payment_Diff.value}` // querystring format`
+          action = `Debt_Payment_Is_Minimum=false&rule_3EbTM7SuKcZ2dFSSqDaCi_selection=2&Debt_Payment_Additional=${Debt_Payment_Additional.value + Debt_Payment_Diff.value}` // querystring format`
         } else if (Debt_Payoff_Period.value >= 6) {
           action = `Debt_Payment=${Debt_Payment_Suggested.value}` // querystring format`
         }
