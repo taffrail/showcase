@@ -75,9 +75,9 @@ export default class extends Controller {
         Debt_Type_FRB,
         Debt_Payment_Minimum,
         Debt_Payoff_Period,
-        Debt_Payment_Suggested,
-        Debt_Payment_Diff,
-        Debt_Payment_Additional
+        Debt_Payment_Suggested = { value: null },
+        Debt_Payment_Diff = { value: null },
+        Debt_Payment_Additional = { value: null },
       } } = api;
 
       if (Debt_Payment_Diff.value === null) { Debt_Payment_Diff.value = 0 }
@@ -93,18 +93,22 @@ export default class extends Controller {
         period_from_now = `Goal reached in ${new Date().getFullYear() + Number(totalYrs)}`
       }
 
-      const tips = [].concat(api.recommendations?.Considerations || []).map(r => {
-        let action = "#";
+      const tips = _.compact([].concat(api.recommendations?.Considerations || []).map(r => {
+        let action;
         if (Debt_Payoff_Period.value >= 6 && Debt_Type_FRB.value == "credit card") {
           action = `Debt_Payment_Additional=${Debt_Payment_Additional.value + Debt_Payment_Diff.value}` // querystring format`
         } else if (Debt_Payoff_Period.value >= 6) {
           action = `Debt_Payment=${Debt_Payment_Suggested.value}` // querystring format`
         }
-        return {
-          tip: r.headline_html || r.headline,
-          action
+        if (action) {
+          return {
+            tip: r.headline_html || r.headline,
+            action
+          }
+        } else {
+          return null;
         }
-      });
+      }));
 
       const goal = {
         period_from_now,
