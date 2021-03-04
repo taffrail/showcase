@@ -364,7 +364,10 @@ export default class TaffrailApi {
       const $el = $(el);
       const { variableName } = $el.data();
       // find corresponding question
-      const question = _.flatMap(this.api.assumptions).find((a) => { return a.form.name == variableName; });
+      const question = _.flatMap(this.api.assumptions).find((a) => {
+        // check question rules first, then input requests
+        return a.form.questionVariable?.reservedName == variableName || a.form.name == variableName;
+      });
       if (question) {
         $el
           .addClass("active")
@@ -524,6 +527,7 @@ export default class TaffrailApi {
     $(document).on("click", "taffrail-var.active", e => {
       e.preventDefault();
       const $this = $(e.currentTarget);
+      $this.tooltip("hide");
       const { idx } = $this.data();
       // temp override `display` global prop to insert question into HTML
       // when user presses "OK" to keep or change answer, global data is refreshed/restored
