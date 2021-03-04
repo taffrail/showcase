@@ -258,7 +258,7 @@ export default class TaffrailApi {
 
     // group all advice into bucketed recommendations
     let groupedAdvice = _.groupBy(allAdvice, (a) => {
-      return (a.tagGroup) ? a.tagGroup.name : "Goals";
+      return (a.tagGroup) ? a.tagGroup.name : "Recommendations";
     });
 
     // This is hard to read but straightforward chained lodash logic. Steps:

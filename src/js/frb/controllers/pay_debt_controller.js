@@ -64,18 +64,24 @@ export default class extends Controller {
         // since it's "last", hide the question.
         // $(".advice").slideUp(300);
       }
+      // override "display" with Advice
+      api.display.advice = api.recommendations["Our Advice"] || [api.display];
       $(".goal-result").show();
 
       // use this to use the "Grouped Advice" template
       // this.TaffrailAdvice.updateForAdvice();
 
       const { variables_map: {
+        Debt_Type_FRB,
         Debt_Payment_Minimum,
         Debt_Payoff_Period,
-        Debt_Payment,
+        Debt_Payment_Suggested,
         Debt_Payment_Diff,
-        Debt_Interest_Paid_Diff
+        Debt_Payment_Additional
       } } = api;
+
+      if (Debt_Payment_Diff.value === null) { Debt_Payment_Diff.value = 0 }
+      if (Debt_Payment_Additional.value === null) { Debt_Payment_Additional.value = 0 }
 
       let period_from_now;
       if (Debt_Payoff_Period.value === null) {
@@ -87,25 +93,18 @@ export default class extends Controller {
         period_from_now = `Goal reached in ${new Date().getFullYear() + Number(totalYrs)}`
       }
 
-      let tips = [];
-
-      // suggest Tip for user to pay off debt faster
-      if (Debt_Payoff_Period.value >= 6) {
-        const increasedPayment = Debt_Payment.value + Debt_Payment_Diff.value;
-        tips.push({
-          tip: `Adding ${Debt_Payment_Diff.valueFormatted} to your payment, 
-                you will pay off your debt in half the time and save ${Debt_Interest_Paid_Diff.valueFormatted} in interest.`,
-          action: `Debt_Payment=${increasedPayment}` // querystring format
-        })
-      }
-
-      // minimum payment required
-      if (Debt_Payoff_Period.value === null) {
-        tips = [{
-          tip: `Make at least the ${Debt_Payment_Minimum.valueFormatted} minimum payment`,
-          action: `Debt_Payment=${Debt_Payment_Minimum.value}` // querystring format
-        }]
-      }
+      const tips = [].concat(api.recommendations?.Considerations || []).map(r => {
+        let action = "#";
+        if (Debt_Payoff_Period.value >= 6 && Debt_Type_FRB.value == "credit card") {
+          action = `Debt_Payment_Additional=${Debt_Payment_Additional.value + Debt_Payment_Diff.value}` // querystring format`
+        } else if (Debt_Payoff_Period.value >= 6) {
+          action = `Debt_Payment=${Debt_Payment_Suggested.value}` // querystring format`
+        }
+        return {
+          tip: r.headline_html || r.headline,
+          action
+        }
+      });
 
       const goal = {
         period_from_now,
