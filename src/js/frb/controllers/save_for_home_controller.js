@@ -4,6 +4,7 @@ import TaffrailAdvice from "../taffrailapi";
 import Turbolinks from "turbolinks";
 import qs from "querystring";
 import Handlebars from "handlebars";
+import pluralize from "pluralize";
 export default class extends Controller {
   static targets = ["goal"];
   // static values = { id: String };
@@ -40,12 +41,8 @@ export default class extends Controller {
     // default values for this adviceset
     const defaults = {
       Homeowner_Association_Fees: 0,
-      // Homeowner_Insurance_Costs_Monthly: 1000/12,
-      // Home_Property_Taxes: 5000,
-      // Mortgage_Down_Payment_Pct: .2,
-      // Mortgage_Insurance_Per_Month: 0,
+      Mortgage_Down_Payment_Pct: .25,
       Mortgage_Interest_Rate: .03,
-      // Mortgage_Term_Years: 30,
     }
     const data = qs.stringify(_.assign(defaults, qs.parse(querystring)));
     this.TaffrailAdvice.load(data, $("main.screen")).then(api => {
@@ -115,10 +112,11 @@ export default class extends Controller {
       }
 
       if (cannotAffordHouse) {
-        period_from_now = "This is a stretch goal";
+        period_from_now = "This goal is out of reach";
       } else {
         if (reachedGoal) {
-          period_from_now += "<span class='text-success'>You got this!</span>";
+          const totalYrs = (Time_Frame_Needed.value / 12).toFixed(0);
+          period_from_now += `<span class='text-success'>You got this in ${pluralize("year", totalYrs, true)}!</span>`;
         } else {
           if (Time_Frame_Needed.value && Time_Frame_Needed.value > 0) {
             if (Time_Frame_Needed.value <= 12) {
