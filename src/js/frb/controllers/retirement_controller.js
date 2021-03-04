@@ -39,7 +39,7 @@ export default class extends Controller {
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
     // default values for this adviceset
-    const defaults = {
+    let defaults = {
       "401K_Tiers": 2,
       "401K_Match_Default_Tiers?": true,
     }
@@ -49,6 +49,20 @@ export default class extends Controller {
     // users in 30s default to "contribute all i'm allowed"
     if (window.jga.UserProfile?.savedProfile?.Age_Now <= 39) {
       defaults["401K_Contribution_Goal"] = "maximize contributions";
+    }
+
+    if (this.TaffrailAdvice.api.adviceset.id == "JUGzB62H3ERLF4P_TJ9ObJs") {
+      defaults = {
+        Age_Now: window.jga.UserProfile?.savedProfile?.Age_Now,
+        Retirement_Income_Ratio: .8, // 80%
+        "Other_Income_In_Retirement?": true,
+        Other_Income_Monthly: 3000, // social security
+        Rate_of_Return: .04,
+        Rate_of_Return_In_Retirement: .04,
+        "Consider_Inflation?": true,
+        Inflation_Rate: .02,
+        Years_In_Retirement: 25, // life expectancy 90
+      }
     }
 
     const data = qs.stringify(_.assign(defaults, qs.parse(querystring)));
@@ -74,6 +88,13 @@ export default class extends Controller {
       // $(".advice").slideDown(300);
       this.TaffrailAdvice.updateForInputRequest();
     } else {
+
+      const { variables_map: {
+        Age_Now,
+        Retirement_Year_Target,
+        Retirement_Savings_Needed = { value: 0, valueFormatted: "$0" }
+      } } = api;
+
       // must be advice
       if (api.display._isLast) {
         // since it's "last", hide the question.
@@ -81,6 +102,14 @@ export default class extends Controller {
 
         // override "display" with Advice
         api.display.advice = api.recommendations["Our Advice"] || [api.display];
+
+        if (this.TaffrailAdvice.api.adviceset.id == "JUGzB62H3ERLF4P_TJ9ObJs") {
+          api.display.advice.unshift({
+            headline_html: `Est. target balance 
+                            <taffrail-var data-variable-name="Retirement_Savings_Needed">${Retirement_Savings_Needed.valueFormatted}</taffrail-var>
+                            at retirement`
+          })
+        }
       }
 
       $(".goal-result").show();
@@ -88,11 +117,7 @@ export default class extends Controller {
       // use this to use the "Grouped Advice" template
       // this.TaffrailAdvice.updateForAdvice();
 
-      const { variables_map: {
-        Age_Now
-      } } = api;
-
-      const retirement_year = `Retire in ${new Date().getFullYear() + (65 - Age_Now.value)}`;
+      const retirement_year = `Retire in ${Retirement_Year_Target?.value || new Date().getFullYear() + (65 - Age_Now.value)}`;
 
       let tips = [];
       let ideas = [];
