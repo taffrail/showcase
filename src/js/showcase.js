@@ -660,7 +660,11 @@ export default class showcaseFull extends ShowcasePage {
         const $chart = $(this);
         const { src } = $chart.data();
         // parent container
-        const containerW = $chart.parents(".advice").outerWidth();
+        let $parentContainer = $chart.parents(".list-all-recommendations");
+        if (!$parentContainer.length) {
+          $parentContainer = $chart.parents(".advice");
+        }
+        const containerW = $parentContainer.outerWidth();
         const $iframe = $chart.find("iframe");
         // set chart container size
         $chart.css({

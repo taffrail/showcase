@@ -280,6 +280,8 @@ export default class ShowcasePage {
 
     // add config to api data because handlebars can't access `jga` global
     this.api.config = window.jga.config;
+
+    this.mapVariables();
   }
 
   /**
@@ -311,6 +313,20 @@ export default class ShowcasePage {
     // render
     const template = Handlebars.compile($("#tmpl_variablesList").html());
     $("#dataModal .variables").html(template(this.api));
+  }
+
+  /**
+    * Map variables into named list
+    */
+  mapVariables() {
+    const vars = this.api.variables || [];
+    this.api.variables_map = {}
+    vars.forEach(v => {
+      if (!v.value) {
+        v.value = null; // sometimes API doesn't return value property
+      }
+      this.api.variables_map[v.name] = v;
+    });
   }
 
   /**
