@@ -2,6 +2,7 @@ import _ from "lodash";
 import copy from "clipboard-copy";
 import { createBrowserHistory } from "history";
 import Handlebars from "handlebars";
+import Markdown from "helper-markdown";
 import Inputmask from "inputmask";
 import Loading from "./loading";
 import pluralize from "pluralize";
@@ -11,6 +12,10 @@ import store from "store";
 export default class ShowcasePage {
   constructor(){
     this.history = createBrowserHistory();
+
+    Handlebars.registerHelper("markdown", Markdown([{
+      highlight: false
+    }]));
 
     // handlebars helpers
     Handlebars.registerHelper("ifEquals", function(arg1, arg2, options) {
