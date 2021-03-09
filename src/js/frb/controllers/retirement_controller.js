@@ -62,6 +62,7 @@ export default class extends Controller {
         "Consider_Inflation?": true,
         Inflation_Rate: .02,
         Years_In_Retirement: 25, // life expectancy 90
+        "401K_Bonus_to_Consider?": false
       }
     }
 
