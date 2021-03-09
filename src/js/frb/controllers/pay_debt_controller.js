@@ -72,14 +72,14 @@ export default class extends Controller {
       // this.TaffrailAdvice.updateForAdvice();
 
       const { variables_map: {
-        Debt_Payment_Minimum,
-        Debt_Payoff_Period,
+        Monthly_Interest_Amt = { value: null, valueFormatted: "" },
+        Debt_Payoff_Period = { value: null },
         Debt_Payment_Suggested = { value: null },
       } } = api;
 
       let period_from_now;
       if (Debt_Payoff_Period.value === null) {
-        period_from_now = "You need to pay at least " + Debt_Payment_Minimum.valueFormatted + "/month";
+        period_from_now = "You need to pay at least " + Monthly_Interest_Amt.valueFormatted + "/month";
       } else if (Debt_Payoff_Period.value <= 12) {
         period_from_now = `Goal reached in ${Debt_Payoff_Period.value.toFixed(0)} months`
       } else {
@@ -101,6 +101,14 @@ export default class extends Controller {
           return null;
         }
       }));
+
+      // setup tip to make min payment
+      if (Debt_Payoff_Period.value === null) {
+        tips.push({
+          tip: `Make the <taffrail-var data-variable-name="Monthly_Interest_Amt">${Monthly_Interest_Amt.valueFormatted}</taffrail-var> minimum payment`,
+          action: `Debt_Payment=${Monthly_Interest_Amt.value + 0.01}` // querystring format`
+        });
+      }
 
       const goal = {
         period_from_now,
