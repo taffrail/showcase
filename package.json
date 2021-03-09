@@ -29,7 +29,7 @@
     "greeting-time": "^1.0.0",
     "handlebars": "^4.7.7",
     "heroku-ssl-redirect": "0.1.1",
-    "history": "^4.10.1",
+    "history": "^5.0.0",
     "http-errors": "~1.8.0",
     "i": "^0.3.6",
     "inputmask": "^5.0.5",
