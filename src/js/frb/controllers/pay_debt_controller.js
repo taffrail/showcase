@@ -72,16 +72,10 @@ export default class extends Controller {
       // this.TaffrailAdvice.updateForAdvice();
 
       const { variables_map: {
-        Debt_Type_FRB = { value: null },
         Debt_Payment_Minimum,
         Debt_Payoff_Period,
         Debt_Payment_Suggested = { value: null },
-        Debt_Payment_Diff = { value: null },
-        Debt_Payment_Additional = { value: null },
       } } = api;
-
-      if (Debt_Payment_Diff.value === null) { Debt_Payment_Diff.value = 0 }
-      if (Debt_Payment_Additional.value === null) { Debt_Payment_Additional.value = 0 }
 
       let period_from_now;
       if (Debt_Payoff_Period.value === null) {
@@ -95,13 +89,7 @@ export default class extends Controller {
 
       const tips = _.compact([].concat(api.recommendations?.Considerations || []).map(r => {
         let action;
-        if (Debt_Payoff_Period.value >= 6 && Debt_Type_FRB.value == "credit card") {
-          action = qs.stringify({
-            Debt_Payment_Is_Minimum: false,
-            rule_3EbTM7SuKcZ2dFSSqDaCi_selection: 2,
-            Debt_Payment_Additional: Debt_Payment_Additional.value + Debt_Payment_Diff.value
-          });
-        } else if (Debt_Payoff_Period.value >= 6) {
+        if (Debt_Payoff_Period.value >= 6) {
           action = `Debt_Payment=${Debt_Payment_Suggested.value}` // querystring format`
         }
         if (action) {
