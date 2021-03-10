@@ -72,6 +72,7 @@ export default class extends Controller {
     this.TaffrailAdvice.updateAssumptionsList();
   }
 
+  // eslint-disable-next-line complexity
   updateMainPane() {
     const { api } = this.TaffrailAdvice;
     // render
@@ -123,6 +124,15 @@ export default class extends Controller {
 
       if (api.recommendations["Our Thinking"] && api.recommendations["Our Thinking"].length) {
         ideas = ideas.concat(api.recommendations["Our Thinking"].map(adv => {
+          return {
+            tip: adv.headline_html || adv.headline,
+            action: "#"
+          }
+        }));
+      }
+
+      if (api.recommendations["Recommendations"] && api.recommendations["Recommendations"].length) {
+        ideas = ideas.concat(api.recommendations["Recommendations"].map(adv => {
           return {
             tip: adv.headline_html || adv.headline,
             action: "#"
