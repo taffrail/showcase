@@ -39,31 +39,21 @@ export default class extends Controller {
     // current querystring without "?" prefix
     const querystring = location.search.substr(1);
     // default values for this adviceset
-    let defaults = {
-      "401K_Tiers": 2,
+    const defaults = {
+      "401K_Tiers": 1,
+      "401K_Tier1_Match_Pct": 1, // 100%
+      "401K_Tier1_Up_To_Pct": .03, // 3%
       "401K_Match_Default_Tiers?": true,
-    }
-    // if (this.TaffrailAdvice.UserProfile?.Age_Now <= 29) {
-    //   defaults["401K_Contribution_Goal"] = "Maximize Match";
-
-    // users in 30s default to "contribute all i'm allowed"
-    if (window.jga.UserProfile?.savedProfile?.Age_Now <= 39) {
-      defaults["401K_Contribution_Goal"] = "maximize contributions";
-    }
-
-    if (this.TaffrailAdvice.api.adviceset.id == "JUGzB62H3ERLF4P_TJ9ObJs") {
-      defaults = {
-        Age_Now: window.jga.UserProfile?.savedProfile?.Age_Now,
-        Retirement_Income_Ratio: .8, // 80%
-        "Other_Income_In_Retirement?": true,
-        Other_Income_Monthly: 3000, // social security
-        Rate_of_Return: .04,
-        Rate_of_Return_In_Retirement: .04,
-        "Consider_Inflation?": true,
-        Inflation_Rate: .02,
-        Years_In_Retirement: 25, // life expectancy 90
-        "401K_Bonus_to_Consider?": false
-      }
+      Age_Now: window.jga.UserProfile?.savedProfile?.Age_Now,
+      Retirement_Income_Ratio: .8, // 80%
+      "Other_Income_In_Retirement?": true,
+      Other_Income_Monthly: 3000, // social security
+      Rate_of_Return: .04,
+      Rate_of_Return_In_Retirement: .04,
+      "Consider_Inflation?": true,
+      Inflation_Rate: .02,
+      Years_In_Retirement: 25, // life expectancy 90
+      "401K_Bonus_to_Consider?": false
     }
 
     const data = qs.stringify(_.assign(defaults, qs.parse(querystring)));
@@ -91,7 +81,6 @@ export default class extends Controller {
     } else {
 
       const { variables_map: {
-        Age_Now,
         Retirement_Year_Target,
         Retirement_Savings_Needed = { value: 0, valueFormatted: "$0" }
       } } = api;
@@ -118,27 +107,27 @@ export default class extends Controller {
       // use this to use the "Grouped Advice" template
       // this.TaffrailAdvice.updateForAdvice();
 
-      const retirement_year = `Retire in ${Retirement_Year_Target?.value || new Date().getFullYear() + (65 - Age_Now.value)}`;
+      const retirement_year = `Retire in ${Retirement_Year_Target?.value}`;
 
-      let tips = [];
+      const tips = [];
       let ideas = [];
 
-      if (api.recommendations["Maximizing your employer match"] && api.recommendations["Maximizing your employer match"].length) {
-        tips = api.recommendations["Maximizing your employer match"].map(adv => {
+      if (api.recommendations["Your Deferral Elections"] && api.recommendations["Your Deferral Elections"].length) {
+        ideas = ideas.concat(api.recommendations["Your Deferral Elections"].map(adv => {
           return {
             tip: adv.headline_html || adv.headline,
             action: "#"
           }
-        });
+        }));
       }
 
-      if (api.recommendations["Ideas to Consider"] && api.recommendations["Ideas to Consider"].length) {
-        ideas = api.recommendations["Ideas to Consider"].map(adv => {
+      if (api.recommendations["Our Thinking"] && api.recommendations["Our Thinking"].length) {
+        ideas = ideas.concat(api.recommendations["Our Thinking"].map(adv => {
           return {
             tip: adv.headline_html || adv.headline,
             action: "#"
           }
-        });
+        }));
       }
 
       const goal = {
