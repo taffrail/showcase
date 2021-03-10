@@ -320,8 +320,9 @@ export default class TaffrailApi {
     const vars = this.api.variables||[];
     this.api.variables_map = {}
     vars.forEach(v => {
-      if (!v.value) {
-        v.value = null; // sometimes API doesn't return value property
+      // sometimes API doesn't return value property
+      if (!_.has(v, "value")) {
+        v.value = null;
       }
       this.api.variables_map[v.name] = v;
     });
