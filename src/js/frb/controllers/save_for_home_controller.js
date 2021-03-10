@@ -97,6 +97,7 @@ export default class extends Controller {
       Goal_HomeSave_Adjust_DownPayment = { value: 0 },
       Goal_HomeSave_Adjust_Price,
       Goal_HomeSave_Adjust_Savings,
+      Goal_HomeSave_Adjust_Time,
       Mortgage_Down_Payment_Savings_Current = { value: 0 },
       Time_Frame_Needed = { value: 0 },
       Time_Frame_Desired = { value: 0 },
@@ -164,6 +165,14 @@ export default class extends Controller {
           tip: `Contribute an additional ${Goal_HomeSave_Adjust_DownPayment.valueFormatted}`,
           action: `Mortgage_Down_Payment_Savings_Current=${Mortgage_Down_Payment_Savings_Current.value + Goal_HomeSave_Adjust_DownPayment.value}` // querystring format
         });
+        if (Goal_HomeSave_Adjust_Time){
+          const adjustmentYears = Number(Math.ceil(Goal_HomeSave_Adjust_Time.value / 12).toFixed(0));
+          const totalAdjustYears = adjustmentYears + (Time_Frame_Desired.value/12);
+          tips.push({
+            tip: `Extend your time frame by ${adjustmentYears} years`,
+            action: `Home_Purchase_Time_Frame=${totalAdjustYears}` // querystring format
+          });
+        }
       }
 
       const goal = {
