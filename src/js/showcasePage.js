@@ -7,6 +7,7 @@ import Loading from "./loading";
 import pluralize from "pluralize";
 import qs from "querystring";
 import store from "store";
+import isHtml from "is-html";
 
 export default class ShowcasePage {
   constructor(){
@@ -22,11 +23,15 @@ export default class ShowcasePage {
     });
 
     Handlebars.registerHelper("breaklines", (text) => {
-      if (text && !text.includes("<taffrail-var")) {
+      if (text && !text.includes("<taffrail-var") && !isHtml(text)) {
         text = Handlebars.Utils.escapeExpression(text);
       }
       text = text.replace(/(\r\n|\n|\r)/gm, "<br>");
       return new Handlebars.SafeString(text);
+    });
+
+    Handlebars.registerHelper("toString", (x) => {
+      return (x === void 0) ? "undefined" : String(x);
     });
   }
 
@@ -186,10 +191,13 @@ export default class ShowcasePage {
         } else {
           const { headline: origHeadline } = lastAdvice;
           lastAdvice.headline = "All done!";
-          lastAdvice.summary = `There is nothing else to display, this is the ${origHeadline}.`;
+          lastAdvice.summary = `There is nothing more to say, this is the ${origHeadline}.`;
 
           if (this.api.error) {
             lastAdvice.summary += `\n\n${this.api.error.name}\n${this.api.error.message}`;
+            if (this.api.error.data) {
+              lastAdvice.summary_html = lastAdvice.summary + `. <a href="${this.api._links.self}" target=_blank class="text-secondary">Open API</a>`;
+            }
           }
         }
       }
