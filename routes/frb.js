@@ -38,6 +38,9 @@ const PERSONAS = {
     "Fit_Living_Paycheck_to_Paycheck?": false,
     "Fit_Financially_Independent?": true,
   },
+  "Agent Zero": {
+    _name: "Agent Zero",
+  }
 }
 
 router.get("/goal-planning/:start?", botMiddleware, (req, res, next) => {
