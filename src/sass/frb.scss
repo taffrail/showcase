@@ -548,12 +548,12 @@ main.screen {
   section {
     display: none;
     color: $gray-light;
-		font-size: $font-size-sm;
+		font-size: .8rem;
     padding: 0 .5rem;
   }
 
   .assumption-group {
-		font-size: .9rem;
+		// font-size: $font-size-sm;
 		font-weight: 500;
 		line-height: 1.2;
 		margin-bottom: .5rem;
@@ -578,7 +578,7 @@ main.screen {
 		li {
 			border-radius: $border-radius;
 			color: $gray-600;
-			padding: .15rem 0;
+			padding: .1rem 0;
       position: relative;
 
 			&.active,
