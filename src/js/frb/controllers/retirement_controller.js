@@ -40,10 +40,6 @@ export default class extends Controller {
     const querystring = location.search.substr(1);
     // default values for this adviceset
     const defaults = {
-      "401K_Tiers": 1,
-      "401K_Tier1_Match_Pct": 1, // 100%
-      "401K_Tier1_Up_To_Pct": .03, // 3%
-      "401K_Match_Default_Tiers?": true,
       Age_Now: window.jga.UserProfile?.savedProfile?.Age_Now,
       Retirement_Income_Ratio: .8, // 80%
       "Other_Income_In_Retirement?": true,
@@ -53,7 +49,7 @@ export default class extends Controller {
       "Consider_Inflation?": true,
       Inflation_Rate: .02,
       Years_In_Retirement: 25, // life expectancy 90
-      "401K_Bonus_to_Consider?": false
+      "401K_Bonus_to_Consider?": false,
     }
 
     const data = qs.stringify(_.assign(defaults, qs.parse(querystring)));
@@ -83,7 +79,7 @@ export default class extends Controller {
 
       const { variables_map: {
         Retirement_Year_Target,
-        Retirement_Savings_Needed = { value: 0, valueFormatted: "$0" }
+        // Retirement_Savings_Needed = { value: 0, valueFormatted: "$0" }
       } } = api;
 
       // must be advice
@@ -94,13 +90,13 @@ export default class extends Controller {
         // override "display" with Advice
         api.display.advice = api.recommendations["Our Advice"] || [api.display];
 
-        if (this.TaffrailAdvice.api.adviceset.id == "JUGzB62H3ERLF4P_TJ9ObJs") {
-          api.display.advice.unshift({
-            headline_html: `Est. target balance 
-                            <taffrail-var data-variable-name="Retirement_Savings_Needed">${Retirement_Savings_Needed.valueFormatted}</taffrail-var>
-                            at retirement`
-          })
-        }
+        // if (this.TaffrailAdvice.api.adviceset.id == "JUGzB62H3ERLF4P_TJ9ObJs") {
+        //   api.display.advice.unshift({
+        //     headline_html: `Est. target balance
+        //                     <taffrail-var data-variable-name="Retirement_Savings_Needed">${Retirement_Savings_Needed.valueFormatted}</taffrail-var>
+        //                     at retirement`
+        //   })
+        // }
       }
 
       $(".goal-result").show();
