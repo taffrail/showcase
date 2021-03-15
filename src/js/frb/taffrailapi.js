@@ -112,8 +112,8 @@ export default class TaffrailApi {
         include: ["filteredVars"],
         showcase: true
       },
-      currFormData,
       userProfileData,
+      currFormData,
       qs.parse(newFormData)
     );
     // does link contain referring AI User Request ID (aiUrId)?
