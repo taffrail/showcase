@@ -52,8 +52,8 @@
         <ul class="text-brand text-secondary intro-personas">
           <% Object.keys(PERSONAS).forEach(key=> { %>
             <li><a class="text-white" href="#" data-select-persona="<%= key %>">
-              <%= key %>
-            </a></li>
+              <%= key %> 
+            </a><span data-profile-selected-goals></span></li>
             <% }) %>
             <li><a class="text-white" href="#" data-select-persona="reset">Reset / logout persona</a></li>
         </ul>

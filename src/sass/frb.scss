@@ -98,6 +98,10 @@ p.intro {
     color: lighten($secondary, 10%) !important;
     font-weight: bold;
   }
+  a ~ span,
+  a ~ span a {
+    color: lighten($secondary, 10%) !important;
+  }
 }
 
 .phone {

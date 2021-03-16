@@ -1,0 +1,21 @@
+<div data-controller="profile" data-profile-id-value="<%= locals.adviceSetId %>">
+
+  <%- include("../loading"); %>
+
+  <div class="advice"></div>
+
+</div>
+
+<script id="tmpl_advice_profile" type="text/x-handlebars-template">
+
+  <div class="mt-5">
+    <div class="text-center w-75 m-auto">
+      <h4 class="text-brand">{{display.headline}}</h4>
+      <p>
+        {{display.summary}}
+      </p>
+      
+      <a href="/frb/goal-planning/start?budgetcreated=1" class="btn btn-block btn-outline-primary" data-goal-chooser>Choose goals</a>
+    </div>
+  </div>
+</script>

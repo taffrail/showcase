@@ -400,6 +400,7 @@ export default class TaffrailApi {
     // hide goal pane
     $(".goal-result").hide();
     // render
+    // eslint-disable-next-line new-cap
     const str = this.TEMPLATES["InputRequest"](this.api);
     $container.html(str);
 
@@ -423,6 +424,7 @@ export default class TaffrailApi {
     this.api._recommendationsExist = _.flatMap(this.api.recommendations).length > 0;
 
     // render
+    // eslint-disable-next-line new-cap
     const str = this.TEMPLATES["Recommendations"](this.api);
     $container.html(str);
 
@@ -469,6 +471,7 @@ export default class TaffrailApi {
     }
 
     // render
+    // eslint-disable-next-line new-cap
     const strAssump = this.TEMPLATES["Assumptions"](this.api);
     $("#assumptions").html(strAssump);
   }
