@@ -19,6 +19,7 @@ export default class {
       this.handleClickSaveGoal();
       this.handleClickDeleteGoal();
       this.handleClickResetGoals();
+      this.handleClickOptimizeGoals();
       this.activateCurrentGoals();
       this.renderBudgetAndGoals();
     } else {
@@ -88,13 +89,39 @@ export default class {
     });
   }
 
+  handleClickOptimizeGoals() {
+    $(document).on("click", "a[data-action='optimize-goals']", e => {
+      e.preventDefault();
+      this._OPTIMIZE();
+    });
+  }
+
   activateCurrentGoals() {
     if (!this.profile) { return; }
     $("body")
       .find("a.active[data-select-persona]")
       .next("span[data-profile-selected-goals]")
       .html(`&nbsp;(${pluralize("goal", this.goalCount, true)}, <a href="#" data-action="reset-goals" data-toggle="tooltip" title="Delete all goals">reset</a>)`);
+  }
 
+  _OPTIMIZE() {
+    const isOverBudget = !(this.availableCash > 0);
+    if (isOverBudget) {
+      this.emit("opto", { message: "You're over budget" });
+      const goals = this.savedGoals;
+      const goalCount = goals.length;
+      const saveForHome = goals.find(g => { return g.controllerName == "save-for-home" });
+      // if you have a home goal, reduce this first
+      if (saveForHome) {
+        const cost = this.getCostFor("save-for-home");
+        console.log("cost", cost)
+        console.log("availableCash", this.availableCash)
+        const newMonthlyCost = cost + this.availableCash;
+        console.log(newMonthlyCost)
+      }
+    }
+    this.renderBudgetAndGoals();
+    this.emit("opto", { message: "Your Action Plan is optimized." });
   }
 
   get monthlyIncome() {
@@ -122,37 +149,68 @@ export default class {
     return p;
   }
 
+  getCostFor(controllerName) {
+    const goal = this.savedGoals.find(g => { return g.controllerName == controllerName });
+    let cost = 0;
+    if (!goal) { return cost; }
+
+    const { data: { variables_map } } = goal;
+    const {
+      Current_Monthly_Savings,
+      Debt_Payment,
+      Mortgage_Down_Payment_Savings_Monthly
+    } = variables_map;
+
+    switch (controllerName) {
+      case "pay-debt":
+        cost += Debt_Payment.value;
+        break;
+      case "save-for-home":
+        cost += Mortgage_Down_Payment_Savings_Monthly.value;
+        break;
+      case "retirement":
+        cost += Current_Monthly_Savings.value;
+        break;
+    }
+
+    return cost;
+  }
+
   get costOfGoals() {
     let cost = 0;
-    const goals = this.savedGoals;
-    const saveForHome = goals.find(g => { return g.controllerName == "save-for-home" });
-    const payoffDebt = goals.find(g => { return g.controllerName == "pay-debt" });
-    const saveRetirement = goals.find(g => { return g.controllerName == "retirement" });
+    cost += this.getCostFor("pay-debt");
+    cost += this.getCostFor("save-for-home");
+    cost += this.getCostFor("retirement");
 
-    if (saveForHome) {
-      const { data: { variables_map } } = saveForHome;
-      const { Mortgage_Down_Payment_Savings_Monthly } = variables_map;
-      cost += Mortgage_Down_Payment_Savings_Monthly.value;
-    }
+    // const goals = this.savedGoals;
+    // const saveForHome = goals.find(g => { return g.controllerName == "save-for-home" });
+    // const payoffDebt = goals.find(g => { return g.controllerName == "pay-debt" });
+    // const saveRetirement = goals.find(g => { return g.controllerName == "retirement" });
 
-    if (payoffDebt) {
-      const { data: { variables_map } } = payoffDebt;
-      const { Debt_Payment } = variables_map;
-      cost += Debt_Payment.value;
-    }
+    // if (saveForHome) {
+    //   const { data: { variables_map } } = saveForHome;
+    //   const { Mortgage_Down_Payment_Savings_Monthly } = variables_map;
+    //   cost += Mortgage_Down_Payment_Savings_Monthly.value;
+    // }
 
-    if (saveRetirement) {
-      const { data: { variables_map } } = saveRetirement;
-      const {
-        Current_Monthly_Savings = { value: 0 },
-        // Monthly_401K_Contribution_Current_Total = { value: 0 },
-        // Monthly_Retirement_Savings_Other_Current = { value: 0 },
-      } = variables_map;
+    // if (payoffDebt) {
+    //   const { data: { variables_map } } = payoffDebt;
+    //   const { Debt_Payment } = variables_map;
+    //   cost += Debt_Payment.value;
+    // }
 
-      cost += Current_Monthly_Savings.value;
-      // cost += Monthly_401K_Contribution_Current_Total.value;
-      // cost += Monthly_Retirement_Savings_Other_Current.value;
-    }
+    // if (saveRetirement) {
+    //   const { data: { variables_map } } = saveRetirement;
+    //   const {
+    //     Current_Monthly_Savings = { value: 0 },
+    //     // Monthly_401K_Contribution_Current_Total = { value: 0 },
+    //     // Monthly_Retirement_Savings_Other_Current = { value: 0 },
+    //   } = variables_map;
+
+    //   cost += Current_Monthly_Savings.value;
+    //   // cost += Monthly_401K_Contribution_Current_Total.value;
+    //   // cost += Monthly_Retirement_Savings_Other_Current.value;
+    // }
 
     return cost;
   }
@@ -172,7 +230,8 @@ export default class {
         availableCashF: numeral(this.availableCash).format("$0,0"),
         startingCashF: numeral(this.startingCash).format("$0,0"),
         percentAllocatedF: numeral(this.percentAllocated).format("0%"),
-        costOfGoalsF: numeral(this.costOfGoals).format("$0,0")
+        costOfGoalsF: numeral(this.costOfGoals).format("$0,0"),
+        showOptimizeButton: goals.length > 1
       }
       console.log("goals ctx", ctx)
       const str = Handlebars.compile($("#tmpl_user_selected_goals").html())(ctx);
