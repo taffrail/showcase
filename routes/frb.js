@@ -9,12 +9,13 @@ const PERSONAS = {
   "Doug": {
     _name: "Doug",
     State: "CA",
-    Marital_Status: "Single",
+    Marital_Status: "single",
     Age_Now: 25,
     Salary: 150000,
     // Annual_Expenses: 100000,
     Expenses_Monthly: 100000 / 12,
-    Income_Monthly: 14000
+    Income_Monthly: 14000,
+    budgetcreated: false
   },
   "Billy & Barbara": {
     _name: "Billy & Barbara",
@@ -24,7 +25,8 @@ const PERSONAS = {
     Salary: 200000,
     // Annual_Expenses: 130000,
     Expenses_Monthly: 130000 / 12,
-    Income_Monthly: 20000
+    Income_Monthly: 20000,
+    budgetcreated: false
   },
   "Client w/o settings": {
     _name: "Client w/o settings",
@@ -43,7 +45,7 @@ router.get("/goal-planning/:start?", botMiddleware, (req, res, next) => {
     inApp: isStart,
     showStart: isStart,
     budgetcreated: budgetcreated,
-    greenScreen: !isStart,
+    greenScreen: true,
     greeting: greetingTime(new Date())
   });
 });
@@ -58,6 +60,7 @@ router.get("/goal-planning/goals/:goal", (req, res, next) => {
     linkAdviceBuilder: null,
     PERSONAS: PERSONAS,
     inApp: true,
+    greenScreen: true,
   });
 });
 
@@ -70,7 +73,7 @@ router.get("/goal-planning/goals/taffrail/:adviceSetId", botMiddleware, (req, re
   const apiUrl = `${process.env.API_HOST}/api/advice/${adviceSetId}?${qs.stringify(qrystr)}`;
 
   const adviceSetView = {
-    "JUIsuPtqv04OaFlrmVCZd0H": "profile", // User profile
+    "JUsIoPDhkNcvs1zb8UErR1I": "profile", // User profile
     "JU-24nfNyguvAjZQiBbqLuf": "house-affordability", // Save For Home
     // "JUrkVc7CCdG": "house-affordability",
     // "JUZsZh4CUVp3MK8xpBYDhtI": "house-affordability",
@@ -100,6 +103,7 @@ router.get("/goal-planning/goals/taffrail/:adviceSetId", botMiddleware, (req, re
     error: view == "error" ? {} : "",
     inApp: true,
     showDrawer: true,
+    greenScreen: true,
   });
 
   // fetch(apiUrl, {

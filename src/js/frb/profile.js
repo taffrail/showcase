@@ -69,6 +69,10 @@ export default class {
   deactivatePersona() {
     this.savedProfile = null;
     this.deactivateCurrentPersona();
+    // clear goals
+    this.goals.savedGoals = [];
+    // reset budget creation
+    this.buildProfileWith({ budgetcreated: false });
     // this.emit("deactivated", { message: "Profile deactivated" });
     window.location.reload();
   }

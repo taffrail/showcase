@@ -6,6 +6,10 @@ import numeral from "numeral";
 
 export default class {
   constructor(profile, isFirstLoad = false) {
+    if (!profile) {
+      $("#budget_start").toggle(true);
+      return;
+    }
     this.profile = profile;
     console.log("goals setup for", profile)
 
@@ -89,7 +93,8 @@ export default class {
     $("body")
       .find("a.active[data-select-persona]")
       .next("span[data-profile-selected-goals]")
-      .html(`&nbsp;(${pluralize("goal", this.goalCount, true)}, <a href="#" data-action="reset-goals">reset</a>)`);
+      .html(`&nbsp;(${pluralize("goal", this.goalCount, true)}, <a href="#" data-action="reset-goals" data-toggle="tooltip" title="Delete all goals">reset</a>)`);
+
   }
 
   get monthlyIncome() {
@@ -153,11 +158,14 @@ export default class {
   }
 
   renderBudgetAndGoals(){
-    $("#budget_start").toggle(!this.profile.budgetcreated);
+    const showBudget = (this.profile && this.profile.budgetcreated);
+    $("#budget_start").toggle(!showBudget);
     const $container = $("#user_selected_goals");
     if ($container.length) {
+      const goals = this.savedGoals;
+      // remove 1st advice from
       const ctx = {
-        goals: this.savedGoals,
+        goals,
         incomeF: numeral(this.monthlyIncome).format("$0,0"),
         expensesF: numeral(this.monthlyExpenses).format("$0,0"),
         positiveAvailableCash: this.availableCash > 0,
@@ -166,18 +174,18 @@ export default class {
         percentAllocatedF: numeral(this.percentAllocated).format("0%"),
         costOfGoalsF: numeral(this.costOfGoals).format("$0,0")
       }
+      console.log("goals ctx", ctx)
       const str = Handlebars.compile($("#tmpl_user_selected_goals").html())(ctx);
       $container.html(str);
 
       // disable goal tiles if goal exists
-      const goals = this.savedGoals;
       const saveForHome = goals.find(g => { return g.controllerName == "save-for-home" });
       const payoffDebt = goals.find(g => { return g.controllerName == "pay-debt" });
       const saveRetirement = goals.find(g => { return g.controllerName == "retirement" });
-
-      $(".goal-tiles a").eq(0).prop("disabled", saveForHome !== undefined).toggleClass("disabled", saveForHome !== undefined);
-      $(".goal-tiles a").eq(1).prop("disabled", saveRetirement !== undefined).toggleClass("disabled", saveRetirement !== undefined);
-      $(".goal-tiles a").eq(2).prop("disabled", payoffDebt !== undefined).toggleClass("disabled", payoffDebt !== undefined);
+      const $tiles = $(".goal-tiles a");
+      $tiles.eq(0).prop("disabled", saveForHome !== undefined).toggleClass("disabled", saveForHome !== undefined);
+      $tiles.eq(1).prop("disabled", saveRetirement !== undefined).toggleClass("disabled", saveRetirement !== undefined);
+      $tiles.eq(2).prop("disabled", payoffDebt !== undefined).toggleClass("disabled", payoffDebt !== undefined);
     }
   }
 
@@ -196,19 +204,21 @@ export default class {
       "retirement": "Save for retirement",
       "pay-debt": "Payoff debt",
     }
-    const data = _.pick(window.jga.api, "adviceset", "display", "params", "paramsAsQueryStr", "variables_map");
-    const { display } = data;
-    const { advice } = display;
+    const data = _.pick(window.jga.api, "adviceset", "params", "paramsAsQueryStr", "variables_map", "save_to_goal");
+    const { save_to_goal } = data;
+    const { advice } = save_to_goal;
+    const [headline] = advice;
 
-    const newDisplay = display;
-    delete newDisplay.advice; // delete this to avoid JSON stringify circular structure error, plus we don't need it
+    // remove headline item from data.display[] so we don't dupe
+    const filteredAdvice = advice.filter(a => { return a.id != headline.id });
 
-    data.display = [display].concat(advice);
+    data.display = filteredAdvice;
     const newGoal = [{
       name: nameMap[controllerName],
       controllerName,
       data,
-      id: _.uniqueId("goal")
+      headline,
+      id: _.uniqueId(`${controllerName}_`)
     }];
 
     // delete current goal, if saved, and replace with new/updated
@@ -218,9 +228,10 @@ export default class {
     }
 
     // set new goals
+    console.log("about to save this goal data", this.savedGoals.concat(newGoal))
     this.savedGoals = this.savedGoals.concat(newGoal);
 
-    this.emit("goals", { message: "Goal saved!" });
+    this.emit("goals", { message: "Goal saved! Action Plan updated." });
   }
 
   emit(name, detail) {

@@ -6,7 +6,7 @@ import qs from "querystring";
 import Handlebars from "handlebars";
 import pluralize from "pluralize";
 export default class extends Controller {
-  static targets = ["goal"];
+  // static targets = ["goal"];
   // static values = { id: String };
 
   connect() {
@@ -63,10 +63,10 @@ export default class extends Controller {
   updateMainPane() {
     const { api } = this.TaffrailAdvice;
     // title
-    const { variables_map: { Home_Price, Home_Price_Original, Home_Purchase_Time_Frame = { value: 0 } } } = api;
-    const price = Home_Price_Original?.valueFormatted || Home_Price?.valueFormatted;
-    const timeFrameYrs = new Date().getFullYear() + Home_Purchase_Time_Frame.value;
-    this.goalTarget.innerHTML = `I want to buy a home for <span class="text-secondary">${price}</span> by <span class="text-secondary">${timeFrameYrs}</span>`;
+    // const { variables_map: { Home_Price, Home_Price_Original, Home_Purchase_Time_Frame = { value: 0 } } } = api;
+    // const price = Home_Price_Original?.valueFormatted || Home_Price?.valueFormatted;
+    // const timeFrameYrs = new Date().getFullYear() + Home_Purchase_Time_Frame.value;
+    // this.goalTarget.innerHTML = `I want to buy a home for <span class="text-secondary">${price}</span> by <span class="text-secondary">${timeFrameYrs}</span>`;
     // render
     if (api.display.type == "INPUT_REQUEST") {
       // $(".advice").slideDown(300);
@@ -76,6 +76,8 @@ export default class extends Controller {
       if (api.display._isLast) {
         // since it's "last", hide the question.
         // $(".advice").slideUp(300);
+
+        api.display.advice = api.recommendations["Recommendations"] || [api.display];
       }
       $(".goal-result").show();
 
@@ -141,7 +143,7 @@ export default class extends Controller {
         // }
       }
 
-      const tip_header = "Reaching your goal"; //new Date().getFullYear() + (Time_Frame_Desired.value / 12);
+      const tip_header = "Reaching your goal"; // new Date().getFullYear() + (Time_Frame_Desired.value / 12);
       const tips = [];
 
       // suggest Tip for user to buy house sooner
@@ -181,6 +183,13 @@ export default class extends Controller {
         tips
       }
       api.display.goal = goal;
+
+      // export data setup for saving to goal
+      api.save_to_goal = {
+        advice: [].concat(api.display.advice).map(a => { return _.omit(a, "advice"); }),
+        goal
+      };
+
     } catch (e) {
       api.display.goal = {}
       console.error(e);

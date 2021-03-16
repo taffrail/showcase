@@ -369,6 +369,7 @@ export default class TaffrailApi {
 
     this._setCurrentIdx();
     this.updateVariablesList();
+    this.updateSaveGoalButton();
 
     // handle taffrail-var
     this.$advice.find("taffrail-var").each((i, el) => {
@@ -385,7 +386,7 @@ export default class TaffrailApi {
           .data("idx", question.idx)
           .attr("data-idx", question.idx)
           .attr("data-toggle", "tooltip")
-          .attr("title", "Click to change")
+          .attr("title", "Tap to change")
         ;
       }
     });
@@ -491,6 +492,20 @@ export default class TaffrailApi {
     // render
     const template = Handlebars.compile($("#tmpl_variablesList").html());
     $("#dataModal .variables").html(template(this.api));
+  }
+
+  updateSaveGoalButton(){
+    const profile = window.jga.UserProfile?.savedProfile;
+    if (profile) {
+      const goalExists = store.get("frb_user_goals_" + profile._name);
+      if (goalExists && goalExists.length) {
+        const { controller: controllerName } = $("body").find("div[data-controller]").data();
+        const actualGoalExists = goalExists.find(g => { return g.controllerName == controllerName });
+        if (actualGoalExists) {
+          $(".advice").find("a[data-action='save-goal']").text("Update Goal");
+        }
+      }
+    }
   }
 
   /**
@@ -663,7 +678,9 @@ export default class TaffrailApi {
       const data = $form.serialize();
 
       // push answer to this question into saved user profile
-      // window.jga.UserProfile.buildProfileWith(qs.parse(data));
+      if (window.jga.UserProfile) {
+        window.jga.UserProfile.buildProfileWith(qs.parse(data));
+      }
 
       this.load(data, $("main.screen"), false).then(api => {
         // update content

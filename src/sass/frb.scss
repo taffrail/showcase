@@ -5,6 +5,10 @@
 @import "../../node_modules/placeholder-loading/src/scss/placeholder-loading";
 @import 'loading';
 
+.text-warning {
+  color: $secondary !important;
+}
+
 #toastWrapper {
   display: none;
   min-height: 200px;
@@ -142,6 +146,13 @@ p.intro {
       &.screen-nopadd {
         padding-left: 0;
         padding-right: 0;
+        padding-bottom: 0;
+
+        h1.text-brand {
+          font-size: 1.25rem;
+          margin-top: .5rem;
+          padding-left: .5rem;
+        }
       }
     }
 
@@ -260,6 +271,28 @@ p.intro {
   & + .goal-tiles {
     a {
       border-top: 0;
+    }
+  }
+}
+
+#user_selected_goals {
+  .card-header .btn {
+    font-weight: bold;
+  }
+  .card-header-summary {
+    font-size: .7rem;
+    font-weight: normal;
+    margin-bottom: 0;
+    padding: .25rem .5rem;
+  }
+
+  .card-body {
+    p {
+      font-size: 85%;
+    }
+
+    .btns .btn-sm {
+      font-size: 80%;
     }
   }
 }
